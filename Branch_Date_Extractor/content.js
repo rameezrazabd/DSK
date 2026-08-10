@@ -16,7 +16,7 @@ try {
     const CURRENT_VERSION = "1.4"; // বর্তমান অ্যাপ ভার্সন
     
     // ⚠️ নিচে YOUR_USERNAME এর জায়গায় আপনার গিটহাবের আসল ইউজারনেম বসিয়ে দিন 
-    const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/Microfin360-Status-Apps/main/update.json"; 
+    const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json"; 
 
     setTimeout(() => {
         fetch(UPDATE_JSON_URL + "?t=" + new Date().getTime())
