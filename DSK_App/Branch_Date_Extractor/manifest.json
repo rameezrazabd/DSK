@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Branch Date Extractor, Member Verification, MIS & AIS Crosschecker",
+  "version": "3.0",
+  "description": "Branch Date Extractor, Member Verification, MIS & AIS Crosschecker",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.microfin360.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": true,
+      "world": "MAIN"
+    }
+  ]
+}
+
