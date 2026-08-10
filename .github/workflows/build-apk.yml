@@ -1,0 +1,73 @@
+name: Build & Release Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: 🔒 Setup Permanent Signing Keystore (Zero Conflict)
+      run: |
+        mkdir -p ~/.android
+        if [ -f .github/microfin.keystore ]; then
+          cp .github/microfin.keystore ~/.android/debug.keystore
+          echo "✅ Restored permanent keystore from repository!"
+        else
+          echo "⚙️ Generating new permanent keystore..."
+          keytool -genkeypair -v -keystore ~/.android/debug.keystore \
+            -storepass android -keypass android -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Microfin IT, OU=Branch Date, O=Microfin360, L=Dhaka, ST=Dhaka, C=BD"
+          cp ~/.android/debug.keystore .github/microfin.keystore
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git add .github/microfin.keystore
+          git commit -m "🔒 Auto-saved permanent release keystore [skip ci]" || true
+          git push || true
+          echo "✅ Generated and committed permanent keystore to repository!"
+        fi
+
+    - name: Setup Gradle & Build APK
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.5'
+        arguments: assembleDebug
+
+    - name: Rename APK for Direct Release
+      run: mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/MicrofinApp-Latest.apk
+
+    - name: Upload APK as GitHub Artifact (Optional Backup)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Microfin-Status-App
+        path: app/build/outputs/apk/debug/MicrofinApp-Latest.apk
+        overwrite: true
+
+    - name: 🚀 Auto Release APK (Permanent Direct Download Link)
+      uses: ncipollo/release-action@v1
+      with:
+        tag: latest
+        name: "🚀 Latest Automatic Build (Microfin App)"
+        body: |
+          এই রিলিজটি গিটহাব থেকে স্বয়ংক্রিয়ভাবে বিল্ড করা হয়েছে। নিচের **MicrofinApp-Latest.apk** লিংকে ক্লিক করলে কোনো লগইন ছাড়াই সরাসরি অ্যাপ ডাউনলোড হবে।
+        artifacts: "app/build/outputs/apk/debug/MicrofinApp-Latest.apk"
+        allowUpdates: true
+        removeArtifacts: true
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
