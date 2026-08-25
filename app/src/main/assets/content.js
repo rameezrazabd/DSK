@@ -1,5 +1,5 @@
 // ========================================================================
-// 🧹 CLEAN UP LEGACY SNAPSHOT MEMORY (No persistent storage for Extension)
+// \u{1F9F9} CLEAN UP LEGACY SNAPSHOT MEMORY (No persistent storage for Extension)
 // ========================================================================
 try {
     localStorage.removeItem('mf_cached_zones');
@@ -10,12 +10,12 @@ try {
 } catch(e) {}
 
 // ========================================================================
-// 🔔 0. AUTO UPDATE NOTIFICATION SYSTEM
+// \u{1F514} 0. AUTO UPDATE NOTIFICATION SYSTEM
 // ========================================================================
 (function checkAppUpdate() {
-    const CURRENT_VERSION = "1.4"; // বর্তমান অ্যাপ ভার্সন
+    const CURRENT_VERSION = "1.4"; // \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09CD\u09AF\u09BE\u09AA \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8
     
-    // ⚠️ নিচে YOUR_USERNAME এর জায়গায় আপনার গিটহাবের আসল ইউজারনেম বসিয়ে দিন 
+    // \u26A0\uFE0F \u09A8\u09BF\u099A\u09C7 YOUR_USERNAME \u098F\u09B0 \u099C\u09BE\u09DF\u0997\u09BE\u09DF \u0986\u09AA\u09A8\u09BE\u09B0 \u0997\u09BF\u099F\u09B9\u09BE\u09AC\u09C7\u09B0 \u0986\u09B8\u09B2 \u0987\u0989\u099C\u09BE\u09B0\u09A8\u09C7\u09AE \u09AC\u09B8\u09BF\u09DF\u09C7 \u09A6\u09BF\u09A8 
     const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json"; 
 
     setTimeout(() => {
@@ -38,13 +38,13 @@ try {
         
         modal.innerHTML = `
             <div style="background:white; width:85%; max-width:340px; border-radius:10px; padding:20px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5); animation: popIn 0.3s ease;">
-                <div style="font-size:42px; margin-bottom:10px;">🚀</div>
-                <h3 style="margin:0 0 10px 0; color:#2c3e50; font-size:18px; font-weight:bold;">${data.title || 'নতুন আপডেট এসেছে!'}</h3>
-                <p style="color:#444; font-size:13px; line-height:1.5; margin-bottom:18px; text-align:left; background:#f8f9fa; padding:12px; border-radius:6px; border-left:4px solid #2980b9;">${data.message || 'অ্যাপটির একটি নতুন সংস্করণ উপলব্ধ হয়েছে। আরও উন্নত সুবিধা পেতে এখনই আপডেট করুন।'}</p>
+                <div style="font-size:42px; margin-bottom:10px;">\u{1F680}</div>
+                <h3 style="margin:0 0 10px 0; color:#2c3e50; font-size:18px; font-weight:bold;">${data.title || '\u09A8\u09A4\u09C1\u09A8 \u0986\u09AA\u09A1\u09C7\u099F \u098F\u09B8\u09C7\u099B\u09C7!'}</h3>
+                <p style="color:#444; font-size:13px; line-height:1.5; margin-bottom:18px; text-align:left; background:#f8f9fa; padding:12px; border-radius:6px; border-left:4px solid #2980b9;">${data.message || '\u0985\u09CD\u09AF\u09BE\u09AA\u099F\u09BF\u09B0 \u098F\u0995\u099F\u09BF \u09A8\u09A4\u09C1\u09A8 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0989\u09AA\u09B2\u09AC\u09CD\u09A7 \u09B9\u09DF\u09C7\u099B\u09C7\u0964 \u0986\u09B0\u0993 \u0989\u09A8\u09CD\u09A8\u09A4 \u09B8\u09C1\u09AC\u09BF\u09A7\u09BE \u09AA\u09C7\u09A4\u09C7 \u098F\u0996\u09A8\u0987 \u0986\u09AA\u09A1\u09C7\u099F \u0995\u09B0\u09C1\u09A8\u0964'}</p>
                 
-                <button id="btn-do-update" style="width:100%; background:#27ae60; color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; font-size:14px; cursor:pointer; box-shadow:0 4px 10px rgba(39,174,96,0.3); margin-bottom:8px;">📥 এখনই ডাউনলোড করুন</button>
+                <button id="btn-do-update" style="width:100%; background:#27ae60; color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; font-size:14px; cursor:pointer; box-shadow:0 4px 10px rgba(39,174,96,0.3); margin-bottom:8px;">\u{1F4E5} \u098F\u0996\u09A8\u0987 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u0995\u09B0\u09C1\u09A8</button>
                 
-                ${data.force_update ? '' : '<button id="btn-skip-update" style="width:100%; background:none; color:#7f8c8d; border:none; padding:8px; font-size:12px; cursor:pointer;">পরে মনে করাও</button>'}
+                ${data.force_update ? '' : '<button id="btn-skip-update" style="width:100%; background:none; color:#7f8c8d; border:none; padding:8px; font-size:12px; cursor:pointer;">\u09AA\u09B0\u09C7 \u09AE\u09A8\u09C7 \u0995\u09B0\u09BE\u0993</button>'}
             </div>
         `;
         
@@ -66,7 +66,7 @@ try {
 })();
 
 // ========================================================================
-// 🌐 0.5 CENTRAL HIERARCHY MASTER SCANNER (UNIFIED SYSTEM SYNC FOR ALL UIs)
+// \u{1F310} 0.5 CENTRAL HIERARCHY MASTER SCANNER (UNIFIED SYSTEM SYNC FOR ALL UIs)
 // ========================================================================
 (function() {
     'use strict';
@@ -120,7 +120,7 @@ try {
             document.body.appendChild(toast);
         }
         toast.style.background = '#f39c12';
-        toast.innerHTML = '<span>⚙️ জোন, অঞ্চল, শাখা সিংক হচ্ছে...</span>';
+        toast.innerHTML = '<span>\u2699\uFE0F \u099C\u09CB\u09A8, \u0985\u099E\u09CD\u099A\u09B2, \u09B6\u09BE\u0996\u09BE \u09B8\u09BF\u0982\u0995 \u09B9\u099A\u09CD\u099B\u09C7...</span>';
 
         const iframe = document.createElement('iframe');
         iframe.allow = "geolocation 'none'";
@@ -132,7 +132,7 @@ try {
             if (document.body.contains(iframe)) iframe.remove();
             window._isCentralSyncRunning = false;
             toast.style.background = '#e74c3c';
-            toast.innerHTML = '<span>⚠️ সিংক হতে সময় লাগছে... পরে আবার চেষ্টা করা হবে!</span>';
+            toast.innerHTML = '<span>\u26A0\uFE0F \u09B8\u09BF\u0982\u0995 \u09B9\u09A4\u09C7 \u09B8\u09AE\u09DF \u09B2\u09BE\u0997\u099B\u09C7... \u09AA\u09B0\u09C7 \u0986\u09AC\u09BE\u09B0 \u099A\u09C7\u09B7\u09CD\u099F\u09BE \u0995\u09B0\u09BE \u09B9\u09AC\u09C7!</span>';
             setTimeout(() => toast.remove(), 3000);
             if (callback) callback(false);
         }, 45000);
@@ -327,7 +327,7 @@ try {
                         localStorage.setItem('microfin_sync_status', 'DONE');
 
                         toast.style.background = '#27ae60';
-                        toast.innerHTML = `<span>✅ জোন, অঞ্চল, শাখা সিংক সম্পন্ন! (${branches.length}টি প্রস্তুত)</span>`;
+                        toast.innerHTML = `<span>\u2705 \u099C\u09CB\u09A8, \u0985\u099E\u09CD\u099A\u09B2, \u09B6\u09BE\u0996\u09BE \u09B8\u09BF\u0982\u0995 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8! (${branches.length}\u099F\u09BF \u09AA\u09CD\u09B0\u09B8\u09CD\u09A4\u09C1\u09A4)</span>`;
                         setTimeout(() => toast.remove(), 2500);
                         window.dispatchEvent(new CustomEvent('mf_central_sync_completed'));
                         if (callback) callback(true);
@@ -344,7 +344,7 @@ try {
                     if (document.body.contains(iframe)) iframe.remove();
                     window._isCentralSyncRunning = false;
                     toast.style.background = '#e74c3c';
-                    toast.innerHTML = '<span>⚠️ সাময়িক সমস্যা। একটু পরে আবার চেষ্টা করা হবে!</span>';
+                    toast.innerHTML = '<span>\u26A0\uFE0F \u09B8\u09BE\u09AE\u09DF\u09BF\u0995 \u09B8\u09AE\u09B8\u09CD\u09AF\u09BE\u0964 \u098F\u0995\u099F\u09C1 \u09AA\u09B0\u09C7 \u0986\u09AC\u09BE\u09B0 \u099A\u09C7\u09B7\u09CD\u099F\u09BE \u0995\u09B0\u09BE \u09B9\u09AC\u09C7!</span>';
                     setTimeout(() => toast.remove(), 3000);
                     if (callback) callback(false);
                 }
@@ -377,7 +377,7 @@ try {
 })();
 
 // ========================================================================
-// EXTENSION 1: 📅 Branch Date Extractor (Compact Mobile Edition)
+// EXTENSION 1: \u{1F4C5} Branch Date Extractor (Compact Mobile Edition)
 // ========================================================================
 (function() {
     'use strict';
@@ -629,15 +629,15 @@ try {
         
         let container = document.createElement('div');
         container.id = 'bde-ghost-date-toggle';
-        container.style.cssText = 'position:fixed; bottom:110px; right:16px; display:flex; align-items:center; background:#2980b9; color:white; border-radius:50px; padding:8px 14px; font-weight:bold; font-size:13px; box-shadow:0 4px 14px rgba(0,0,0,0.4); z-index:999998; font-family:Arial; transition:all 0.3s ease; cursor:pointer;';
+        container.style.cssText = 'position:fixed; bottom:118px; right:16px; display:flex; align-items:center; background:#2980b9; color:white; border-radius:50px; padding:8px 14px; font-weight:bold; font-size:13px; box-shadow:0 4px 14px rgba(0,0,0,0.4); z-index:999998; font-family:Arial; transition:all 0.3s ease; cursor:pointer;';
         
         let textSpan = document.createElement('span');
-        textSpan.innerText = '📅 Branch Dates';
+        textSpan.innerText = '\u{1F4C5} Branch Dates';
         textSpan.style.cssText = 'margin-right:8px; pointer-events:none;';
 
         let closeBtn = document.createElement('button');
-        closeBtn.innerText = '✕';
-        closeBtn.title = 'বন্ধ করুন';
+        closeBtn.innerText = '\u2715';
+        closeBtn.title = '\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8';
         closeBtn.style.cssText = 'background: rgba(255,255,255,0.25); color:white; border:none; width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; outline:none; transition:0.2s;';
         closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255,0,0,0.8)';
         closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255,255,255,0.25)';
@@ -666,38 +666,38 @@ try {
 
         panel.innerHTML = `
             <div id="bde-drag-header" style="background:#2c3e50; color:white; padding:7px 12px; display:flex; justify-content:space-between; align-items:center; cursor:move; flex-shrink:0;">
-                <strong style="font-size:13px;">📅 Branch Date Extractor</strong>
-                <button id="bde-close-date-panel" title="বন্ধ করুন" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255, 65, 108, 0.45); transition: all 0.2s ease; outline: none; padding: 0;" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 3px 10px rgba(255, 65, 108, 0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 6px rgba(255, 65, 108, 0.45)';" onmousedown="this.style.transform='scale(0.95)';">✕</button>
+                <strong style="font-size:13px;">\u{1F4C5} Branch Date Extractor</strong>
+                <button id="bde-close-date-panel" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255, 65, 108, 0.45); transition: all 0.2s ease; outline: none; padding: 0;" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 3px 10px rgba(255, 65, 108, 0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 6px rgba(255, 65, 108, 0.45)';" onmousedown="this.style.transform='scale(0.95)';">\u2715</button>
             </div>
 
             <div style="padding:6px; display:flex; flex-direction:column; flex:1; overflow:hidden;">
                 <div style="display:flex; gap:4px; margin-bottom:4px; align-items:flex-end; flex-shrink:0;">
                     <div style="flex:1;">
-                        <label style="font-size:10px; font-weight:bold; color:#555;">📍 লেভেল:</label>
+                        <label style="font-size:10px; font-weight:bold; color:#555;">\u{1F4CD} \u09B2\u09C7\u09AD\u09C7\u09B2:</label>
                         <select id="bde-ui-level" style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-size:11px; height:24px;"></select>
                     </div>
                     <div style="flex:1.6;">
-                        <label style="font-size:10px; font-weight:bold; color:#555;">🏢 নির্বাচন করুন:</label>
+                        <label style="font-size:10px; font-weight:bold; color:#555;">\u{1F3E2} \u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8 \u0995\u09B0\u09C1\u09A8:</label>
                         <select id="bde-ui-target" style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-size:11px; height:24px;"></select>
                     </div>
                     <div>
-                        <button id="bde-sync-btn" style="height:24px; width:28px; background:#bdc3c7; color:#2c3e50; border:none; border-radius:3px; cursor:pointer; font-weight:bold; font-size:12px;" title="সিঙ্ক">🔄</button>
+                        <button id="bde-sync-btn" style="height:24px; width:28px; background:#bdc3c7; color:#2c3e50; border:none; border-radius:3px; cursor:pointer; font-weight:bold; font-size:12px;" title="\u09B8\u09BF\u0999\u09CD\u0995">\u{1F504}</button>
                     </div>
                 </div>
 
-                <button id="bde-start-fetch-btn" style="width:100%; background:#27ae60; color:white; border:none; padding:6px; font-weight:bold; font-size:13px; border-radius:4px; cursor:pointer; margin-bottom:5px; flex-shrink:0;">🚀 Fetch Dates (Auto Engine)</button>
+                <button id="bde-start-fetch-btn" style="width:100%; background:#27ae60; color:white; border:none; padding:6px; font-weight:bold; font-size:13px; border-radius:4px; cursor:pointer; margin-bottom:5px; flex-shrink:0;">\u{1F680} Fetch Dates (Auto Engine)</button>
                 
-                <!-- 🌟 স্লিম স্মার্ট ২-ট্যাব (বক্স ও ট্যাব একত্রিত করা হলো জায়গা বাঁচাতে) -->
+                <!-- \u{1F31F} \u09B8\u09CD\u09B2\u09BF\u09AE \u09B8\u09CD\u09AE\u09BE\u09B0\u09CD\u099F \u09E8-\u099F\u09CD\u09AF\u09BE\u09AC (\u09AC\u0995\u09CD\u09B8 \u0993 \u099F\u09CD\u09AF\u09BE\u09AC \u098F\u0995\u09A4\u09CD\u09B0\u09BF\u09A4 \u0995\u09B0\u09BE \u09B9\u09B2\u09CB \u099C\u09BE\u09DF\u0997\u09BE \u09AC\u09BE\u0981\u099A\u09BE\u09A4\u09C7) -->
                 <div id="bde-tabs-bar" style="display:flex; gap:6px; margin-bottom:5px; flex-shrink:0;">
-                    <button id="bde-tab-all" style="flex:1; background:#2980b9; color:white; border:none; padding:6px; border-radius:4px; font-size:11.5px; font-weight:bold; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.2);">🏢 সকল শাখা (<span id="bde-lbl-all">০</span>)</button>
-                    <button id="bde-tab-overdue" style="flex:1; background:#fdedec; color:#c0392b; border:1px solid #e74c3c; padding:6px; border-radius:4px; font-size:11.5px; font-weight:bold; cursor:pointer; box-shadow:0 1px 3px rgba(231,76,60,0.15);">⚠️ পিছিয়ে আছে (<span id="bde-lbl-overdue">০</span>)</button>
+                    <button id="bde-tab-all" style="flex:1; background:#2980b9; color:white; border:none; padding:6px; border-radius:4px; font-size:11.5px; font-weight:bold; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.2);">\u{1F3E2} \u09B8\u0995\u09B2 \u09B6\u09BE\u0996\u09BE (<span id="bde-lbl-all">\u09E6</span>)</button>
+                    <button id="bde-tab-overdue" style="flex:1; background:#fdedec; color:#c0392b; border:1px solid #e74c3c; padding:6px; border-radius:4px; font-size:11.5px; font-weight:bold; cursor:pointer; box-shadow:0 1px 3px rgba(231,76,60,0.15);">\u26A0\uFE0F \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7 (<span id="bde-lbl-overdue">\u09E6</span>)</button>
                 </div>
 
                 <div id="bde-status-msg" style="font-size:11px; font-weight:bold; color:#d35400; text-align:center; min-height:16px; flex-shrink:0;"></div>
                 
                 <div id="bde-table-output" style="margin-top:4px; flex:1; overflow-y:auto; border:1px solid #eaeaea; border-radius:4px;"></div>
                 
-                <button id="bde-export-excel-btn" style="display:none; width:100%; background:#8e44ad; color:white; border:none; padding:6px; margin-top:4px; font-weight:bold; font-size:13px; border-radius:4px; cursor:pointer; flex-shrink:0;">📥 Download Excel</button>
+                <button id="bde-export-excel-btn" style="display:none; width:100%; background:#8e44ad; color:white; border:none; padding:6px; margin-top:4px; font-weight:bold; font-size:13px; border-radius:4px; cursor:pointer; flex-shrink:0;">\u{1F4E5} Download Excel</button>
             </div>
         `;
 
@@ -732,13 +732,13 @@ try {
         }
 
         document.getElementById('bde-sync-btn').onclick = () => {
-            document.getElementById('bde-status-msg').innerText = "⏳ ডাটাবেস সিঙ্ক হচ্ছে...";
+            document.getElementById('bde-status-msg').innerText = "\u23F3 \u09A1\u09BE\u099F\u09BE\u09AC\u09C7\u09B8 \u09B8\u09BF\u0999\u09CD\u0995 \u09B9\u099A\u09CD\u099B\u09C7...";
             window.runGlobalHierarchySync(true, (success) => {
                 if(success) {
-                    document.getElementById('bde-status-msg').innerHTML = "<span style='color:green;'>✅ সিঙ্ক সফল!</span>";
+                    document.getElementById('bde-status-msg').innerHTML = "<span style='color:green;'>\u2705 \u09B8\u09BF\u0999\u09CD\u0995 \u09B8\u09AB\u09B2!</span>";
                     updateUIForRole();
                 } else {
-                    document.getElementById('bde-status-msg').innerHTML = "<span style='color:red;'>❌ সিঙ্ক ব্যর্থ!</span>";
+                    document.getElementById('bde-status-msg').innerHTML = "<span style='color:red;'>\u274C \u09B8\u09BF\u0999\u09CD\u0995 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5!</span>";
                 }
             });
         };
@@ -750,7 +750,7 @@ try {
             if (!table) return;
 
             let statusMsg = document.getElementById('bde-status-msg');
-            if(statusMsg) statusMsg.innerHTML = "<span style='color:#2980b9;'>⏳ Excel ফাইল তৈরি হচ্ছে...</span>";
+            if(statusMsg) statusMsg.innerHTML = "<span style='color:#2980b9;'>\u23F3 Excel \u09AB\u09BE\u0987\u09B2 \u09A4\u09C8\u09B0\u09BF \u09B9\u099A\u09CD\u099B\u09C7...</span>";
 
             try {
                 let allRows = [];
@@ -761,7 +761,7 @@ try {
                     if (tr && tr.cells.length >= 5) {
                         let isOverdue = tbody.getAttribute('data-status') === 'overdue';
                         let branch = tr.cells[0].innerText.replace(/[\r\n]+/g, ' ').replace(/\[.*?\]/g, '').trim();
-                        let statusText = isOverdue ? "🔴 পিছিয়ে আছে" : "✅ সঠিক";
+                        let statusText = isOverdue ? "\u{1F534} \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7" : "\u2705 \u09B8\u09A0\u09BF\u0995";
                         
                         let rowObj = {
                             branch: branch,
@@ -786,7 +786,7 @@ try {
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <Styles>
   <Style ss:ID="Default" ss:Name="Normal">
-   <Alignment ss:Vertical="Center"/>
+   <Alignment ss:Vertical="Center" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>
     <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>
@@ -795,29 +795,29 @@ try {
    </Borders>
    <Font ss:FontName="Calibri" ss:Size="10" ss:Color="#2C3E50"/>
   </Style>
-  <Style ss:ID="H_Branch"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Left" ss:Vertical="Center"/></Style>
-  <Style ss:ID="H_Status"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-  <Style ss:ID="H_MIS"><Interior ss:Color="#2980B9" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-  <Style ss:ID="H_AIS"><Interior ss:Color="#27AE60" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
+  <Style ss:ID="H_Branch"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>
+  <Style ss:ID="H_Status"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
+  <Style ss:ID="H_MIS"><Interior ss:Color="#2980B9" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
+  <Style ss:ID="H_AIS"><Interior ss:Color="#27AE60" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
   
-  <Style ss:ID="R_Normal_L" ss:Parent="Default"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/></Style>
-  <Style ss:ID="R_Normal_C" ss:Parent="Default"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-  <Style ss:ID="R_Normal_S" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
+  <Style ss:ID="R_Normal_L" ss:Parent="Default"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>
+  <Style ss:ID="R_Normal_C" ss:Parent="Default"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
+  <Style ss:ID="R_Normal_S" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
 
-  <Style ss:ID="R_Delay_L" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Left" ss:Vertical="Center"/></Style>
-  <Style ss:ID="R_Delay_C" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-  <Style ss:ID="R_Delay_S" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
+  <Style ss:ID="R_Delay_L" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>
+  <Style ss:ID="R_Delay_C" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
+  <Style ss:ID="R_Delay_S" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
 
-  <Style ss:ID="Lag_Red" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-  <Style ss:ID="Lag_Org" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#D35400"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-  <Style ss:ID="Lag_Grn" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
+  <Style ss:ID="Lag_Red" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
+  <Style ss:ID="Lag_Org" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#D35400"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
+  <Style ss:ID="Lag_Grn" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
  </Styles>`;
 
                 function buildWorksheet(sheetName, dataRows) {
-                    let sXml = ` <Worksheet ss:Name="${sheetName}">\n  <Table>\n   <Column ss:Width="240"/>\n   <Column ss:Width="110"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Row ss:Height="22">\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">শাখার নাম</Data></Cell>\n    <Cell ss:StyleID="H_Status"><Data ss:Type="String">স্ট্যাটাস</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">MIS ডেট</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">বিলম্ব</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">AIS ডেট</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">বিলম্ব</Data></Cell>\n   </Row>`;
+                    let sXml = ` <Worksheet ss:Name="${sheetName}">\n  <Table>\n   <Column ss:Width="240"/>\n   <Column ss:Width="110"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Row ss:Height="22">\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</Data></Cell>\n    <Cell ss:StyleID="H_Status"><Data ss:Type="String">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">MIS \u09A1\u09C7\u099F</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">AIS \u09A1\u09C7\u099F</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</Data></Cell>\n   </Row>`;
 
                     dataRows.forEach(r => {
-                        let isDelay = r.status.includes("পিছিয়ে") || r.status.includes("🔴");
+                        let isDelay = r.status.includes("\u09AA\u09BF\u099B\u09BF\u09DF\u09C7") || r.status.includes("\u{1F534}");
                         let cL = isDelay ? "R_Delay_L" : "R_Normal_L";
                         let cC = isDelay ? "R_Delay_C" : "R_Normal_C";
                         let cS = isDelay ? "R_Delay_S" : "R_Normal_S";
@@ -840,8 +840,8 @@ try {
                     return sXml;
                 }
 
-                xml += buildWorksheet("🏢 সকল শাখা", allRows);
-                xml += buildWorksheet("⚠️ পিছিয়ে আছে", overdueRows);
+                xml += buildWorksheet("\u{1F3E2} \u09B8\u0995\u09B2 \u09B6\u09BE\u0996\u09BE", allRows);
+                xml += buildWorksheet("\u26A0\uFE0F \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7", overdueRows);
                 xml += `\n</Workbook>`;
 
                 let fileName = `Branch_Dates_${new Date().toISOString().split('T')[0]}.xls`;
@@ -860,17 +860,17 @@ try {
                     URL.revokeObjectURL(url);
                 }
 
-                if(statusMsg) statusMsg.innerHTML = "<span style='color:green;'>✅ Excel ফাইলটি সফলভাবে ডাউনলোড হয়েছে!</span>";
+                if(statusMsg) statusMsg.innerHTML = "<span style='color:green;'>\u2705 Excel \u09AB\u09BE\u0987\u09B2\u099F\u09BF \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u09B9\u09DF\u09C7\u099B\u09C7!</span>";
             } catch(err) {
                 console.error(err);
-                if(statusMsg) statusMsg.innerHTML = `<span style='color:red;'>❌ Excel ডাউনলোডে সমস্যা: ${err.message}</span>`;
+                if(statusMsg) statusMsg.innerHTML = `<span style='color:red;'>\u274C Excel \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1\u09C7 \u09B8\u09AE\u09B8\u09CD\u09AF\u09BE: ${err.message}</span>`;
             }
         };
 
         if (sessionStorage.getItem('mf_cached_branches')) {
             updateUIForRole();
         } else {
-            document.getElementById('bde-status-msg').innerHTML = "<span style='color:#2980b9;'>⏳ স্ক্যান চলছে, একটু অপেক্ষা করুন...</span>";
+            document.getElementById('bde-status-msg').innerHTML = "<span style='color:#2980b9;'>\u23F3 \u09B8\u09CD\u0995\u09CD\u09AF\u09BE\u09A8 \u099A\u09B2\u099B\u09C7, \u098F\u0995\u099F\u09C1 \u0985\u09AA\u09C7\u0995\u09CD\u09B7\u09BE \u0995\u09B0\u09C1\u09A8...</span>";
         }
     }
 
@@ -880,9 +880,9 @@ try {
         let levelDropdown = document.getElementById('bde-ui-level');
 
         levelDropdown.innerHTML = '';
-        if (zones.length > 0) levelDropdown.innerHTML += '<option value="3">জোন (Zone)</option>';
-        if (areas.length > 0) levelDropdown.innerHTML += '<option value="2">অঞ্চল (Area)</option>';
-        levelDropdown.innerHTML += '<option value="1">শাখা (Branch)</option>';
+        if (zones.length > 0) levelDropdown.innerHTML += '<option value="3">\u099C\u09CB\u09A8 (Zone)</option>';
+        if (areas.length > 0) levelDropdown.innerHTML += '<option value="2">\u0985\u099E\u09CD\u099A\u09B2 (Area)</option>';
+        levelDropdown.innerHTML += '<option value="1">\u09B6\u09BE\u0996\u09BE (Branch)</option>';
 
         populateTargets();
     }
@@ -890,7 +890,7 @@ try {
     function populateTargets() {
         let level = document.getElementById('bde-ui-level').value;
         let targetSel = document.getElementById('bde-ui-target');
-        targetSel.innerHTML = '<option value="ALL" data-name="ALL">🚀 Select All Branches</option>';
+        targetSel.innerHTML = '<option value="ALL" data-name="ALL">\u{1F680} Select All Branches</option>';
 
         let data = [];
         if (level === '3') data = JSON.parse(sessionStorage.getItem('mf_cached_zones') || '[]');
@@ -920,7 +920,7 @@ try {
         }
 
         if(branchesToProcess.length === 0) {
-            alert("❌ কোনো শাখা পাওয়া যায়নি! দয়া করে ডানদিকের 🔄 বাটনে চাপ দিয়ে একবার সিঙ্ক করে নিন।");
+            alert("\u274C \u0995\u09CB\u09A8\u09CB \u09B6\u09BE\u0996\u09BE \u09AA\u09BE\u0993\u09AF\u09BC\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF! \u09A6\u09AF\u09BC\u09BE \u0995\u09B0\u09C7 \u09A1\u09BE\u09A8\u09A6\u09BF\u0995\u09C7\u09B0 \u{1F504} \u09AC\u09BE\u099F\u09A8\u09C7 \u099A\u09BE\u09AA \u09A6\u09BF\u09DF\u09C7 \u098F\u0995\u09AC\u09BE\u09B0 \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09C7 \u09A8\u09BF\u09A8\u0964");
             return;
         }
 
@@ -936,11 +936,11 @@ try {
             <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:center; table-layout:fixed;">
                 <thead style="position: sticky; top: 0; z-index:5;">
                     <tr>
-                        <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:46%; text-align:left; padding-left:5px;">শাখার নাম</th>
-                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:18%; white-space:nowrap;">MIS ডেট</th>
-                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:9%; white-space:nowrap;">বিলম্ব</th>
-                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:18%; white-space:nowrap;">AIS ডেট</th>
-                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:9%; white-space:nowrap;">বিলম্ব</th>
+                        <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:46%; text-align:left; padding-left:5px;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
+                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:18%; white-space:nowrap;">MIS \u09A1\u09C7\u099F</th>
+                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:9%; white-space:nowrap;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
+                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:18%; white-space:nowrap;">AIS \u09A1\u09C7\u099F</th>
+                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:9%; white-space:nowrap;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
                     </tr>
                 </thead>
         `;
@@ -951,7 +951,7 @@ try {
                 <tbody id="bde-tr-${safeId}" data-status="current">
                     <tr>
                         <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; white-space:normal; line-height:1.25; font-size:10px;">${b.name}</td>
-                        <td colspan="4" style="padding:3px 2px; border:1px solid #bdc3c7; color:gray; font-size:10px; white-space:nowrap;">⏳ ফেচিং...</td>
+                        <td colspan="4" style="padding:3px 2px; border:1px solid #bdc3c7; color:gray; font-size:10px; white-space:nowrap;">\u23F3 \u09AB\u09C7\u099A\u09BF\u0982...</td>
                     </tr>
                 </tbody>
             `;
@@ -960,10 +960,10 @@ try {
         output.innerHTML = tableHtml;
 
         try {
-            if(statusElement) statusElement.innerHTML = `<span style="color:#2980b9;">⏳ MIS ডাটা স্ক্র্যাপ হচ্ছে...</span>`;
+            if(statusElement) statusElement.innerHTML = `<span style="color:#2980b9;">\u23F3 MIS \u09A1\u09BE\u099F\u09BE \u09B8\u09CD\u0995\u09CD\u09B0\u09CD\u09AF\u09BE\u09AA \u09B9\u099A\u09CD\u099B\u09C7...</span>`;
             let misDataMap = await fetchDatesViaInvisibleFrame('MIS', level, targetId, branchesToProcess);
 
-            if(statusElement) statusElement.innerHTML = `<span style="color:#2980b9;">⏳ AIS ডাটা স্ক্র্যাপ হচ্ছে...</span>`;
+            if(statusElement) statusElement.innerHTML = `<span style="color:#2980b9;">\u23F3 AIS \u09A1\u09BE\u099F\u09BE \u09B8\u09CD\u0995\u09CD\u09B0\u09CD\u09AF\u09BE\u09AA \u09B9\u099A\u09CD\u099B\u09C7...</span>`;
             let aisDataMap = await fetchDatesViaInvisibleFrame('AIS', level, targetId, branchesToProcess);
 
             let currentCount = 0;
@@ -988,7 +988,7 @@ try {
                 let isMismatch = (misDate !== "N/A" && aisDate !== "N/A" && misDate !== aisDate);
                 let rowBg = isMismatch ? "background:#fdedec;" : (isOverdue ? "background:#fff5f5;" : "");
                 
-                let badgeHtml = isOverdue ? `<span style="color:#c0392b; font-weight:bold;">[🔴 বিলম্ব] </span>` : `<span style="color:#27ae60; font-weight:bold;">[✅] </span>`;
+                let badgeHtml = isOverdue ? `<span style="color:#c0392b; font-weight:bold;">[\u{1F534} \u09AC\u09BF\u09B2\u09AE\u09CD\u09AC] </span>` : `<span style="color:#27ae60; font-weight:bold;">[\u2705] </span>`;
                 let cleanName = `${badgeHtml}${b.name}`;
 
                 let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, '');
@@ -1008,7 +1008,7 @@ try {
                 }
             }
 
-            // 🌟 Update Slim Tabs Counts
+            // \u{1F31F} Update Slim Tabs Counts
             let tabsBar = document.getElementById('bde-tabs-bar');
             if (tabsBar) {
                 tabsBar.style.display = 'flex';
@@ -1016,11 +1016,11 @@ try {
                 document.getElementById('bde-lbl-overdue').innerText = overdueCount;
             }
 
-            if(statusElement) statusElement.innerHTML = `<span style="color:green;">✅ সব শাখার ডেট ও Lag স্ক্যান সম্পন্ন!</span>`;
+            if(statusElement) statusElement.innerHTML = `<span style="color:green;">\u2705 \u09B8\u09AC \u09B6\u09BE\u0996\u09BE\u09B0 \u09A1\u09C7\u099F \u0993 Lag \u09B8\u09CD\u0995\u09CD\u09AF\u09BE\u09A8 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!</span>`;
             
         } catch(e) {
             console.error(e);
-            if(statusElement) statusElement.innerHTML = `<span style="color:red;">❌ স্ক্যানিংয়ে সমস্যা হয়েছে!</span>`;
+            if(statusElement) statusElement.innerHTML = `<span style="color:red;">\u274C \u09B8\u09CD\u0995\u09CD\u09AF\u09BE\u09A8\u09BF\u0982\u09DF\u09C7 \u09B8\u09AE\u09B8\u09CD\u09AF\u09BE \u09B9\u09DF\u09C7\u099B\u09C7!</span>`;
         } finally {
             let finalStartBtn = document.getElementById('bde-start-fetch-btn');
             let finalExportBtn = document.getElementById('bde-export-excel-btn');
@@ -1062,7 +1062,7 @@ try {
 })();
 
 // ========================================================================
-// EXTENSION 2: 🚀 MIS & AIS Checker-DSK_IT (Full Screen & Zero Digit Clip)
+// EXTENSION 2: \u{1F680} MIS & AIS Checker-DSK_IT (Full Screen & Zero Digit Clip)
 // ========================================================================
 (function() {
     'use strict';
@@ -1074,25 +1074,73 @@ try {
         return [d.getFullYear(), m, day].join('-');
     }
 
+    function getFirstDayOfMonth() {
+        let d = new Date(), m = '' + (d.getMonth() + 1);
+        if (m.length < 2) m = '0' + m;
+        return [d.getFullYear(), m, '01'].join('-');
+    }
+
     const formatNum = (num) => Number(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+    function parseIs(doc) {
+        let surplusMonth = -2;
+        let surplusYear = -2;
+        try {
+            let cellElements = doc.querySelectorAll('.th_title, .acc_th, td');
+            for (let cell of cellElements) {
+                if (cell.textContent && cell.textContent.toLowerCase().includes('surplus/deficit')) {
+                    let tr = cell.closest('tr');
+                    if (tr) {
+                        let amountCells = tr.querySelectorAll('.th_amount, td');
+                        // Filter out the title cell itself if it's in amountCells
+                        let vals = [];
+                        for(let c of amountCells) {
+                             if(c === cell) continue;
+                             let text = c.textContent.replace(/[^\d.-]/g, '');
+                             if(text !== '') vals.push(parseFloat(text) || 0);
+                        }
+                        if (vals.length >= 2) {
+                            surplusMonth = vals[vals.length - 2];
+                            surplusYear = vals[vals.length - 1];
+                        }
+                    }
+                }
+            }
+        } catch(e) {
+            return { surplusMonth: -1, surplusYear: -1 };
+        }
+        return { surplusMonth, surplusYear };
+    }
+
     function parseAis(doc) {
-        let savings = 0, loan = 0, cashInHand = 0, cashAtBank = 0, equity = 0;
+        let savings = 0, loan = 0, cashInHand = 0, cashAtBank = 0, equity = 0, equityPrev = 0;
         try {
             doc.querySelectorAll('tr').forEach(tr => {
                 let rowText = (tr.textContent || "").toLowerCase();
                 let cells = tr.querySelectorAll('td, th');
-                if (cells.length >= 3) {
-                    let val = parseFloat(cells[1].textContent.replace(/[^\d.-]/g, '')) || 0;
+                if (cells.length >= 2) {
+                    let vals = [];
+                    for (let i = 1; i < cells.length; i++) {
+                        let textVal = cells[i].textContent.replace(/[^\d.-]/g, '');
+                        if (textVal && textVal !== '-') {
+                            let parsed = parseFloat(textVal);
+                            if (!isNaN(parsed)) vals.push(parsed);
+                        }
+                    }
+                    let val = vals.length > 0 ? vals[0] : 0;
+                    
                     if (rowText.includes('members savings deposit')) savings = val;
                     else if (rowText.includes('loan to beneficiries') || rowText.includes('loan to members')) loan = val;
                     else if (rowText === 'cash in hand' || rowText.includes('cash in hand') && !rowText.includes('total')) cashInHand = val;
                     else if ((rowText.includes('cash at bank') || rowText.includes('cash at bank (branch)')) && !rowText.includes('total')) cashAtBank = val;
-                    else if (rowText.includes('total equity/capital fund') || rowText.includes('total equity')) equity = val;
+                    else if (rowText.includes('total equity/capital fund') || rowText.includes('total equity')) {
+                        equity = val;
+                        equityPrev = vals.length > 1 ? vals[1] : 0;
+                    }
                 }
             });
         } catch(e) {}
-        return { savings, loan, cashInHand, cashAtBank, equity };
+        return { savings, loan, cashInHand, cashAtBank, equity, equityPrev };
     }
 
     function parseMis(doc) {
@@ -1155,8 +1203,8 @@ try {
 
             let timeout = setTimeout(() => {
                 if(document.body.contains(iframe)) iframe.remove();
-                resolve(null);
-            }, 60000); 
+                resolve(type === 'is' ? { surplusMonth: -999, surplusYear: -999 } : null);
+            }, type === 'samity' ? 300000 : 90000); 
 
             let isProcessed = false;
             let uType = sessionStorage.getItem('mf_user_type') || 'HO';
@@ -1170,21 +1218,21 @@ try {
                         let win = iframe.contentWindow;
                         let btn = doc.querySelector('button[type="submit"]') || doc.querySelector('.rep_btn button.btn-primary');
 
-                        if (uType === 'HO' || uType === 'ZONE') {
-                            let reportLvlDropdown = doc.querySelector('select[name="cbo_report_level"]');
-                            if (reportLvlDropdown && reportLvlDropdown.value !== reportLevel) {
-                                triggerVueChange(reportLvlDropdown, reportLevel, win);
-                                await new Promise(r => setTimeout(r, 400)); 
-                            }
+                        let reportLvlDropdown = null;
+                        for(let i=0; i<15; i++) {
+                            reportLvlDropdown = doc.querySelector('select[name="cbo_report_level"]');
+                            if(reportLvlDropdown) break;
+                            await new Promise(r => setTimeout(r, 200));
+                        }
+                        
+                        if (reportLvlDropdown && reportLvlDropdown.value !== reportLevel) {
+                            triggerVueChange(reportLvlDropdown, reportLevel, win);
+                            await new Promise(r => setTimeout(r, 600)); 
+                        }
+
+                        if (uType === 'HO' || uType === 'ZONE' || uType === 'AREA') {
                             let targetSelector = reportLevel === '3' ? 'select[name="cbo_zone"]' : (reportLevel === '2' ? 'select[name="cbo_area"]' : 'select[name="cbo_branch"]');
                             let targetSel = await waitForOptions(doc, targetSelector);
-                            if (targetSel && targetId !== 'ALL' && targetSel.value !== targetId) {
-                                triggerVueChange(targetSel, targetId, win);
-                                await new Promise(r => setTimeout(r, 400)); 
-                            }
-                        } 
-                        else if (uType === 'AREA') {
-                            let targetSel = await waitForOptions(doc, 'select[name="cbo_branch"]');
                             if (targetSel && targetId !== 'ALL' && targetSel.value !== targetId) {
                                 triggerVueChange(targetSel, targetId, win);
                                 await new Promise(r => setTimeout(r, 400)); 
@@ -1199,6 +1247,11 @@ try {
                             }
                             let scSel = doc.querySelector('select[name="cbo_service_charge"]');
                             if (scSel && scSel.value !== "1") triggerVueChange(scSel, "1", win);
+                            
+                            let fractionSel = doc.querySelector('select[name="cbo_is_fraction_contain"]');
+                            if (fractionSel && fractionSel.value !== "1") {
+                                triggerVueChange(fractionSel, "1", win);
+                            }
                             
                             let foSel = doc.querySelector('select[name="cbo_funding_organization"]');
                             if (foSel && foSel.value !== "-1") triggerVueChange(foSel, "-1", win);
@@ -1257,6 +1310,266 @@ try {
                                     }
                                 }, 400);
                             }, 1000);
+                        } else if (type === 'due_collection') {
+                            try {
+                                let targetDateFrom = document.getElementById('custom-audit-date-from').value;
+                                let targetDateTo = document.getElementById('custom-audit-date').value;
+                                
+                                let branchSel = doc.querySelector('select[name="cbo_branch"]');
+                                if (branchSel && targetId !== 'SELF' && branchSel.value !== targetId) triggerVueChange(branchSel, targetId, win);
+
+                                let dateInputFrom = doc.querySelector('input[name="txt_date_from"]');
+                                if (dateInputFrom && dateInputFrom.value !== targetDateFrom) triggerVueChange(dateInputFrom, targetDateFrom, win);
+
+                                let dateInputTo = doc.querySelector('input[name="txt_date_to"]');
+                                if (dateInputTo && dateInputTo.value !== targetDateTo) triggerVueChange(dateInputTo, targetDateTo, win);
+
+                                let samitySel = doc.querySelector('select[name="cbo_samity_id"]');
+                                if (samitySel && samitySel.value !== "-1") triggerVueChange(samitySel, "-1", win);
+
+                                let prodSel = doc.querySelector('select[name="cbo_product"]');
+                                if (prodSel && prodSel.value !== "-1") triggerVueChange(prodSel, "-1", win);
+
+                                let scSel = doc.querySelector('select[name="cbo_service_charge"]');
+                                if (scSel && scSel.value !== "0") triggerVueChange(scSel, "0", win);
+                                
+                                setTimeout(() => {
+                                    win._activeReqs = 0;
+                                    win._reqCompleted = false;
+                                    win._interceptedDueData = null;
+                                    
+                                    if (!win._intercepted) {
+                                        let origOpen = win.XMLHttpRequest.prototype.open;
+                                        win.XMLHttpRequest.prototype.open = function(method, url) {
+                                            let isReportReq = method.toUpperCase() === 'POST' || (url && (url.includes('report') || url.includes('api')));
+                                            if (isReportReq) win._activeReqs++;
+                                            this.addEventListener('load', function() { 
+                                                if(isReportReq) { 
+                                                    win._activeReqs--; 
+                                                    win._reqCompleted = true; 
+                                                    if (url && url.includes('ajax_due_collection_register')) {
+                                                        try {
+                                                            win._interceptedDueData = JSON.parse(this.responseText);
+                                                        } catch(err){}
+                                                    }
+                                                } 
+                                            });
+                                            this.addEventListener('error', () => { if(isReportReq) { win._activeReqs--; win._reqCompleted = true; } });
+                                            this.addEventListener('abort', () => { if(isReportReq) { win._activeReqs--; win._reqCompleted = true; } });
+                                            origOpen.apply(this, arguments);
+                                        };
+                                        let origFetch = win.fetch;
+                                        win.fetch = async function(resource, options) {
+                                            let method = (options && options.method) ? options.method : 'GET';
+                                            let url = typeof resource === 'string' ? resource : (resource && resource.url ? resource.url : '');
+                                            let isReportReq = method.toUpperCase() === 'POST' || url.includes('report') || url.includes('api');
+                                            if (isReportReq) win._activeReqs++;
+                                            try {
+                                                let res = await origFetch.apply(this, arguments);
+                                                if (isReportReq) { 
+                                                    win._activeReqs--; 
+                                                    win._reqCompleted = true; 
+                                                    if (url.includes('ajax_due_collection_register')) {
+                                                        try {
+                                                            let clone = res.clone();
+                                                            win._interceptedDueData = await clone.json();
+                                                        } catch(err){}
+                                                    }
+                                                }
+                                                return res;
+                                            } catch(e) {
+                                                if (isReportReq) { win._activeReqs--; win._reqCompleted = true; }
+                                                throw e;
+                                            }
+                                        };
+                                        win._intercepted = true;
+                                    }
+
+                                    win._reqCompleted = false;
+                                    let currentBtn = doc.querySelector('button[type="submit"]') || doc.querySelector('.rep_btn button.btn-primary') || btn;
+                                    if (currentBtn) {
+                                        currentBtn.dispatchEvent(new MouseEvent('click', { view: win, bubbles: true, cancelable: true }));
+                                        currentBtn.click();
+                                    }
+                                    
+                                    let poll = setInterval(() => {
+                                        if (win._reqCompleted && win._activeReqs === 0 && win._interceptedDueData) {
+                                            clearInterval(poll); clearTimeout(timeout); isProcessed = true;
+                                            
+                                            let data = win._interceptedDueData;
+                                            let totalCurrent = 0;
+                                            let totalMatured = 0;
+                                            let totalOutstanding = 0;
+                                            let totalDue = 0;
+
+                                            if (data && data.due_collection) {
+                                                let firstRow = null;
+                                                for (let k in data.due_collection) {
+                                                    firstRow = data.due_collection[k];
+                                                    break;
+                                                }
+                                                if (firstRow && typeof firstRow === 'object') {
+                                                    if (!('regular_due_collection_amount' in firstRow)) {
+                                                        alert("DEBUG: We got data but wrong keys! Keys are: " + Object.keys(firstRow).join(', '));
+                                                    }
+                                                }
+
+                                                for (let key in data.due_collection) {
+                                                    let row = data.due_collection[key];
+                                                    totalCurrent += parseFloat(row.regular_due_collection_amount || row.current_due || row.regular_due || 0);
+                                                    totalMatured += parseFloat(row.expired_due_collection_amount || row.matured_due || row.expired_due || 0);
+                                                    totalOutstanding += parseFloat(row.outstanding || 0);
+                                                    totalDue += parseFloat(row.due || 0);
+                                                }
+                                            }
+                                            iframe.remove(); resolve({ totalCurrent, totalMatured, totalOutstanding, totalDue });
+                                        } else if (win._reqCompleted && win._activeReqs === 0) {
+                                            // Fallback if data was loaded via XMLHttpRequest or HTML instead
+                                            let bodyText = (doc.body.textContent || '').toLowerCase();
+                                            if (bodyText.includes('due collection') || bodyText.includes('grand total')) {
+                                                clearInterval(poll); clearTimeout(timeout); isProcessed = true;
+                                                alert("DEBUG: Intercept failed or HTML rendered instead of JSON.");
+                                                iframe.remove(); resolve({ totalCurrent: 0, totalMatured: 0, totalOutstanding: 0, totalDue: 0 });
+                                            }
+                                        }
+                                    }, 400);
+                                }, 1000);
+                            } catch (e) {
+                                console.error('Due Collection API Error:', e);
+                                isProcessed = true; clearTimeout(timeout); iframe.remove();
+                                resolve({ totalCurrent: 0, totalMatured: 0, totalOutstanding: 0, totalDue: 0 });
+                                return;
+                            }
+                        } else if (type === 'samity') {
+                            try {
+                                let savedHd = sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup');
+                                let clonedHeaders = {};
+                                if (savedHd) clonedHeaders = JSON.parse(savedHd);
+                                
+                                let cUrl = sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup');
+                                let apiBasePath = '/core-service/'; // fallback
+                                if (cUrl) {
+                                    try {
+                                        let urlObj = new URL(cUrl.startsWith('http') ? cUrl : window.location.origin + '/' + cUrl);
+                                        let pathParts = urlObj.pathname.split('index.php');
+                                        if (pathParts.length > 0) {
+                                            apiBasePath = pathParts[0];
+                                            if (!apiBasePath.endsWith('/')) apiBasePath += '/';
+                                        }
+                                    } catch(e){}
+                                }
+                                
+                                let allSamities = [];
+                                let offset = 0;
+                                let limit = 500;
+                                let totalCount = 0;
+                                
+                                while (true) {
+                                    let apiUrl = window.location.origin + apiBasePath + 'index.php/samities/index?limit=' + limit + '&offset=' + offset + '&isSearch=1&cbo_branch=' + (targetId === 'SELF' ? '' : targetId) + '&cbo_status=1&cbo_employee=';
+                                    let r = await window.fetch(apiUrl, { method: 'GET', headers: clonedHeaders, credentials: 'include' });
+                                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                                    let data = await r.json();
+                                    
+                                    if (data.total) totalCount = parseInt(data.total);
+                                    else if (data.recordsTotal) totalCount = parseInt(data.recordsTotal);
+                                    
+                                    if (data.samities && data.samities.length > 0) {
+                                        for (let s of data.samities) {
+                                            let code = s.code;
+                                            let members = parseInt(s.total_member || '0');
+                                            // Prevent duplicates
+                                            if (!allSamities.some(x => x.code === code)) {
+                                                allSamities.push({ code, members });
+                                            }
+                                        }
+                                        if (data.samities.length < limit) {
+                                            break;
+                                        }
+                                        offset += data.samities.length;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                
+                                if (totalCount === 0) totalCount = allSamities.length;
+                                
+                                isProcessed = true; clearTimeout(timeout); iframe.remove();
+                                resolve({ totalCount: totalCount, data: allSamities });
+                                return;
+                            } catch (e) {
+                                console.error('Samity API Error:', e);
+                                isProcessed = true; clearTimeout(timeout); iframe.remove();
+                                resolve({ totalCount: 0, data: [] });
+                                return;
+                            }
+                        } else if (type === 'is') {
+
+
+
+
+
+                            let dateInputIs = doc.querySelector('input[name="txt_as_on_date"]');
+                            if(dateInputIs && dateInputIs.value !== targetDate) triggerVueChange(dateInputIs, targetDate, win);
+
+                            let fundSel = doc.querySelector('select[name="project_id"]');
+                            if (fundSel && fundSel.value !== "-1") triggerVueChange(fundSel, "-1", win);
+                            
+                            let fractionSel = doc.querySelector('select[name="cbo_is_fraction_contain"]');
+                            if (fractionSel && fractionSel.value !== "1") {
+                                triggerVueChange(fractionSel, "1", win);
+                            }
+
+                            setTimeout(() => {
+                                win._activeReqs = 0;
+                                win._reqCompleted = false;
+                                
+                                if (!win._intercepted) {
+                                    let origOpen = win.XMLHttpRequest.prototype.open;
+                                    win.XMLHttpRequest.prototype.open = function(method, url) {
+                                        let isReportReq = method.toUpperCase() === 'POST' || (url && (url.includes('report') || url.includes('api')));
+                                        if (isReportReq) win._activeReqs++;
+                                        this.addEventListener('load', () => { if(isReportReq) { win._activeReqs--; win._reqCompleted = true; } });
+                                        this.addEventListener('error', () => { if(isReportReq) { win._activeReqs--; win._reqCompleted = true; } });
+                                        this.addEventListener('abort', () => { if(isReportReq) { win._activeReqs--; win._reqCompleted = true; } });
+                                        origOpen.apply(this, arguments);
+                                    };
+                                    let origFetch = win.fetch;
+                                    win.fetch = async function(resource, options) {
+                                        let method = (options && options.method) ? options.method : 'GET';
+                                        let url = typeof resource === 'string' ? resource : (resource && resource.url ? resource.url : '');
+                                        let isReportReq = method.toUpperCase() === 'POST' || url.includes('report') || url.includes('api');
+                                        if (isReportReq) win._activeReqs++;
+                                        try {
+                                            let res = await origFetch.apply(this, arguments);
+                                            if (isReportReq) { win._activeReqs--; win._reqCompleted = true; }
+                                            return res;
+                                        } catch(e) {
+                                            if (isReportReq) { win._activeReqs--; win._reqCompleted = true; }
+                                            throw e;
+                                        }
+                                    };
+                                    win._intercepted = true;
+                                }
+
+                                win._reqCompleted = false; // Reset again right before click
+                                let currentBtn = doc.querySelector('button[type="submit"]') || doc.querySelector('.rep_btn button.btn-primary') || btn;
+                                if (currentBtn) {
+                                    currentBtn.dispatchEvent(new MouseEvent('click', { view: win, bubbles: true, cancelable: true }));
+                                    currentBtn.click();
+                                }
+                                
+                                let poll = setInterval(() => {
+                                    let bodyText = (doc.body.textContent || '').toLowerCase();
+                                    // Wait until a request has completed AND no active requests are running
+                                    if (win._reqCompleted && win._activeReqs === 0 && bodyText.includes('surplus/deficit')) {
+                                        setTimeout(() => {
+                                            clearInterval(poll); clearTimeout(timeout); isProcessed = true;
+                                            let data = parseIs(doc);
+                                            iframe.remove(); resolve(data);
+                                        }, 1000); // 1s buffer for Vue render
+                                    }
+                                }, 400);
+                            }, 1000);
                         }
                     } catch(e) { clearTimeout(timeout); iframe.remove(); resolve(null); }
                 }, 2000);
@@ -1279,8 +1592,8 @@ try {
         textSpan.style.cssText = 'margin-right:8px; pointer-events:none;';
 
         let closeBtn = document.createElement('button');
-        closeBtn.innerText = '✕';
-        closeBtn.title = 'বন্ধ করুন';
+        closeBtn.innerText = '\u2715';
+        closeBtn.title = '\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8';
         closeBtn.style.cssText = 'background: rgba(255,255,255,0.25); color:white; border:none; width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; outline:none; transition:0.2s;';
         closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255,0,0,0.8)';
         closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255,255,255,0.25)';
@@ -1305,13 +1618,15 @@ try {
 
     function initMisAisToggleBtn() {
         if (!window.location.hash.includes('dashboard')) return;
-        createCheckerButton('mis-ais-toggle-btn', '🚀 MIS & AIS Crosschecker', 210, '#2c3e50', 'MIS');
-        createCheckerButton('cash-bank-toggle-btn', '💰 Cash-Bank', 260, '#16a085', 'CASH');
-        createCheckerButton('equity-toggle-btn', '📊 Equity', 310, '#8e44ad', 'EQUITY');
+        createCheckerButton('mis-ais-toggle-btn', '\u{1F680} MIS & AIS Crosschecker', 202, '#2c3e50', 'MIS');
+        createCheckerButton('cash-bank-toggle-btn', '\u{1F4B0} Cash-Bank', 244, '#16a085', 'CASH');
+        createCheckerButton('equity-toggle-btn', '\u{1F4CA} Equity', 286, '#8e44ad', 'EQUITY');
+        createCheckerButton('samity-toggle-btn', '\u{1F465} Samity wise member info.', 328, '#2980b9', 'SAMITY');
+        createCheckerButton('due-toggle-btn', '\u{1F4B0} Due collection Summary', 370, '#c0392b', 'DUE_COLLECTION');
     }
 
     function openMisAisPanel(customTitle) {
-        customTitle = customTitle || '🚀 MIS & AIS Checker-DSK_IT';
+        customTitle = customTitle || '\u{1F680} MIS & AIS Checker-DSK_IT';
         if (document.getElementById('ghost-audit-panel')) return;
 
         const panel = document.createElement('div');
@@ -1323,18 +1638,18 @@ try {
             <div id="ghost-header" style="background:#2c3e50; color:white; padding:8px 12px; cursor:move; display:flex; justify-content:space-between; align-items:center;">
                 <strong id="panel-title" style="font-size:13px; pointer-events:none; white-space:nowrap;">${customTitle}</strong>
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <button id="sync-locations-btn" style="background:#f39c12; border:none; color:white; font-size:11px; cursor:pointer; padding:3px 8px; border-radius:3px; font-weight:bold;">🔄 Sync</button>
-                    <button id="ghost-close" title="বন্ধ করুন" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255, 65, 108, 0.45); transition: all 0.2s ease;">✕</button>
+                    <button id="sync-locations-btn" style="background:#f39c12; border:none; color:white; font-size:11px; cursor:pointer; padding:3px 8px; border-radius:3px; font-weight:bold;">\u{1F504} Sync</button>
+                    <button id="ghost-close" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255, 65, 108, 0.45); transition: all 0.2s ease;">\u2715</button>
                 </div>
             </div>
             
             <div id="ghost-body" style="padding:6px; overflow-y:auto; max-height: 88vh; display: block;">
                 <div style="display:flex; gap:4px; margin-bottom:4px; align-items:flex-end;" id="controls-container">
                 </div>
-                <button id="start-audit-btn" style="width:100%; background:#27ae60; color:white; border:none; padding:6px; font-weight:bold; font-size:13px; border-radius:3px; cursor:pointer; transition:0.2s;">🚀 Start Audit Process</button>
+                <button id="start-audit-btn" style="width:100%; background:#27ae60; color:white; border:none; padding:6px; font-weight:bold; font-size:13px; border-radius:3px; cursor:pointer; transition:0.2s;">\u{1F680} Start Audit Process</button>
                 <div id="audit-status" style="margin-top:4px; font-size:11px; font-weight:bold; color:#d35400; text-align:center; min-height:15px;"></div>
                 <div id="audit-output" style="margin-top:4px;"></div>
-                <button id="export-excel-btn" style="display:none; width:100%; background:#8e44ad; color:white; border:none; padding:6px; margin-top:4px; font-weight:bold; font-size:13px; border-radius:3px; cursor:pointer; transition:0.2s;">📥 Download Excel</button>
+                <button id="export-excel-btn" style="display:none; width:100%; background:#8e44ad; color:white; border:none; padding:6px; margin-top:4px; font-weight:bold; font-size:13px; border-radius:3px; cursor:pointer; transition:0.2s;">\u{1F4E5} Download Excel</button>
             </div>
         `;
 
@@ -1345,27 +1660,54 @@ try {
             if (!container) return;
             
             let uType = sessionStorage.getItem('mf_user_type');
-            let dateHtml = `
+            let dateHtml = ``;
+            if (window.currentCheckerType === 'DUE_COLLECTION') {
+                dateHtml = `
                 <div style="flex:1;">
-                    <label style="font-size:10px; font-weight:bold; color:#34495e;">📅 তারিখ:</label>
+                    <label style="font-size:10px; font-weight:bold; color:#34495e;">\u{1F4C5} From:</label>
+                    <input type="date" id="custom-audit-date-from" style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-family:Arial; font-size:10px; height:24px;" value="${getFirstDayOfMonth()}">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:10px; font-weight:bold; color:#34495e;">\u{1F4C5} To:</label>
+                    <input type="date" id="custom-audit-date" style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-family:Arial; font-size:10px; height:24px;" value="${getToday()}">
+                </div>
+                `;
+            } else {
+                dateHtml = `
+                <div style="flex:1; display:${window.currentCheckerType === 'SAMITY' ? 'none' : 'block'};">
+                    <label style="font-size:10px; font-weight:bold; color:#34495e;">\u{1F4C5} \u09A4\u09BE\u09B0\u09BF\u0996:</label>
                     <input type="date" id="custom-audit-date" style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-family:Arial; cursor:pointer; font-size:11px; height:24px;" value="${getToday()}">
                 </div>
-            `;
-
-
+                `;
+            }
 
             if (uType === 'BRANCH') {
-                container.innerHTML = dateHtml; 
-            } 
-            else if (uType === 'AREA') {
-                container.innerHTML = `
+                let currentBranchName = localStorage.getItem('microfin_entity_name') || 'My Branch';
+                if (currentBranchName === 'My Branch' || !currentBranchName) {
+                    let bInfo = document.querySelector('.branch_info');
+                    if (bInfo) {
+                        let bText = bInfo.innerText.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ');
+                        let m = bText.match(/Branch\s*:\s*(.*?)(?=\s+Date|\s+Zone|\s+Area|$|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)/i);
+                        if (m && m[1]) currentBranchName = m[1].trim();
+                    }
+                }
+                container.innerHTML = dateHtml + `
                     <div style="flex:1.5;">
-                        <label style="font-size:10px; font-weight:bold; color:#34495e;">🏢 নির্বাচন:</label>
-                        <select id="custom-target" style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-size:11px; height:24px;">
-                            <option value="ALL">-- 🚀 All Branches (Batch) --</option>
+                        <label style="font-size:10px; font-weight:bold; color:#34495e;">\u{1F3E2} \u09B6\u09BE\u0996\u09BE:</label>
+                        <select disabled style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-size:11px; height:24px; background:#f5f5f5; cursor:not-allowed;">
+                            <option>${currentBranchName}</option>
                         </select>
                     </div>
-                    ${dateHtml}
+                `;
+            } 
+            else if (uType === 'AREA') {
+                container.innerHTML = dateHtml + `
+                    <div style="flex:1.5;">
+                        <label style="font-size:10px; font-weight:bold; color:#34495e;">\u{1F3E2} \u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
+                        <select id="custom-target" style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-size:11px; height:24px;">
+                            <option value="ALL">-- \u{1F680} All Branches (Batch) --</option>
+                        </select>
+                    </div>
                 `;
                 populateTargets();
             } 
@@ -1373,34 +1715,38 @@ try {
                 let zones = JSON.parse(sessionStorage.getItem('mf_cached_zones') || '[]');
                 let areas = JSON.parse(sessionStorage.getItem('mf_cached_areas') || '[]');
                 
-                let levelOptions = `<option value="1">শাখা</option>`;
-                if (areas.length > 0) levelOptions += `<option value="2">অঞ্চল</option>`;
-                if (zones.length > 0) levelOptions += `<option value="3" selected>জোন</option>`;
+                let levelOptions = `<option value="1">\u09B6\u09BE\u0996\u09BE</option>`;
+                if (areas.length > 0) levelOptions += `<option value="2">\u0985\u099E\u09CD\u099A\u09B2</option>`;
+                if (zones.length > 0) levelOptions += `<option value="3" selected>\u099C\u09CB\u09A8</option>`;
                 else if (areas.length > 0) levelOptions = levelOptions.replace('value="2"', 'value="2" selected');
                 else levelOptions = levelOptions.replace('value="1"', 'value="1" selected');
 
-                container.innerHTML = `
+                container.innerHTML = dateHtml + `
                     <div style="flex:0.8;">
-                        <label style="font-size:10px; font-weight:bold; color:#34495e;">📍 লেভেল:</label>
+                        <label style="font-size:10px; font-weight:bold; color:#34495e;">\u{1F4CD} \u09B2\u09C7\u09AD\u09C7\u09B2:</label>
                         <select id="custom-level" style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-size:11px; height:24px;">
                             ${levelOptions}
                         </select>
                     </div>
                     <div style="flex:1.4;">
-                        <label style="font-size:10px; font-weight:bold; color:#34495e;">🏢 নির্বাচন:</label>
+                        <label style="font-size:10px; font-weight:bold; color:#34495e;">\u{1F3E2} \u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
                         <select id="custom-target" style="width:100%; padding:3px; border:1px solid #bdc3c7; border-radius:3px; font-size:11px; height:24px;">
+                            <option value="">\u09B2\u09CB\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</option>
                         </select>
                     </div>
-                    ${dateHtml}
                 `;
-                document.getElementById('custom-level').onchange = populateTargets;
-                populateTargets();
+                
+                let lvl = document.getElementById('custom-level');
+                if(lvl) {
+                    lvl.onchange = populateTargets;
+                    populateTargets();
+                }
             }
         }
 
         function populateTargets() {
             let targetSel = document.getElementById('custom-target');
-            if(!targetSel) return;
+
             
             let uType = sessionStorage.getItem('mf_user_type');
             let data = [];
@@ -1409,7 +1755,7 @@ try {
 
             let level = document.getElementById('custom-level') ? document.getElementById('custom-level').value : '1';
             
-            targetSel.innerHTML = '<option value="ALL" selected>🚀 Select All</option>';
+            targetSel.innerHTML = '<option value="ALL" selected>\u{1F680} Select All</option>';
             
             if (uType === 'AREA') {
                 data = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
@@ -1437,7 +1783,7 @@ try {
         }
 
         document.getElementById('sync-locations-btn').onclick = () => {
-            document.getElementById('audit-status').innerHTML = `<span style="color:#f39c12;">⏳ সিংক হচ্ছে...</span>`;
+            document.getElementById('audit-status').innerHTML = `<span style="color:#f39c12;">\u23F3 \u09B8\u09BF\u0982\u0995 \u09B9\u099A\u09CD\u099B\u09C7...</span>`;
             document.getElementById('start-audit-btn').disabled = true;
             document.getElementById('export-excel-btn').style.display = 'none';
             
@@ -1445,11 +1791,11 @@ try {
                 let st = document.getElementById('audit-status');
                 if(st) {
                     if(success) {
-                        st.innerHTML = `<span style="color:#27ae60;">✅ সিস্টেম প্রস্তুত!</span>`;
+                        st.innerHTML = `<span style="color:#27ae60;">\u2705 \u09B8\u09BF\u09B8\u09CD\u099F\u09C7\u09AE \u09AA\u09CD\u09B0\u09B8\u09CD\u09A4\u09C1\u09A4!</span>`;
                         document.getElementById('start-audit-btn').disabled = false;
                         populateTargets();
                     } else {
-                        st.innerHTML = `<span style="color:#e74c3c;">❌ সিংক ফেইল্ড!</span>`;
+                        st.innerHTML = `<span style="color:#e74c3c;">\u274C \u09B8\u09BF\u0982\u0995 \u09AB\u09C7\u0987\u09B2\u09CD\u09A1!</span>`;
                     }
                 }
             });
@@ -1477,7 +1823,16 @@ try {
         });
 
         document.getElementById('export-excel-btn').onclick = () => {
+            let previousTab = window._misAisCurrentTab;
+            window._misAisCurrentTab = 'ALL';
+            if(window.applyTabFilters) window.applyTabFilters();
+
             let table = document.querySelector('.audit-table');
+            if(!table) {
+                window._misAisCurrentTab = previousTab;
+                if(window.applyTabFilters) window.applyTabFilters();
+                return;
+            }
             if(!table) return;
 
             let cloneAll = table.cloneNode(true);
@@ -1488,9 +1843,59 @@ try {
             
             let cloneDiff = table.cloneNode(true);
             cloneDiff.querySelectorAll('.audit-row-group').forEach(tbody => {
-                if (!tbody.classList.contains(diffClass)) tbody.remove();
+                if (!tbody.classList.contains(diffClass)) { tbody.remove(); return; }
+                
+                if (window.currentCheckerType === 'EQUITY') {
+                    let equityRow = tbody.querySelector('.equity-row');
+                    let surplusRow = tbody.querySelector('.surplus-row');
+                    let branchTdEq = tbody.querySelector('.branch-name-td');
+                    if (equityRow && surplusRow && branchTdEq) {
+                        let eLoss = equityRow.classList.contains('is-loss');
+                        let sLoss = surplusRow.classList.contains('is-loss');
+                        if (eLoss && !sLoss) {
+                            surplusRow.remove();
+                            branchTdEq.rowSpan = 1;
+                        } else if (sLoss && !eLoss) {
+                            equityRow.remove();
+                            branchTdEq.rowSpan = 1;
+                            surplusRow.insertBefore(branchTdEq, surplusRow.firstChild);
+                        }
+                    }
+                }
             });
             cloneDiff.querySelectorAll('.manual-retry-btn').forEach(btn => btn.remove());
+
+            let cloneHighCash = null;
+            if (window.currentCheckerType === 'CASH') {
+                cloneHighCash = table.cloneNode(true);
+                cloneHighCash.querySelectorAll('.audit-row-group').forEach(tbody => {
+                    if (!tbody.classList.contains('high-cash')) {
+                        tbody.remove();
+                    } else {
+                        let cashRow = tbody.querySelector('.cash-row');
+                        let bankRow = tbody.querySelector('.bank-row');
+                        let branchTd = tbody.querySelector('.branch-name-td');
+                        
+                        if (cashRow && bankRow && branchTd) {
+                            let cHigh = cashRow.classList.contains('is-high');
+                            let bHigh = bankRow.classList.contains('is-high');
+                            
+                            if (cHigh && !bHigh) {
+                                bankRow.remove();
+                                branchTd.rowSpan = 1;
+                            } else if (bHigh && !cHigh) {
+                                cashRow.remove();
+                                branchTd.rowSpan = 1;
+                                bankRow.insertBefore(branchTd, bankRow.firstChild);
+                            }
+                        }
+                    }
+                });
+                cloneHighCash.querySelectorAll('.manual-retry-btn').forEach(btn => btn.remove());
+            }
+
+            window._misAisCurrentTab = previousTab;
+            if(window.applyTabFilters) window.applyTabFilters();
 
             let xmlContent = `<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
@@ -1501,7 +1906,7 @@ try {
  xmlns:html="http://www.w3.org/TR/REC-html40">
  <Styles>
   <Style ss:ID="Default" ss:Name="Normal">
-   <Alignment ss:Vertical="Center"/>
+   <Alignment ss:Vertical="Center" ss:WrapText="1"/>
    <Borders/>
    <Font ss:FontName="Arial" ss:Size="10"/>
    <Interior/>
@@ -1509,33 +1914,33 @@ try {
    <Protection/>
   </Style>
   <Style ss:ID="sHeader">
-   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
    <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
    <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1" ss:Color="#FFFFFF"/>
    <Interior ss:Color="#2c3e50" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="sRowspan">
-   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/>
    <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
    <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1" ss:Color="#27ae60"/>
    <Interior ss:Color="#f4f9f4" ss:Pattern="Solid"/>
   </Style>
   <Style ss:ID="sNormal">
-   <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
+   <Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/>
    <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
   </Style>
   <Style ss:ID="sNormalBold">
-   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+   <Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/>
    <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
    <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1"/>
   </Style>
   <Style ss:ID="sRed">
-   <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
+   <Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/>
    <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
    <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1" ss:Color="#FF0000"/>
   </Style>
   <Style ss:ID="sGreen">
-   <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
+   <Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/>
    <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
    <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1" ss:Color="#008000"/>
   </Style>
@@ -1544,6 +1949,8 @@ try {
             let sheets = [{name: 'All Branches', table: cloneAll}];
             if (window.currentCheckerType === 'MIS' || window.currentCheckerType === 'EQUITY') {
                 sheets.push({name: diffSheetName, table: cloneDiff});
+            } else if (window.currentCheckerType === 'CASH' && cloneHighCash) {
+                sheets.push({name: 'High Cash-Bank', table: cloneHighCash});
             }
             
             sheets.forEach(sheet => {
@@ -1573,7 +1980,7 @@ try {
                         let mergeAttr = (rowspan && parseInt(rowspan) > 1) ? ` ss:MergeDown="${parseInt(rowspan) - 1}"` : '';
 
                         let type = "String";
-                        let numCheck = text.replace(/,/g, '').replace(/৳/g, '').trim();
+                        let numCheck = text.replace(/,/g, '').replace(/\u09F3/g, '').trim();
                         if (!isNaN(numCheck) && numCheck !== "") {
                             type = "Number";
                             text = numCheck;
@@ -1582,7 +1989,8 @@ try {
                         // ss:Index helps ensure proper column placement in case Excel's auto-flow with MergeDown gets confused
                         if (td.tagName.toLowerCase() !== 'th' && !td.hasAttribute('rowspan')) {
                             // If this row is missing the first column (because of rowspan above), start at col 2
-                            if ((tr.children.length === 4 || tr.children.length === 2) && colIndex === 1) colIndex = 2;
+                            let hasColspan = Array.from(tr.children).some(c => c.hasAttribute('colspan'));
+                            if (window.currentCheckerType !== 'SAMITY' && window.currentCheckerType !== 'DUE_COLLECTION' && !hasColspan && tr.children.length < 5 && colIndex === 1) colIndex = 2;
                         }
                         
                         xmlContent += `<Cell ss:Index="${colIndex}" ss:StyleID="${style}"${mergeAttr}><Data ss:Type="${type}">${text}</Data></Cell>`;
@@ -1631,6 +2039,7 @@ try {
                 let btnTarget = e.target;
                 let bId = btnTarget.getAttribute('data-id');
                 let bName = btnTarget.getAttribute('data-name');
+                let targetName = bName;
                 let safeId = bId.toString().replace(/[^a-zA-Z0-9]/g, '');
                 let sDate = document.getElementById('custom-audit-date').value;
                 
@@ -1640,7 +2049,7 @@ try {
                 tbody.innerHTML = `
                     <tr>
                         <td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${bName}</td>
-                        <td colspan="4" style="text-align:center; color:#d35400; font-size:9.5px;">🔄 রিট্রাই চলছে...</td>
+                        <td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} \u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987 \u099A\u09B2\u099B\u09C7...</td>
                     </tr>
                 `;
 
@@ -1649,217 +2058,41 @@ try {
                     if(stEl) stEl.innerText = msg; 
                 };
 
-                updateStatus(`ম্যানুয়াল রিট্রাই: ${bName}...`);
+                updateStatus(`\u09AE\u09CD\u09AF\u09BE\u09A8\u09C1\u09AF\u09BC\u09BE\u09B2 \u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987: ${bName}...`);
 
                 let mData = null;
                 let aData = null;
+                let iData = null;
                 if (window.currentCheckerType === 'MIS') {
                     mData = await scrapeViaGhost('#/reports/member-migration-balances/member-migration-balance-index', sDate, '1', bId, 'mis', updateStatus);
                     if (mData) {
                         let t2 = document.getElementById(`tbody-${safeId}`);
-                        if(t2) t2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="4" style="text-align:center; color:#27ae60; font-size:9.5px;">🔄 AIS রিড হচ্ছে...</td></tr>`;
+                        if(t2) t2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', sDate, '1', bId, 'ais', updateStatus);
                     }
-                } else {
-                    let t2 = document.getElementById(`tbody-${safeId}`);
-                    if(t2) t2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="4" style="text-align:center; color:#27ae60; font-size:9.5px;">🔄 AIS রিড হচ্ছে...</td></tr>`;
-                    aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', sDate, '1', bId, 'ais', updateStatus);
-                }
-
-                let tbodyAfter = document.getElementById(`tbody-${safeId}`);
-                if(!tbodyAfter) return;
-
-                if ((window.currentCheckerType === 'MIS' && mData && aData) || (window.currentCheckerType !== 'MIS' && aData)) {
-                    mData = mData || {};
-                    let lDiff = (mData.loan || 0) - (aData.loan || 0);
-                    let sDiff = (mData.savings || 0) - (aData.savings || 0);
-                    
-                    let htmlRows = '';
-                    if (window.currentCheckerType === 'MIS') {
-                        htmlRows = `
-                            <tr>
-                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${bName}</td>
-                                <td style="text-align:left; font-size:9px;"><b>Loan</b></td>
-                                <td style="white-space:nowrap; font-size:9px;">${formatNum(mData.loan)}</td>
-                                <td style="white-space:nowrap; font-size:9px;">${formatNum(aData.loan)}</td>
-                                <td style="color:${lDiff===0?'green':'red'}; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(lDiff)}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:left; font-size:9px;"><b>Savings</b></td>
-                                <td style="white-space:nowrap; font-size:9px;">${formatNum(mData.savings)}</td>
-                                <td style="white-space:nowrap; font-size:9px;">${formatNum(aData.savings)}</td>
-                                <td style="color:${sDiff===0?'green':'red'}; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(sDiff)}</td>
-                            </tr>
-                        `;
-                    } else if (window.currentCheckerType === 'CASH') {
-                        htmlRows = `
-                            <tr>
-                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${bName}</td>
-                                <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Cash</b></td>
-                                <td style="color:#16a085; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.cashInHand)}</td>
-                            </tr>
-                            <tr style="background:#fcfcfc;">
-                                <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Bank</b></td>
-                                <td style="color:#16a085; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.cashAtBank)}</td>
-                            </tr>
-                        `;
-                    } else if (window.currentCheckerType === 'EQUITY') {
-                        htmlRows = `
-                            <tr>
-                                <td rowspan="1" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${bName}</td>
-                                <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Equity</b></td>
-                                <td style="color:#8e44ad; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equity)}</td>
-                            </tr>
-                        `;
-                    }
-                    tbodyAfter.innerHTML = htmlRows;
-                    updateStatus(`✅ ম্যানুয়াল রিট্রাই সফল!`);
-                } else {
-                    tbodyAfter.innerHTML = `
-                        <tr>
-                            <td style="text-align:left; font-weight:bold; color:#e74c3c; font-size:9.5px;">${bName}</td>
-                            <td colspan="3" style="text-align:center; color:red; font-size:9.5px;">❌ ব্যর্থ!</td>
-                            <td style="text-align:center;">
-                                <button class="manual-retry-btn" data-id="${bId}" data-name="${bName}" style="background:#e74c3c; color:white; border:none; padding:2px 6px; font-size:9.5px; border-radius:2px; cursor:pointer;">🔄 Retry</button>
-                            </td>
-                        </tr>
-                    `;
-                    updateStatus(`❌ ম্যানুয়াল রিট্রাই ব্যর্থ!`);
-                }
-            }
-        });
-
-        const btn = document.getElementById('start-audit-btn');
-        const status = document.getElementById('audit-status');
-        const output = document.getElementById('audit-output');
-
-        btn.onclick = async () => {
-            let selectedDate = document.getElementById('custom-audit-date').value;
-            let uType = sessionStorage.getItem('mf_user_type');
-            
-            let reportLevel = '1';
-            let targetId = 'SELF';
-            let targetName = localStorage.getItem('microfin_entity_name') || 'My Branch';
-            let isBatchMode = false;
-            let branchesToProcess = [];
-
-            if (uType === 'HO' || uType === 'ZONE') {
-                reportLevel = document.getElementById('custom-level').value;
-                let targetSel = document.getElementById('custom-target');
-                targetId = targetSel.value;
-                targetName = targetSel.options[targetSel.selectedIndex].text;
-                
-                if (targetId === 'ALL') {
-                    isBatchMode = true;
-                    if (reportLevel === '3') branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
-                    else if (reportLevel === '2') branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
-                    else if (reportLevel === '1') branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
-                } else {
-                    if (reportLevel === '1') isBatchMode = false;
-                    else {
-                        isBatchMode = true;
-                        let allBranches = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
-                        if (reportLevel === '3') branchesToProcess = allBranches.filter(b => b.zone === targetName || b.zone === targetId);
-                        else if (reportLevel === '2') branchesToProcess = allBranches.filter(b => b.area === targetName || b.area === targetId);
-                    }
-                }
-            } 
-            else if (uType === 'AREA') {
-                let targetSel = document.getElementById('custom-target');
-                targetId = targetSel.value;
-                targetName = targetSel.options[targetSel.selectedIndex].text;
-
-                if (targetId === 'ALL') {
-                    isBatchMode = true;
-                    branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
-                } else {
-                    isBatchMode = false;
-                }
-            } 
-            else if (uType === 'BRANCH') {
-                isBatchMode = false;
-                targetId = 'SELF';
-                targetName = localStorage.getItem('microfin_entity_name') || 'My Branch';
-            }
-
-            if(isBatchMode && branchesToProcess.length === 0) {
-                alert("❌ কোনো শাখা পাওয়া যায়নি! দয়া করে 'Sync' এ ক্লিক করুন।");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.style.background = "#7f8c8d";
-            document.getElementById('export-excel-btn').style.display = 'none';
-            output.innerHTML = "";
-            
-            status.innerHTML = `<div style="display:inline-block; width:10px; height:10px; border:2px solid #f3f3f3; border-top:2px solid #d35400; border-radius:50%; animation:spin 1s linear infinite; vertical-align:middle; margin-right:4px;"></div> <span id="status-text">প্রসেসিং শুরু হচ্ছে...</span>`;
-            
-            const updateStatus = (msg) => { 
-                let stEl = document.getElementById('status-text');
-                if(stEl) stEl.innerText = msg; 
-            };
-
-            const tableStyle = `
-                <style>
-                    .audit-table { width:100%; border-collapse:collapse; font-size:9.5px; text-align:right; table-layout:fixed; }
-                    .audit-table th { border: 1px solid #bdc3c7; padding: 3px 2px; text-align:center; overflow:hidden; }
-                    .audit-table td { border: 1px solid #bdc3c7; padding: 3px 2px; }
-                    .audit-table tbody { border-bottom: 2px solid #2c3e50; }
-                </style>
-            `;
-
-            if (!isBatchMode) {
-                let misData = null;
-                let aisData = null;
-
-                if (window.currentCheckerType === 'MIS') {
-                    misData = await scrapeViaGhost('#/reports/member-migration-balances/member-migration-balance-index', selectedDate, reportLevel, targetId, 'mis', updateStatus);
-                    if(!misData) {
-                        updateStatus(`🔄 MIS ডাটা ফেইল করেছে! পুনরায় চেষ্টা করা হচ্ছে...`);
-                        misData = await scrapeViaGhost('#/reports/member-migration-balances/member-migration-balance-index', selectedDate, reportLevel, targetId, 'mis', updateStatus);
-                    }
-                    if(misData) {
-                        aisData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, reportLevel, targetId, 'ais', updateStatus);
-                        if(!aisData) {
-                            updateStatus(`🔄 AIS ডাটা ফেইল করেছে! পুনরায় চেষ্টা করা হচ্ছে...`);
-                            aisData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, reportLevel, targetId, 'ais', updateStatus);
+                    } else if (window.currentCheckerType === 'SAMITY') {
+                        let tRetry2 = document.getElementById(`tbody-${safeId}`);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="3" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        aData = await scrapeViaGhost('#/samity/samities/index', sDate, '1', bId, 'samity', updateStatus);
+                        if (!aData) {
+                            let tRetry3 = document.getElementById(`tbody-${safeId}`);
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${bName}</td><td colspan="3" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            aData = await scrapeViaGhost('#/samity/samities/index', sDate, '1', bId, 'samity', updateStatus);
                         }
-                    }
-                } else {
-                    aisData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, reportLevel, targetId, 'ais', updateStatus);
-                    if(!aisData) {
-                        updateStatus(`🔄 AIS ডাটা ফেইল করেছে! পুনরায় চেষ্টা করা হচ্ছে...`);
-                        aisData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, reportLevel, targetId, 'ais', updateStatus);
-                    }
-                }
-
-                let finalStatus = document.getElementById('audit-status');
-                let finalBtn = document.getElementById('start-audit-btn');
-                let finalOutput = document.getElementById('audit-output');
-
-                if((window.currentCheckerType === 'MIS' && (!misData || !aisData)) || (window.currentCheckerType !== 'MIS' && !aisData)) {
-                    if(finalStatus) finalStatus.innerHTML = `<span style="color:red;">❌ অডিট ব্যর্থ! ডাটা পাওয়া যায়নি।</span>`;
-                    if(finalBtn) { finalBtn.disabled = false; finalBtn.style.background = "#27ae60"; }
-                    return;
-                }
-
-                if(finalStatus) finalStatus.innerHTML = `<span style="color:green;">✅ অডিট সফল!</span>`;
-                if(finalBtn) { finalBtn.disabled = false; finalBtn.style.background = "#27ae60"; }
-
-                misData = misData || {};
-                let loanDiff = (misData.loan || 0) - (aisData.loan || 0);
-                let savDiff = (misData.savings || 0) - (aisData.savings || 0);
-
-                if(finalOutput) {
-                    let theadHTML = '';
-                    if (window.currentCheckerType === 'MIS') {
-                        theadHTML = `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:20%;">MIS</th><th style="width:20%;">AIS</th><th style="width:22%;">Diff.</th></tr>`;
+                    } else if (window.currentCheckerType === 'DUE_COLLECTION') {
+                        let tRetry2 = document.getElementById(`tbody-${safeId}`);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="2" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        aData = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', sDate, '1', bId, 'due_collection', updateStatus);
+                        if (!aData) {
+                            let tRetry3 = document.getElementById(`tbody-${safeId}`);
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${bName}</td><td colspan="2" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Due Collection \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            aData = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', sDate, '1', bId, 'due_collection', updateStatus);
+                        }
                     } else {
                         theadHTML = `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:62%; text-align:right;">Balance (AIS)</th></tr>`;
                     }
 
-                    let htmlRowsSingle = '';
-                    if (window.currentCheckerType === 'MIS') {
+                    let htmlRowsSingle = '';                    if (window.currentCheckerType === 'MIS') {
                         htmlRowsSingle = `
                             <tr>
                                 <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
@@ -1876,60 +2109,126 @@ try {
                             </tr>
                         `;
                     } else if (window.currentCheckerType === 'CASH') {
+                        let cashColor = aisData.cashInHand > 2000 ? 'red' : '#16a085';
+                        let bankColor = aisData.cashAtBank > 1000000 ? 'red' : '#16a085';
                         htmlRowsSingle = `
                             <tr>
                                 <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
                                 <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Cash</b></td>
-                                <td style="color:#16a085; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aisData.cashInHand)}</td>
+                                <td style="color:${cashColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aisData.cashInHand)}</td>
                             </tr>
                             <tr style="background:#fcfcfc;">
                                 <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Bank</b></td>
-                                <td style="color:#16a085; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aisData.cashAtBank)}</td>
+                                <td style="color:${bankColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aisData.cashAtBank)}</td>
                             </tr>
                         `;
                     } else if (window.currentCheckerType === 'EQUITY') {
                         htmlRowsSingle = `
-                            <tr>
-                                <td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
+                            <tr class="equity-row">
+                                <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">${targetName}</td>
                                 <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Equity</b></td>
-                                <td style="color:#8e44ad; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aisData.equity)}</td>
+                                <td style="color:${(aisData.equity < 0 && aisData.equity !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aisData.equity)}</td>
+                                <td style="color:${(aisData.equityPrev < 0 && aisData.equityPrev !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aisData.equityPrev)}</td>
+                            </tr>
+                            <tr class="surplus-row" style="border-bottom:1px solid #bdc3c7;">
+                                <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Surplus</b></td>
+                                <td style="color:${(isData.surplusMonth < 0 && isData.surplusMonth !== -999) ? 'red' : '#e67e22'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${sM}</td>
+                                <td style="color:${(isData.surplusYear < 0 && isData.surplusYear !== -999) ? 'red' : '#d35400'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${sY}</td>
                             </tr>
                         `;
+                    } else if (window.currentCheckerType === 'SAMITY') {
+                        let totalCount = misData && misData.totalCount !== undefined ? misData.totalCount : (misData ? misData.length : 0);
+                        let smallSamities = misData && misData.data ? misData.data.filter(s => s.members >= 0 && s.members <= 19) : (misData ? misData.filter(s => s.members >= 0 && s.members <= 19) : []);
+                        let smallCount = smallSamities.length;
+                        let codesText = smallSamities.map(s => s.code).join(', ');
+                        htmlRowsSingle = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
+                    } else if (window.currentCheckerType === 'DUE_COLLECTION') {
+                        htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (misData ? misData.totalCurrent.toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (misData ? misData.totalMatured.toFixed(2) : '0') + `</td></tr>`;
                     }
-
-                    finalOutput.innerHTML = tableStyle + `
-                        <div style="max-height:60vh; overflow-y:auto;">
-                        <table class="audit-table">
-                            <thead style="background:#2c3e50; color:white; position:sticky; top:0; z-index:1;">
-                                ${theadHTML}
-                            </thead>
-                            <tbody>
-                                ${htmlRowsSingle}
-                            </tbody>
-                        </table>
-                        </div>
-                    `;
-                }
+                    tbody.innerHTML = htmlRowsSingle;
                 
                 let expBtn = document.getElementById('export-excel-btn');
                 if(expBtn) expBtn.style.display = 'block';
-            } 
-            else {
+            } else if (e.target && e.target.id === 'start-audit-btn') {
+                let uType = sessionStorage.getItem('mf_user_type');
+                let targetId = 'SELF';
+                let targetName = localStorage.getItem('microfin_entity_name') || 'My Branch';
+                let level = '1';
+                
+                let targetSel = document.getElementById('custom-target');
+                if (targetSel) {
+                    targetId = targetSel.value;
+                    targetName = targetSel.options[targetSel.selectedIndex].text;
+                    level = document.getElementById('custom-level') ? document.getElementById('custom-level').value : '1';
+                }
+                
+                let allBranches = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
+                let branchesToProcess = [];
+                let selectedDate = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : '';
+                
+                if (uType === 'BRANCH') {
+                    let currentBranchName = localStorage.getItem('microfin_entity_name') || 'My Branch';
+                    if (currentBranchName === 'My Branch' || !currentBranchName) {
+                        let bInfo = document.querySelector('.branch_info');
+                        if (bInfo) {
+                            let bText = bInfo.innerText.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ');
+                            let m = bText.match(/Branch\s*:\s*(.*?)(?=\s+Date|\s+Zone|\s+Area|$|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)/i);
+                            if (m && m[1]) currentBranchName = m[1].trim();
+                        }
+                    }
+                    let bData = JSON.parse(sessionStorage.getItem('mf_user_branch') || '{}');
+                    if(bData.id) {
+                        bData.name = currentBranchName;
+                        branchesToProcess = [bData];
+                    } else {
+                        branchesToProcess = [{id: 'SELF', name: currentBranchName}];
+                    }
+                } else if (targetId === 'ALL') {
+                    branchesToProcess = allBranches;
+                } else {
+                    if (level === '3') branchesToProcess = allBranches.filter(b => b.zone === targetName);
+                    else if (level === '2') branchesToProcess = allBranches.filter(b => b.area === targetName);
+                    else if (level === '1') branchesToProcess = allBranches.filter(b => b.id === targetId);
+                }
+                
+                if(branchesToProcess.length === 0) {
+                    alert("\u274C \u0995\u09CB\u09A8\u09CB \u09B6\u09BE\u0996\u09BE \u09AA\u09BE\u0993\u09AF\u09BC\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF!");
+                    return;
+                }
+
+                let output = document.getElementById('audit-output');
+                let tableStyle = `<style>.audit-table { width:100%; border-collapse:collapse; background:white; } .audit-table th, .audit-table td { border:1px solid #bdc3c7; padding:4px; font-family:Arial, sans-serif; } .has-diff {} .no-diff {} .loss-branch {} .high-cash {} .audit-table th { background:#2c3e50; color:white; }</style>`;
+                
+                let now = new Date();
+                let dtString = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
                 window._misAisCurrentTab = window._misAisCurrentTab || 'ALL';
                 let tableHtml = tableStyle + `
                     <div style="margin-bottom:6px; display:flex; gap:6px; justify-content:center;">
-                        <button id="tab-all-branches" style="background:#2980b9; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'ALL' ? '1' : '0.5'}; transition:0.2s;">📊 সকল শাখা</button>
+                        <button id="tab-all-branches" style="background:#2980b9; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'ALL' ? '1' : '0.5'}; transition:0.2s;">\u{1F4CA} \u09B8\u0995\u09B2 \u09B6\u09BE\u0996\u09BE</button>
                         ${window.currentCheckerType === 'MIS' ? 
-                            `<button id="tab-only-diff" style="background:#e74c3c; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'DIFF' ? '1' : '0.5'}; transition:0.2s;">⚠️ Only Differences</button>` :
-                            (window.currentCheckerType === 'EQUITY' ? `<button id="tab-loss-branches" style="background:#e74c3c; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'LOSS' ? '1' : '0.5'}; transition:0.2s;">📉 লস শাখা</button>` : '')
+                            `<button id="tab-only-diff" style="background:#e74c3c; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'DIFF' ? '1' : '0.5'}; transition:0.2s;">\u26A0\uFE0F Only Differences</button>` :
+                            (window.currentCheckerType === 'EQUITY' ? `<button id="tab-loss-branches" style="background:#e74c3c; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'LOSS' ? '1' : '0.5'}; transition:0.2s;">\u{1F4C9} \u09B2\u09B8 \u09B6\u09BE\u0996\u09BE</button>` : 
+                            (window.currentCheckerType === 'CASH' ? `<button id="tab-high-cash" style="background:#c0392b; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'HIGH_CASH' ? '1' : '0.5'}; transition:0.2s;">\u{1F6A8} High Cash-Bank</button>` : ''))
                         }
                     </div>
                     <div style="max-height:55vh; overflow-y:auto;">
                     <table class="audit-table">
                         <thead style="background:#2c3e50; color:white; position:sticky; top:0; z-index:1;">
+                            <tr style="background:#e8f4f8; color:#2980b9;">
+                                <td colspan="5" style="padding:4px; font-size:11px; text-align:center; font-weight:bold; border:1px solid #bdc3c7;">
+                                    \u{1F552} Report Generated On: ${dtString}
+                                </td>
+                            </tr>
                             ${window.currentCheckerType === 'MIS' ? 
                                 `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:20%;">MIS</th><th style="width:20%;">AIS</th><th style="width:22%;">Diff.</th></tr>` :
-                                `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:62%; text-align:right;">Balance (AIS)</th></tr>`
+                              (window.currentCheckerType === 'EQUITY' ?
+                                `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:31%; text-align:right;">Current Yr / This Month</th><th style="width:31%; text-align:right;">Previous Yr / This Yr</th></tr>` :
+                              (window.currentCheckerType === 'SAMITY' ?
+                                `<tr><th style="width:150px; text-align:center; vertical-align:middle;">Branch</th><th style="width:100px; text-align:center; vertical-align:middle;">Total Samity</th><th style="width:120px; text-align:center; vertical-align:middle;">Samity Count (0-19 Members)</th><th style="width:400px; text-align:center; vertical-align:middle;">Samity Numbers</th></tr>` :
+                              (window.currentCheckerType === 'DUE_COLLECTION' ?
+                                `<tr><th style="width:30%; text-align:left;">Branch</th><th style="width:35%; text-align:center;">Current Due</th><th style="width:35%; text-align:center;">Matured Due</th></tr>` :
+                                `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:62%; text-align:right;">Balance (AIS)</th></tr>`)))
                             }
                         </thead>
                 `;
@@ -1939,7 +2238,7 @@ try {
                         <tbody id="tbody-${safeId}" class="audit-row-group">
                             <tr style="background:#fff;">
                                 <td style="text-align:left; font-weight:bold; color:#2c3e50; font-size:9.5px;">${b.name}</td>
-                                <td colspan="${window.currentCheckerType === 'MIS' ? '4' : '2'}" style="text-align:center; color:gray; font-size:9.5px;">⏳ অপেক্ষমান...</td>
+                                <td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:gray; font-size:9.5px;">\u23F3 \u0985\u09AA\u09C7\u0995\u09CD\u09B7\u09AE\u09BE\u09A8...</td>
                             </tr>
                         </tbody>
                     `;
@@ -1950,14 +2249,75 @@ try {
                 let tabAll = document.getElementById('tab-all-branches');
                 let tabDiff = document.getElementById('tab-only-diff');
                 let tabLoss = document.getElementById('tab-loss-branches');
+                let tabHighCash = document.getElementById('tab-high-cash');
                 
+                window.applyTabFilters = function(targetTbody = null) {
+                    let tbodies = targetTbody ? [targetTbody] : document.querySelectorAll('.audit-row-group');
+                    let tab = window._misAisCurrentTab;
+                    tbodies.forEach(tbody => {
+                        let isDiff = tbody.classList.contains('has-diff');
+                        let isLoss = tbody.classList.contains('loss-branch');
+                        let isHighCash = tbody.classList.contains('high-cash');
+                        
+                        if (tab === 'DIFF' && !isDiff) tbody.style.display = 'none';
+                        else if (tab === 'LOSS' && !isLoss) tbody.style.display = 'none';
+                        else if (tab === 'HIGH_CASH' && !isHighCash) tbody.style.display = 'none';
+                        else tbody.style.display = '';
+
+                        let cashRow = tbody.querySelector('.cash-row');
+                        let bankRow = tbody.querySelector('.bank-row');
+                        let branchTd = tbody.querySelector('.branch-name-td');
+                        
+                        if (cashRow && bankRow && branchTd) {
+                            if (tab === 'HIGH_CASH') {
+                                let cHigh = cashRow.classList.contains('is-high');
+                                let bHigh = bankRow.classList.contains('is-high');
+                                if (cHigh && bHigh) {
+                                    cashRow.style.display = ''; bankRow.style.display = ''; branchTd.rowSpan = 2; cashRow.insertBefore(branchTd, cashRow.firstChild);
+                                } else if (cHigh) {
+                                    cashRow.style.display = ''; bankRow.style.display = 'none'; branchTd.rowSpan = 1; cashRow.insertBefore(branchTd, cashRow.firstChild);
+                                } else if (bHigh) {
+                                    cashRow.style.display = 'none'; bankRow.style.display = ''; branchTd.rowSpan = 1; bankRow.insertBefore(branchTd, bankRow.firstChild);
+                                } else {
+                                    cashRow.style.display = ''; bankRow.style.display = ''; branchTd.rowSpan = 2; cashRow.insertBefore(branchTd, cashRow.firstChild);
+                                }
+                            } else {
+                                cashRow.style.display = ''; bankRow.style.display = ''; branchTd.rowSpan = 2; cashRow.insertBefore(branchTd, cashRow.firstChild);
+                            }
+                        }
+                        
+                        let equityRow = tbody.querySelector('.equity-row');
+                        let surplusRow = tbody.querySelector('.surplus-row');
+                        let branchTdEq = tbody.querySelector('.branch-name-td');
+                        
+                        if (equityRow && surplusRow && branchTdEq) {
+                            if (tab === 'LOSS') {
+                                let eLoss = equityRow.classList.contains('is-loss');
+                                let sLoss = surplusRow.classList.contains('is-loss');
+                                if (eLoss && sLoss) {
+                                    equityRow.style.display = ''; surplusRow.style.display = ''; branchTdEq.rowSpan = 2; equityRow.insertBefore(branchTdEq, equityRow.firstChild);
+                                } else if (eLoss) {
+                                    equityRow.style.display = ''; surplusRow.style.display = 'none'; branchTdEq.rowSpan = 1; equityRow.insertBefore(branchTdEq, equityRow.firstChild);
+                                } else if (sLoss) {
+                                    equityRow.style.display = 'none'; surplusRow.style.display = ''; branchTdEq.rowSpan = 1; surplusRow.insertBefore(branchTdEq, surplusRow.firstChild);
+                                } else {
+                                    equityRow.style.display = ''; surplusRow.style.display = ''; branchTdEq.rowSpan = 2; equityRow.insertBefore(branchTdEq, equityRow.firstChild);
+                                }
+                            } else {
+                                equityRow.style.display = ''; surplusRow.style.display = ''; branchTdEq.rowSpan = 2; equityRow.insertBefore(branchTdEq, equityRow.firstChild);
+                            }
+                        }
+                    });
+                };
+
                 if (tabAll) {
                     tabAll.onclick = () => {
                         window._misAisCurrentTab = 'ALL';
                         tabAll.style.opacity = '1';
                         if (tabDiff) tabDiff.style.opacity = '0.5';
                         if (tabLoss) tabLoss.style.opacity = '0.5';
-                        document.querySelectorAll('.audit-row-group').forEach(el => el.style.display = '');
+                        if (tabHighCash) tabHighCash.style.opacity = '0.5';
+                        if (window.applyTabFilters) window.applyTabFilters();
                     };
                 }
                 if (tabDiff) {
@@ -1965,10 +2325,8 @@ try {
                         window._misAisCurrentTab = 'DIFF';
                         tabDiff.style.opacity = '1';
                         if (tabAll) tabAll.style.opacity = '0.5';
-                        document.querySelectorAll('.audit-row-group').forEach(el => {
-                            if (el.classList.contains('no-diff')) el.style.display = 'none';
-                            else el.style.display = '';
-                        });
+                        if (tabHighCash) tabHighCash.style.opacity = '0.5';
+                        if (window.applyTabFilters) window.applyTabFilters();
                     };
                 }
                 if (tabLoss) {
@@ -1976,57 +2334,97 @@ try {
                         window._misAisCurrentTab = 'LOSS';
                         tabLoss.style.opacity = '1';
                         if (tabAll) tabAll.style.opacity = '0.5';
-                        document.querySelectorAll('.audit-row-group').forEach(el => {
-                            if (el.classList.contains('loss-branch')) el.style.display = '';
-                            else el.style.display = 'none';
-                        });
+                        if (tabHighCash) tabHighCash.style.opacity = '0.5';
+                        if (window.applyTabFilters) window.applyTabFilters();
                     };
                 }
-
+                if (tabHighCash) {
+                    tabHighCash.onclick = () => {
+                        window._misAisCurrentTab = 'HIGH_CASH';
+                        tabHighCash.style.opacity = '1';
+                        if (tabAll) tabAll.style.opacity = '0.5';
+                        if (tabDiff) tabDiff.style.opacity = '0.5';
+                        if (tabLoss) tabLoss.style.opacity = '0.5';
+                        if (window.applyTabFilters) window.applyTabFilters();
+                    };
+                }
+                const updateStatus = (msg) => { 
+                    let stEl = document.getElementById('audit-status');
+                    if(stEl) stEl.innerText = msg; 
+                };
                 let successCount = 0;
                 for (let i = 0; i < branchesToProcess.length; i++) {
                     let b = branchesToProcess[i];
                     let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, '');
 
-                    updateStatus(`[${i+1}/${branchesToProcess.length}] অডিট চলছে: ${b.name}...`);
+                    updateStatus(`[${i+1}/${branchesToProcess.length}] \u0985\u09A1\u09BF\u099F \u099A\u09B2\u099B\u09C7: ${b.name}...`);
                     
                     let tbodyBefore = document.getElementById(`tbody-${safeId}`);
                     if(tbodyBefore) {
                         tbodyBefore.innerHTML = `
                             <tr>
                                 <td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td>
-                                <td colspan="4" style="text-align:center; color:#d35400; font-size:9.5px;">🔄 MIS রিড হচ্ছে...</td>
+                                <td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} MIS \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td>
                             </tr>
                         `;
                     }
 
                     let mData = null;
                     let aData = null;
+                    let iData = null;
                     if (window.currentCheckerType === 'MIS') {
                         mData = await scrapeViaGhost('#/reports/member-migration-balances/member-migration-balance-index', selectedDate, '1', b.id, 'mis', updateStatus);
                         if (!mData) {
                             let tRetry1 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry1) tRetry1.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="4" style="text-align:center; color:#d35400; font-size:9.5px;">🔄 MIS অটো-রিট্রাই...</td></tr>`;
+                            if(tRetry1) tRetry1.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} MIS \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
                             mData = await scrapeViaGhost('#/reports/member-migration-balances/member-migration-balance-index', selectedDate, '1', b.id, 'mis', updateStatus);
                         }
                         if (mData) {
                             let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="4" style="text-align:center; color:#27ae60; font-size:9.5px;">🔄 AIS রিড হচ্ছে...</td></tr>`;
+                            if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                             aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
                             if (!aData) {
                                 let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                                if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="4" style="text-align:center; color:#d35400; font-size:9.5px;">🔄 AIS অটো-রিট্রাই...</td></tr>`;
+                                if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Balance Sheet \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
                                 aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
                             }
                         }
+                    } else if (window.currentCheckerType === 'SAMITY') {
+                        let tRetry2 = document.getElementById(`tbody-${safeId}`);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="3" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        aData = await scrapeViaGhost('#/samity/samities/index', selectedDate, '1', b.id, 'samity', updateStatus);
+                        if (!aData) {
+                            let tRetry3 = document.getElementById(`tbody-${safeId}`);
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="3" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            aData = await scrapeViaGhost('#/samity/samities/index', selectedDate, '1', b.id, 'samity', updateStatus);
+                        }
+                    } else if (window.currentCheckerType === 'DUE_COLLECTION') {
+                        let tRetry2 = document.getElementById(`tbody-${safeId}`);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="2" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        aData = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', selectedDate, '1', b.id, 'due_collection', updateStatus);
+                        if (!aData) {
+                            let tRetry3 = document.getElementById(`tbody-${safeId}`);
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="2" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Due Collection \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            aData = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', selectedDate, '1', b.id, 'due_collection', updateStatus);
+                        }
                     } else {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="4" style="text-align:center; color:#27ae60; font-size:9.5px;">🔄 AIS রিড হচ্ছে...</td></tr>`;
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="4" style="text-align:center; color:#d35400; font-size:9.5px;">🔄 AIS অটো-রিট্রাই...</td></tr>`;
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Balance Sheet \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
                             aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
+                        }
+                        if (window.currentCheckerType === 'EQUITY') {
+                            let tRetry4 = document.getElementById(`tbody-${safeId}`);
+                            if(tRetry4) tRetry4.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Income Statement \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                            iData = await scrapeViaGhost('#/reports/acc-income-statements/income-statment-filter', selectedDate, '1', b.id, 'is', updateStatus);
+                            if (!iData) {
+                                let tRetry5 = document.getElementById(`tbody-${safeId}`);
+                                if(tRetry5) tRetry5.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Income Statement \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                                iData = await scrapeViaGhost('#/reports/acc-income-statements/income-statment-filter', selectedDate, '1', b.id, 'is', updateStatus);
+                            }
                         }
                     }
 
@@ -2035,12 +2433,15 @@ try {
 
                     if ((window.currentCheckerType === 'MIS' && mData && aData) || (window.currentCheckerType !== 'MIS' && aData)) {
                         mData = mData || {};
-                        let lDiff = (mData.loan || 0) - (aData.loan || 0);
-                        let sDiff = (mData.savings || 0) - (aData.savings || 0);
+                        iData = iData || {};
+                        let lDiff = window.currentCheckerType === 'MIS' ? (mData.loan || 0) - (aData.loan || 0) : 0;
+                        let sDiff = window.currentCheckerType === 'MIS' ? (mData.savings || 0) - (aData.savings || 0) : 0;
+                        let sM = iData && iData.surplusMonth !== undefined ? (iData.surplusMonth === -999 ? "TIMEOUT" : formatNum(iData.surplusMonth)) : "0";
+                        let sY = iData && iData.surplusYear !== undefined ? (iData.surplusYear === -999 ? "TIMEOUT" : formatNum(iData.surplusYear)) : "0";
                         
                         let lDiffColor = Math.abs(lDiff) < 1 ? 'green' : 'red';
                         let sDiffColor = Math.abs(sDiff) < 1 ? 'green' : 'red';
-                        let hasDifference = Math.abs(lDiff) >= 1 || Math.abs(sDiff) >= 1;
+                        let hasDifference = window.currentCheckerType === 'MIS' && (Math.abs(lDiff) >= 1 || Math.abs(sDiff) >= 1);
                         
                         if (hasDifference) {
                             tbodyAfter.classList.add('has-diff');
@@ -2050,15 +2451,23 @@ try {
                             tbodyAfter.classList.remove('has-diff');
                         }
 
-                        if (window.currentCheckerType === 'EQUITY' && aData.equity < 0) {
+                        if (window.currentCheckerType === 'EQUITY' && ((aData && aData.equity < 0 && aData.equity !== -999) || (aData && aData.equityPrev < 0 && aData.equityPrev !== -999) || (iData && iData.surplusMonth < 0 && iData.surplusMonth !== -999) || (iData && iData.surplusYear < 0 && iData.surplusYear !== -999))) {
                             tbodyAfter.classList.add('loss-branch');
                         } else {
                             tbodyAfter.classList.remove('loss-branch');
                         }
 
+                        if (window.currentCheckerType === 'CASH' && (aData.cashInHand > 2000 || aData.cashAtBank > 1000000)) {
+                            tbodyAfter.classList.add('high-cash');
+                        } else {
+                            tbodyAfter.classList.remove('high-cash');
+                        }
+
                         if (window._misAisCurrentTab === 'DIFF' && !tbodyAfter.classList.contains('has-diff')) {
                             tbodyAfter.style.display = 'none';
                         } else if (window._misAisCurrentTab === 'LOSS' && !tbodyAfter.classList.contains('loss-branch')) {
+                            tbodyAfter.style.display = 'none';
+                        } else if (window._misAisCurrentTab === 'HIGH_CASH' && !tbodyAfter.classList.contains('high-cash')) {
                             tbodyAfter.style.display = 'none';
                         } else {
                             tbodyAfter.style.display = '';
@@ -2082,35 +2491,54 @@ try {
                                 </tr>
                             `;
                         } else if (window.currentCheckerType === 'CASH') {
+                            let cashColor = aData.cashInHand > 2000 ? 'red' : '#16a085';
+                            let bankColor = aData.cashAtBank > 1000000 ? 'red' : '#16a085';
+                            let isHighCashClass = aData.cashInHand > 2000 ? 'is-high' : '';
+                            let isHighBankClass = aData.cashAtBank > 1000000 ? 'is-high' : '';
                             htmlRowsBatch = `
-                                <tr>
-                                    <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
+                                <tr class="cash-row ${isHighCashClass}">
+                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
                                     <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Cash</b></td>
-                                    <td style="color:#16a085; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.cashInHand)}</td>
+                                    <td style="color:${cashColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.cashInHand)}</td>
                                 </tr>
-                                <tr style="background:#fcfcfc;">
+                                <tr class="bank-row ${isHighBankClass}" style="background:#fcfcfc;">
                                     <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Bank</b></td>
-                                    <td style="color:#16a085; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.cashAtBank)}</td>
+                                    <td style="color:${bankColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.cashAtBank)}</td>
                                 </tr>
                             `;
                         } else if (window.currentCheckerType === 'EQUITY') {
                             htmlRowsBatch = `
-                                <tr>
-                                    <td rowspan="1" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
+                                <tr class="equity-row">
+                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">${b.name}</td>
                                     <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Equity</b></td>
-                                    <td style="color:#8e44ad; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equity)}</td>
+                                    <td style="color:${(aData.equity < 0 && aData.equity !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equity)}</td>
+                                    <td style="color:${(aData.equityPrev < 0 && aData.equityPrev !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equityPrev)}</td>
+                                </tr>
+                                <tr class="surplus-row" style="border-bottom:1px solid #bdc3c7;">
+                                    <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Surplus</b></td>
+                                    <td style="color:${(iData.surplusMonth < 0 && iData.surplusMonth !== -999) ? 'red' : '#e67e22'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${sM}</td>
+                                    <td style="color:${(iData.surplusYear < 0 && iData.surplusYear !== -999) ? 'red' : '#d35400'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${sY}</td>
                                 </tr>
                             `;
+                        } else if (window.currentCheckerType === 'SAMITY') {
+                            let totalCount = aData && aData.totalCount !== undefined ? aData.totalCount : (aData ? aData.length : 0);
+                            let smallSamities = aData && aData.data ? aData.data.filter(s => s.members >= 0 && s.members <= 19) : (aData ? aData.filter(s => s.members >= 0 && s.members <= 19) : []);
+                            let smallCount = smallSamities.length;
+                            let codesText = smallSamities.map(s => s.code).join(', ');
+                            htmlRowsBatch = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
+                        } else if (window.currentCheckerType === 'DUE_COLLECTION') {
+                            htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? aData.totalCurrent.toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? aData.totalMatured.toFixed(2) : '0') + `</td></tr>`;
                         }
                         tbodyAfter.innerHTML = htmlRowsBatch;
+                        if (window.applyTabFilters) window.applyTabFilters(tbodyAfter);
                         successCount++;
                     } else {
                         tbodyAfter.innerHTML = `
                             <tr>
                                 <td style="text-align:left; font-weight:bold; color:#e74c3c; font-size:9.5px;">${b.name}</td>
-                                <td colspan="${window.currentCheckerType === 'MIS' ? '3' : '1'}" style="text-align:center; color:red; font-size:9.5px;">❌ ডাটা নেই</td>
+                                <td colspan="${window.currentCheckerType === 'MIS' ? '3' : (window.currentCheckerType === 'EQUITY' ? '2' : '1')}" style="text-align:center; color:red; font-size:9.5px;">\u274C \u09A1\u09BE\u099F\u09BE \u09A8\u09C7\u0987</td>
                                 <td style="text-align:center; vertical-align:middle;">
-                                    <button class="manual-retry-btn" data-id="${b.id}" data-name="${b.name}" style="background:#e74c3c; color:white; border:none; padding:2px 6px; font-size:9.5px; border-radius:2px; cursor:pointer; font-weight:bold;">🔄 Retry</button>
+                                    <button class="manual-retry-btn" data-id="${b.id}" data-name="${b.name}" style="background:#e74c3c; color:white; border:none; padding:2px 6px; font-size:9.5px; border-radius:2px; cursor:pointer; font-weight:bold;">\u{1F504} Retry</button>
                                 </td>
                             </tr>
                         `;
@@ -2118,7 +2546,7 @@ try {
                 }
 
                 let finalStatus = document.getElementById('audit-status');
-                if(finalStatus) finalStatus.innerHTML = `<span style="color:green;">✅ ${successCount} টি শাখার অডিট সম্পন্ন!</span>`;
+                if(finalStatus) finalStatus.innerHTML = `<span style="color:green;">\u2705 ${successCount} \u099F\u09BF \u09B6\u09BE\u0996\u09BE\u09B0 \u0985\u09A1\u09BF\u099F \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!</span>`;
                 
                 let finalBtn = document.getElementById('start-audit-btn');
                 if(finalBtn) { finalBtn.disabled = false; finalBtn.style.background = "#27ae60"; }
@@ -2126,7 +2554,7 @@ try {
                 let expBtn = document.getElementById('export-excel-btn');
                 if(expBtn) expBtn.style.display = 'block';
             }
-        };
+        });
 
         if(!document.getElementById('spinner-css')) {
             const style = document.createElement('style');
@@ -2147,6 +2575,10 @@ try {
             if (btn2) btn2.remove();
             let btn3 = document.getElementById('equity-toggle-btn');
             if (btn3) btn3.remove();
+            let btn4 = document.getElementById('samity-toggle-btn');
+            if (btn4) btn4.remove();
+            let btn5 = document.getElementById('due-toggle-btn');
+            if (btn5) btn5.remove();
             
             let p = document.getElementById('ghost-audit-panel');
             if (p) p.remove();
@@ -2156,12 +2588,12 @@ try {
 })();
 
 // ========================================================================
-// 📊 3. HIERARCHICAL BRANCH REPORT (DASHBOARD MEMBER VERIFICATION MODULE)
+// \u{1F4CA} 3. HIERARCHICAL BRANCH REPORT (DASHBOARD MEMBER VERIFICATION MODULE)
 // ========================================================================
 (function() {
     'use strict';
 
-    // 🌟 Ultra-Safe Storage Utilities (Error Proof)
+    // \u{1F31F} Ultra-Safe Storage Utilities (Error Proof)
     const storageUtil = {
         set: function(key, value, callback) {
             try {
@@ -2195,7 +2627,7 @@ try {
         }
     };
 
-    // ১. গ্লোবাল ভেরিয়েবল ও ইন্টারসেপ্টর
+    // \u09E7. \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09AD\u09C7\u09B0\u09BF\u09AF\u09BC\u09C7\u09AC\u09B2 \u0993 \u0987\u09A8\u09CD\u099F\u09BE\u09B0\u09B8\u09C7\u09AA\u09CD\u099F\u09B0
     let clonedUrl = null;
     let clonedHeaders = {};
     let isCapturing = false;
@@ -2285,7 +2717,7 @@ try {
         };
     }
 
-    // ২. ডাটা ম্যানেজমেন্ট (Safe Parsing)
+    // \u09E8. \u09A1\u09BE\u099F\u09BE \u09AE\u09CD\u09AF\u09BE\u09A8\u09C7\u099C\u09AE\u09C7\u09A8\u09CD\u099F (Safe Parsing)
     function getMappings() {
         let aMap = {}, zMap = {};
         try { aMap = JSON.parse(localStorage.getItem('microfin_aMap') || '{}'); } catch(e){}
@@ -2298,7 +2730,7 @@ try {
         };
     }
 
-    // ৩. API টেমপ্লেট সংগ্রহ করা (Background Iframe)
+    // \u09E9. API \u099F\u09C7\u09AE\u09AA\u09CD\u09B2\u09C7\u099F \u09B8\u0982\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09BE (Background Iframe)
     async function ensureApiAndBranchList() {
         if (sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup')) {
             return;
@@ -2395,7 +2827,7 @@ try {
         });
     }
 
-    // ৪. API ডেটা ফেচার (High Speed - Main Window Execution)
+    // \u09EA. API \u09A1\u09C7\u099F\u09BE \u09AB\u09C7\u099A\u09BE\u09B0 (High Speed - Main Window Execution)
     async function fetchMemberCount(branchId, nidStatus) {
         let tmplStr = sessionStorage.getItem('mf_api_template');
         if (!tmplStr) {
@@ -2461,7 +2893,7 @@ try {
         }
     }
 
-    // ড্যাশবোর্ডে ভাসমান বাটন
+    // \u09A1\u09CD\u09AF\u09BE\u09B6\u09AC\u09CB\u09B0\u09CD\u09A1\u09C7 \u09AD\u09BE\u09B8\u09AE\u09BE\u09A8 \u09AC\u09BE\u099F\u09A8
     function injectToggleBtn() {
         if (document.getElementById('member-report-toggle-btn')) return;
         
@@ -2470,14 +2902,14 @@ try {
         container.style.cssText = 'position:fixed; bottom:160px; right:16px; display:flex; align-items:center; background:#8e44ad; color:white; border-radius:50px; padding:8px 14px; font-weight:bold; font-size:13px; box-shadow:0 4px 14px rgba(0,0,0,0.4); z-index:999998; font-family:Arial; transition:0.3s;';
         
         let textSpan = document.createElement('span');
-        textSpan.innerText = '👥 Member Verification';
+        textSpan.innerText = '\u{1F465} Member CIB Verification';
         textSpan.style.cssText = 'margin-right:8px; pointer-events:none;';
 
         container.onclick = () => injectUI();
 
         let closeBtn = document.createElement('button');
-        closeBtn.innerText = '✕';
-        closeBtn.title = 'বন্ধ করুন';
+        closeBtn.innerText = '\u2715';
+        closeBtn.title = '\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8';
         closeBtn.style.cssText = 'background: rgba(255,255,255,0.25); color:white; border:none; width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; outline:none; transition:0.2s;';
         closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255,0,0,0.8)';
         closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255,255,255,0.25)';
@@ -2494,7 +2926,7 @@ try {
         document.body.appendChild(container);
     }
 
-    // ৫. প্যানেল ইনজেকশন ও ট্রি রেন্ডারিং ইঞ্জিন
+    // \u09EB. \u09AA\u09CD\u09AF\u09BE\u09A8\u09C7\u09B2 \u0987\u09A8\u099C\u09C7\u099C\u09B6\u09A8 \u0993 \u099F\u09CD\u09B0\u09BF \u09B0\u09C7\u09A8\u09CD\u09A1\u09BE\u09B0\u09BF\u0982 \u0987\u099E\u09CD\u099C\u09BF\u09A8
     function injectUI() {
         try {
             if (document.getElementById('auto-report-panel')) return;
@@ -2512,13 +2944,13 @@ try {
                 let zones = [...new Set(Object.values(maps.zMap))].filter(Boolean).sort();
                 let areas = [...new Set(Object.values(maps.aMap))].filter(Boolean).sort();
                 
-                let levelOptions = `<option value="1">শাখা</option>`;
+                let levelOptions = `<option value="1">\u09B6\u09BE\u0996\u09BE</option>`;
                 if (maps.role === 'HO' || maps.role === 'ZONE') {
-                    if (areas.length > 0) levelOptions += `<option value="2">অঞ্চল</option>`;
+                    if (areas.length > 0) levelOptions += `<option value="2">\u0985\u099E\u09CD\u099A\u09B2</option>`;
                 }
                 
                 if (maps.role === 'HO') {
-                    if (zones.length > 0) levelOptions += `<option value="3" selected>জোন</option>`;
+                    if (zones.length > 0) levelOptions += `<option value="3" selected>\u099C\u09CB\u09A8</option>`;
                     else if (areas.length > 0) levelOptions = levelOptions.replace('value="2"', 'value="2" selected');
                     else levelOptions = levelOptions.replace('value="1"', 'value="1" selected');
                 } else if (maps.role === 'ZONE') {
@@ -2531,13 +2963,13 @@ try {
                 filterHtml = `
                     <div style="display:flex; gap:8px; margin-bottom:8px;">
                         <div style="flex:1;">
-                            <label style="font-size:10px; font-weight:bold; color:#34495e;">📍 লেভেল:</label>
+                            <label style="font-size:10px; font-weight:bold; color:#34495e;">\u{1F4CD} \u09B2\u09C7\u09AD\u09C7\u09B2:</label>
                             <select id="mv-level-selection" style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px; font-size:12px;">
                                 ${levelOptions}
                             </select>
                         </div>
                         <div style="flex:1.5;">
-                            <label style="font-size:10px; font-weight:bold; color:#34495e;">🏢 নির্বাচন:</label>
+                            <label style="font-size:10px; font-weight:bold; color:#34495e;">\u{1F3E2} \u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
                             <select id="filter-selection" style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px; font-size:12px;">
                             </select>
                         </div>
@@ -2547,18 +2979,18 @@ try {
 
             panel.innerHTML = `
                 <div id="mem-report-header" style="background:#8e44ad; color:white; padding:8px 12px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
-                    <strong style="font-size:14px; pointer-events:none; white-space:nowrap;">👥 Member Verification Report</strong>
+                    <strong style="font-size:14px; pointer-events:none; white-space:nowrap;">\u{1F465} Member CIB Verification Report</strong>
                     <div style="display:flex; gap:6px; align-items:center;">
-                        <button id="resync-btn" style="background:#f39c12; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold;">🔄 Resync</button>
-                        <button id="close-panel-btn" title="বন্ধ করুন" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 25px; height: 25px; border-radius: 50%; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(255, 65, 108, 0.45); transition: 0.2s;">✕</button>
+                        <button id="resync-btn" style="background:#f39c12; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold;">\u{1F504} Resync</button>
+                        <button id="close-panel-btn" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 25px; height: 25px; border-radius: 50%; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(255, 65, 108, 0.45); transition: 0.2s;">\u2715</button>
                     </div>
                 </div>
                 <div style="padding:10px; overflow-y:auto; flex:1; display:flex; flex-direction:column;">
                     ${filterHtml}
-                    <button id="gen-btn" style="width:100%; background:${isReady ? '#8e44ad' : '#ccc'}; color:white; border:none; padding:8px; cursor:${isReady ? 'pointer' : 'not-allowed'}; font-weight:bold; border-radius:4px; font-size:13px; flex-shrink:0;" ${!isReady ? 'disabled' : ''}>🚀 Generate Tree Report</button>
+                    <button id="gen-btn" style="width:100%; background:${isReady ? '#8e44ad' : '#ccc'}; color:white; border:none; padding:8px; cursor:${isReady ? 'pointer' : 'not-allowed'}; font-weight:bold; border-radius:4px; font-size:13px; flex-shrink:0;" ${!isReady ? 'disabled' : ''}>\u{1F680} Generate Tree Report</button>
                     <div id="status-text" style="margin-top:8px; font-size:12px; font-weight:bold; text-align:center; color:#2c3e50; min-height:16px;"></div>
                     <div id="table-container" style="overflow-y:auto; margin-top:8px; flex:1; max-height:55vh;"></div>
-                    <button id="export-btn" style="display:none; width:100%; background:#27ae60; color:white; border:none; padding:8px; margin-top:8px; font-weight:bold; border-radius:4px; font-size:13px; flex-shrink:0;">📥 Download Excel</button>
+                    <button id="export-btn" style="display:none; width:100%; background:#27ae60; color:white; border:none; padding:8px; margin-top:8px; font-weight:bold; border-radius:4px; font-size:13px; flex-shrink:0;">\u{1F4E5} Download Excel</button>
                 </div>
             `;
             document.body.appendChild(panel);
@@ -2573,17 +3005,17 @@ try {
                 mvLevel.onchange = () => {
                     let val = mvLevel.value;
                     if (val === '3') {
-                        mvFilter.innerHTML = '<option value="ALL">🌐 All Zones</option>' + zones.map(z => `<option value="${z}">${z}</option>`).join('');
+                        mvFilter.innerHTML = '<option value="ALL">\u{1F310} All Zones</option>' + zones.map(z => `<option value="${z}">${z}</option>`).join('');
                     } else if (val === '2') {
-                        mvFilter.innerHTML = '<option value="ALL">🌐 All Areas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+                        mvFilter.innerHTML = '<option value="ALL">\u{1F310} All Areas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
                     } else if (val === '1') {
-                        mvFilter.innerHTML = '<option value="ALL">🌐 All Branches</option>' + bList.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+                        mvFilter.innerHTML = '<option value="ALL">\u{1F310} All Branches</option>' + bList.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
                     }
                 };
                 mvLevel.onchange(); 
             }
 
-            // 🌟 Make header draggable
+            // \u{1F31F} Make header draggable
             let isDraggingMem = false, initialXMem, initialYMem;
             const memHeader = document.getElementById('mem-report-header');
             if (memHeader) {
@@ -2636,7 +3068,7 @@ try {
                     let html = `<table id="reportTable" border="1" style="width:100%; border-collapse:collapse; font-size:11px; line-height:1.2;">
                         <tr style="background:#e8f4f8; color:#2980b9;">
                             <td colspan="4" style="padding:6px; font-size:12px; text-align:center; font-weight:bold;">
-                                🕒 Report Generated On: ${dtString}
+                                \u{1F552} Report Generated On: ${dtString}
                             </td>
                         </tr>
                         <tr style="background:#2c3e50; color:white; font-size:11px;">
@@ -2670,11 +3102,11 @@ try {
                         let totalHOActive = 0, totalHOVerified = 0;
                         
                         for (let z in tree) {
-                            html += `<tr style="background:#0277bd; color:white;"><td colspan="4" style="padding:4px;"><b>🏢 Zone: ${z}</b></td></tr>`;
+                            html += `<tr style="background:#0277bd; color:white;"><td colspan="4" style="padding:4px;"><b>\u{1F3E2} Zone: ${z}</b></td></tr>`;
                             let zoneActive = 0, zoneVerified = 0;
                             
                             for (let a in tree[z]) {
-                                html += `<tr style="background:#e1f5fe; color:#01579b;"><td colspan="4" style="padding:4px;">&nbsp;&nbsp;<b>📍 Area: ${a}</b></td></tr>`;
+                                html += `<tr style="background:#e1f5fe; color:#01579b;"><td colspan="4" style="padding:4px;">&nbsp;&nbsp;<b>\u{1F4CD} Area: ${a}</b></td></tr>`;
                                 let areaActive = 0, areaVerified = 0;
                                 
                                 for (let b of tree[z][a]) {
@@ -2685,16 +3117,16 @@ try {
                                     areaActive += active;
                                     areaVerified += verified;
                                     
-                                    html += `<tr style="background:#fff;"><td style="padding:4px; word-break:break-word;">&nbsp;&nbsp;&nbsp;&nbsp;🏷️ ${b.name}</td><td style="text-align:center; padding:4px;">${active}</td><td style="text-align:center; padding:4px;">${verified}</td><td style="text-align:center; padding:4px;"><b>${perc}%</b></td></tr>`;
+                                    html += `<tr style="background:#fff;"><td style="padding:4px; word-break:break-word;">&nbsp;&nbsp;&nbsp;&nbsp;\u{1F3F7}\uFE0F ${b.name}</td><td style="text-align:center; padding:4px;">${active}</td><td style="text-align:center; padding:4px;">${verified}</td><td style="text-align:center; padding:4px;"><b>${perc}%</b></td></tr>`;
                                 }
                                 let areaPerc = areaActive > 0 ? Math.round((areaVerified / areaActive) * 100) : 0;
-                                html += `<tr style="background:#fff2e6; font-weight:bold;"><td style="text-align:left; padding:4px; word-break:break-word;">&nbsp;&nbsp;📊 Total Area (${a})</td><td style="text-align:center; padding:4px;">${areaActive}</td><td style="text-align:center; padding:4px;">${areaVerified}</td><td style="text-align:center; color:#d35400; padding:4px;">${areaPerc}%</td></tr>`;
+                                html += `<tr style="background:#fff2e6; font-weight:bold;"><td style="text-align:left; padding:4px; word-break:break-word;">&nbsp;&nbsp;\u{1F4CA} Total Area (${a})</td><td style="text-align:center; padding:4px;">${areaActive}</td><td style="text-align:center; padding:4px;">${areaVerified}</td><td style="text-align:center; color:#d35400; padding:4px;">${areaPerc}%</td></tr>`;
                                 
                                 zoneActive += areaActive;
                                 zoneVerified += areaVerified;
                             }
                             let zonePerc = zoneActive > 0 ? Math.round((zoneVerified / zoneActive) * 100) : 0;
-                            html += `<tr style="background:#e6f4ea; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">📊 Total Zone (${z})</td><td style="text-align:center; padding:2px;">${zoneActive}</td><td style="text-align:center; padding:2px;">${zoneVerified}</td><td style="text-align:center; color:green; padding:2px;">${zonePerc}%</td></tr>`;
+                            html += `<tr style="background:#e6f4ea; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">\u{1F4CA} Total Zone (${z})</td><td style="text-align:center; padding:2px;">${zoneActive}</td><td style="text-align:center; padding:2px;">${zoneVerified}</td><td style="text-align:center; color:green; padding:2px;">${zonePerc}%</td></tr>`;
                             
                             totalHOActive += zoneActive;
                             totalHOVerified += zoneVerified;
@@ -2702,7 +3134,7 @@ try {
                         
                         if (Object.keys(tree).length > 1) {
                             let hoPerc = totalHOActive > 0 ? Math.round((totalHOVerified / totalHOActive) * 100) : 0;
-                            html += `<tr style="background:#2c3e50; color:white; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">📊 Grand Total</td><td style="text-align:center; padding:2px;">${totalHOActive}</td><td style="text-align:center; padding:2px;">${totalHOVerified}</td><td style="text-align:center; color:#f1c40f; padding:2px;">${hoPerc}%</td></tr>`;
+                            html += `<tr style="background:#2c3e50; color:white; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">\u{1F4CA} Grand Total</td><td style="text-align:center; padding:2px;">${totalHOActive}</td><td style="text-align:center; padding:2px;">${totalHOVerified}</td><td style="text-align:center; color:#f1c40f; padding:2px;">${hoPerc}%</td></tr>`;
                         }
                     } 
                     else if (currentRole === 'ZONE') {
@@ -2713,7 +3145,7 @@ try {
                         });
                         let grandActive = 0, grandVerified = 0;
                         for (let a in tree) {
-                            html += `<tr style="background:#0277bd; color:white;"><td colspan="4" style="padding:4px;"><b>📍 Area: ${a}</b></td></tr>`;
+                            html += `<tr style="background:#0277bd; color:white;"><td colspan="4" style="padding:4px;"><b>\u{1F4CD} Area: ${a}</b></td></tr>`;
                             let areaActive = 0, areaVerified = 0;
                             
                             for (let b of tree[a]) {
@@ -2724,21 +3156,21 @@ try {
                                 areaActive += active;
                                 areaVerified += verified;
                                 
-                                html += `<tr style="background:#fff; font-size:11px;"><td style="padding:2px; white-space:nowrap;">&nbsp;&nbsp;🏷️ ${b.name}</td><td style="text-align:center; padding:2px;">${active}</td><td style="text-align:center; padding:2px;">${verified}</td><td style="text-align:center; padding:2px;"><b>${perc}%</b></td></tr>`;
+                                html += `<tr style="background:#fff; font-size:11px;"><td style="padding:2px; white-space:nowrap;">&nbsp;&nbsp;\u{1F3F7}\uFE0F ${b.name}</td><td style="text-align:center; padding:2px;">${active}</td><td style="text-align:center; padding:2px;">${verified}</td><td style="text-align:center; padding:2px;"><b>${perc}%</b></td></tr>`;
                             }
                             let areaPerc = areaActive > 0 ? Math.round((areaVerified / areaActive) * 100) : 0;
-                            html += `<tr style="background:#fff2e6; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">📊 Total Area (${a})</td><td style="text-align:center; padding:2px;">${areaActive}</td><td style="text-align:center; padding:2px;">${areaVerified}</td><td style="text-align:center; color:#d35400; padding:2px;">${areaPerc}%</td></tr>`;
+                            html += `<tr style="background:#fff2e6; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">\u{1F4CA} Total Area (${a})</td><td style="text-align:center; padding:2px;">${areaActive}</td><td style="text-align:center; padding:2px;">${areaVerified}</td><td style="text-align:center; color:#d35400; padding:2px;">${areaPerc}%</td></tr>`;
                             
                             grandActive += areaActive;
                             grandVerified += areaVerified;
                         }
                         if (Object.keys(tree).length > 1) {
                             let grandPerc = grandActive > 0 ? Math.round((grandVerified / grandActive) * 100) : 0;
-                            let totalLabel = "📊 Grand Total";
+                            let totalLabel = "\u{1F4CA} Grand Total";
                             if (uniqueZones.size === 1 && rawBranches[0].zone && rawBranches[0].zone !== 'Unknown Zone' && rawBranches[0].zone !== 'Branch') {
-                                totalLabel = `📊 Total Zone (${rawBranches[0].zone})`;
+                                totalLabel = `\u{1F4CA} Total Zone (${rawBranches[0].zone})`;
                             } else if (maps.entityName) {
-                                totalLabel = `📊 Grand Total (${maps.entityName})`;
+                                totalLabel = `\u{1F4CA} Grand Total (${maps.entityName})`;
                             }
                             html += `<tr style="background:#e6f4ea; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">${totalLabel}</td><td style="text-align:center; padding:2px;">${grandActive}</td><td style="text-align:center; padding:2px;">${grandVerified}</td><td style="text-align:center; color:green; padding:2px;">${grandPerc}%</td></tr>`;
                         }
@@ -2754,15 +3186,15 @@ try {
                             grandActive += active;
                             grandVerified += verified;
                             
-                            html += `<tr style="background:#fff; font-size:11px;"><td style="padding:2px; white-space:nowrap;"><span style="font-weight:bold; color:#2c3e50;">🏷️ ${b.name}</span></td><td style="text-align:center; padding:2px;">${active}</td><td style="text-align:center; padding:2px;">${verified}</td><td style="text-align:center; padding:2px;"><b>${perc}%</b></td></tr>`;
+                            html += `<tr style="background:#fff; font-size:11px;"><td style="padding:2px; white-space:nowrap;"><span style="font-weight:bold; color:#2c3e50;">\u{1F3F7}\uFE0F ${b.name}</span></td><td style="text-align:center; padding:2px;">${active}</td><td style="text-align:center; padding:2px;">${verified}</td><td style="text-align:center; padding:2px;"><b>${perc}%</b></td></tr>`;
                         }
                         if (rawBranches.length > 1) {
                             let grandPerc = grandActive > 0 ? Math.round((grandVerified / grandActive) * 100) : 0;
-                            let totalLabel = "📊 Grand Total";
+                            let totalLabel = "\u{1F4CA} Grand Total";
                             if (uniqueAreas.size === 1 && rawBranches[0].area && rawBranches[0].area !== 'Unknown Area' && rawBranches[0].area !== 'Branch') {
-                                totalLabel = `📊 Total Area (${rawBranches[0].area})`;
+                                totalLabel = `\u{1F4CA} Total Area (${rawBranches[0].area})`;
                             } else if (maps.entityName) {
-                                totalLabel = `📊 Grand Total (${maps.entityName})`;
+                                totalLabel = `\u{1F4CA} Grand Total (${maps.entityName})`;
                             } 
                             html += `<tr style="background:#fff2e6; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">${totalLabel}</td><td style="text-align:center; padding:2px;">${grandActive}</td><td style="text-align:center; padding:2px;">${grandVerified}</td><td style="text-align:center; color:#d35400; padding:2px;">${grandPerc}%</td></tr>`;
                         }
@@ -2860,7 +3292,7 @@ try {
 
                     renderTable(currentReportStructure);
                     
-                    status.innerText = "✅ Report Generated Successfully!";
+                    status.innerText = "\u2705 Report Generated Successfully!";
                     document.getElementById('export-btn').style.display = 'block';
                     btn.disabled = false;
                 };
@@ -2897,7 +3329,7 @@ try {
         }
     }
 
-    // ৬. অটো স্টার্টার (শুধুমাত্র হোমপেজ / ড্যাশবোর্ড)
+    // \u09EC. \u0985\u099F\u09CB \u09B8\u09CD\u099F\u09BE\u09B0\u09CD\u099F\u09BE\u09B0 (\u09B6\u09C1\u09A7\u09C1\u09AE\u09BE\u09A4\u09CD\u09B0 \u09B9\u09CB\u09AE\u09AA\u09C7\u099C / \u09A1\u09CD\u09AF\u09BE\u09B6\u09AC\u09CB\u09B0\u09CD\u09A1)
     let hasSyncedThisPageLoad = false;
 
     setInterval(() => {
@@ -2929,10 +3361,14 @@ try {
         }
     }, 1000);
 
+    // Force 'Is Round Up' to 'No' on any visible report page automatically
+    setInterval(() => {
+        let fractionSel = document.querySelector('select[name="cbo_is_fraction_contain"]');
+        if (fractionSel && fractionSel.value !== "1") {
+            fractionSel.value = "1";
+            fractionSel.dispatchEvent(new Event('change', { bubbles: true }));
+            fractionSel.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }, 1500);
+
 })();
-
-
-
-
-
-
