@@ -13,7 +13,7 @@ try {
 // 🔔 0. AUTO UPDATE NOTIFICATION SYSTEM
 // ========================================================================
 (function checkAppUpdate() {
-    const CURRENT_VERSION = "1.5"; // বর্তমান অ্যাপ ভার্সন
+    const CURRENT_VERSION = "1.6"; // বর্তমান অ্যাপ ভার্সন
     
     // ⚠️ নিচে YOUR_USERNAME এর জায়গায় আপনার গিটহাবের আসল ইউজারনেম বসিয়ে দিন 
     const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json"; 
