@@ -10,12 +10,12 @@ try {
 } catch(e) {}
 
 // ========================================================================
-// \u{1F514} 0. AUTO UPDATE NOTIFICATION SYSTEM
+// 🔔 0. AUTO UPDATE NOTIFICATION SYSTEM
 // ========================================================================
 (function checkAppUpdate() {
-    const CURRENT_VERSION = "1.8"; // \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09CD\u09AF\u09BE\u09AA \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8
+    const CURRENT_VERSION = "1.5"; // বর্তমান অ্যাপ ভার্সন
     
-    // \u26A0\uFE0F \u09A8\u09BF\u099A\u09C7 YOUR_USERNAME \u098F\u09B0 \u099C\u09BE\u09DF\u0997\u09BE\u09DF \u0986\u09AA\u09A8\u09BE\u09B0 \u0997\u09BF\u099F\u09B9\u09BE\u09AC\u09C7\u09B0 \u0986\u09B8\u09B2 \u0987\u0989\u099C\u09BE\u09B0\u09A8\u09C7\u09AE \u09AC\u09B8\u09BF\u09DF\u09C7 \u09A6\u09BF\u09A8 
+    // ⚠️ নিচে YOUR_USERNAME এর জায়গায় আপনার গিটহাবের আসল ইউজারনেম বসিয়ে দিন 
     const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json"; 
 
     setTimeout(() => {
@@ -1447,7 +1447,7 @@ try {
                                 if (savedHd) clonedHeaders = JSON.parse(savedHd);
                                 
                                 let cUrl = sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup');
-                                let apiBasePath = '/core-service/'; // fallback
+                                let apiBasePath = '/core-service/'; // fallback to core-service because samity API lives there
                                 if (cUrl) {
                                     try {
                                         let urlObj = new URL(cUrl.startsWith('http') ? cUrl : window.location.origin + '/' + cUrl);
@@ -1466,6 +1466,7 @@ try {
                                 
                                 while (true) {
                                     let apiUrl = window.location.origin + apiBasePath + 'index.php/samities/index?limit=' + limit + '&offset=' + offset + '&isSearch=1&cbo_branch=' + (targetId === 'SELF' ? '' : targetId) + '&cbo_status=1&cbo_employee=';
+                                    console.log('DEBUG SAMITY URL:', apiUrl);
                                     let r = await window.fetch(apiUrl, { method: 'GET', headers: clonedHeaders, credentials: 'include' });
                                     if (!r.ok) throw new Error('HTTP ' + r.status);
                                     let data = await r.json();
@@ -1473,8 +1474,9 @@ try {
                                     if (data.total) totalCount = parseInt(data.total);
                                     else if (data.recordsTotal) totalCount = parseInt(data.recordsTotal);
                                     
-                                    if (data.samities && data.samities.length > 0) {
-                                        for (let s of data.samities) {
+                                    let samitiesArray = Array.isArray(data.samities) ? data.samities : (typeof data.samities === 'object' && data.samities !== null ? Object.values(data.samities) : []);
+                                    if (samitiesArray.length > 0) {
+                                        for (let s of samitiesArray) {
                                             let code = s.code;
                                             let members = parseInt(s.total_member || '0');
                                             // Prevent duplicates
@@ -1482,10 +1484,10 @@ try {
                                                 allSamities.push({ code, members });
                                             }
                                         }
-                                        if (data.samities.length < limit) {
+                                        if (samitiesArray.length < limit) {
                                             break;
                                         }
-                                        offset += data.samities.length;
+                                        offset += samitiesArray.length;
                                     } else {
                                         break;
                                     }
@@ -2196,6 +2198,14 @@ try {
                     return;
                 }
 
+                let statusMsg = document.getElementById('audit-status');
+                if (window.currentCheckerType === 'SAMITY') {
+                    if (!sessionStorage.getItem('mf_cloned_url') && !localStorage.getItem('mf_cloned_url_backup')) {
+                        if(statusMsg) statusMsg.innerHTML = `<span style="color:#2980b9;">\u23F3 API \u09B9\u09C7\u09A1\u09BE\u09B0 \u09B8\u0982\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09BE \u09B9\u099A\u09CD\u099B\u09C7 (Background)...</span>`;
+                        if (window.ensureApiAndBranchList) await window.ensureApiAndBranchList();
+                    }
+                }
+
                 let output = document.getElementById('audit-output');
                 let tableStyle = `<style>.audit-table { width:100%; border-collapse:collapse; background:white; } .audit-table th, .audit-table td { border:1px solid #bdc3c7; padding:4px; font-family:Arial, sans-serif; } .has-diff {} .no-diff {} .loss-branch {} .high-cash {} .audit-table th { background:#2c3e50; color:white; }</style>`;
                 
@@ -2650,7 +2660,7 @@ try {
             } catch(e){}
         }
 
-        if (this._url && (this._url.includes('cbo_branch') || this._url.includes('cbo_member_status') || (this._url.includes('members') && (this._url.includes('limit=') || this._url.includes('ajax') || this._url.includes('list'))))) {
+        if (this._url && this._url.includes('members') && (this._url.includes('limit=') || this._url.includes('ajax') || this._url.includes('list') || this._url.includes('cbo_branch'))) {
             clonedUrl = this._url; 
             isCapturing = false;
             try {
@@ -2731,7 +2741,7 @@ try {
     }
 
     // \u09E9. API \u099F\u09C7\u09AE\u09AA\u09CD\u09B2\u09C7\u099F \u09B8\u0982\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09BE (Background Iframe)
-    async function ensureApiAndBranchList() {
+    window.ensureApiAndBranchList = async function() {
         if (sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup')) {
             return;
         }
@@ -2774,7 +2784,7 @@ try {
                             };
                             
                             win.XMLHttpRequest.prototype.send = function(body) {
-                                if (this._url && (this._url.includes('cbo_branch') || this._url.includes('cbo_member_status') || (this._url.includes('members') && (this._url.includes('limit=') || this._url.includes('ajax') || this._url.includes('list'))))) {
+                                if (this._url && this._url.includes('members') && (this._url.includes('limit=') || this._url.includes('ajax') || this._url.includes('list') || this._url.includes('cbo_branch'))) {
                                     clonedUrl = this._url; 
                                     clonedHeaders = Object.assign({}, this._headers); 
                                     try {
@@ -2806,8 +2816,8 @@ try {
                         if (sBtn) {
                             sBtn.click();
                             let checks = 0;
-                            while (!sessionStorage.getItem('mf_cloned_url') && checks < 20) {
-                                await new Promise(r => setTimeout(r, 150));
+                            while (!sessionStorage.getItem('mf_cloned_url') && checks < 50) {
+                                await new Promise(r => setTimeout(r, 200));
                                 checks++;
                             }
                         }
@@ -3248,7 +3258,7 @@ try {
                     
                     if (!sessionStorage.getItem('mf_cloned_url') && !localStorage.getItem('mf_cloned_url_backup')) {
                         status.innerText = "Connecting to Data Source (background)...";
-                        await ensureApiAndBranchList();
+                        if (window.ensureApiAndBranchList) await window.ensureApiAndBranchList();
                     }
 
                     if (!sessionStorage.getItem('mf_cloned_url') && !localStorage.getItem('mf_cloned_url_backup')) {
@@ -3372,4 +3382,3 @@ try {
     }, 1500);
 
 })();
-
