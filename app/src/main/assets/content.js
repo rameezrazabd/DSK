@@ -10,12 +10,12 @@ try {
 } catch(e) {}
 
 // ========================================================================
-// 🔔 0. AUTO UPDATE NOTIFICATION SYSTEM
+// \u{1F514} 0. AUTO UPDATE NOTIFICATION SYSTEM
 // ========================================================================
 (function checkAppUpdate() {
-    const CURRENT_VERSION = "1.9"; // বর্তমান অ্যাপ ভার্সন
+    const CURRENT_VERSION = "1.9"; // \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09CD\u09AF\u09BE\u09AA \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8
     
-    // ⚠️ নিচে YOUR_USERNAME এর জায়গায় আপনার গিটহাবের আসল ইউজারনেম বসিয়ে দিন 
+    // \u26A0\uFE0F \u09A8\u09BF\u099A\u09C7 YOUR_USERNAME \u098F\u09B0 \u099C\u09BE\u09DF\u0997\u09BE\u09DF \u0986\u09AA\u09A8\u09BE\u09B0 \u0997\u09BF\u099F\u09B9\u09BE\u09AC\u09C7\u09B0 \u0986\u09B8\u09B2 \u0987\u0989\u099C\u09BE\u09B0\u09A8\u09C7\u09AE \u09AC\u09B8\u09BF\u09DF\u09C7 \u09A6\u09BF\u09A8 
     const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json"; 
 
     setTimeout(() => {
@@ -108,6 +108,9 @@ try {
         }
         window._isCentralSyncRunning = true;
         sessionStorage.removeItem('mf_cloned_url');
+                    sessionStorage.removeItem('mf_api_template');
+                    sessionStorage.removeItem('mf_cloned_headers');
+                    localStorage.removeItem('mf_cloned_headers_backup');
         sessionStorage.removeItem('mf_cloned_headers');
         localStorage.removeItem('mf_cloned_url_backup');
         localStorage.removeItem('mf_cloned_headers_backup');
@@ -359,6 +362,9 @@ try {
             sessionStorage.removeItem('mf_global_hierarchy_synced');
             sessionStorage.removeItem('mf_auto_synced');
             sessionStorage.removeItem('mf_cloned_url');
+                    sessionStorage.removeItem('mf_api_template');
+                    sessionStorage.removeItem('mf_cloned_headers');
+                    localStorage.removeItem('mf_cloned_headers_backup');
             sessionStorage.removeItem('mf_cloned_headers');
             sessionStorage.removeItem('mf_user_type');
             localStorage.removeItem('microfin_sync_status');
@@ -608,6 +614,91 @@ try {
         }
     }
 
+        function updateUIForRole() {
+        let lvl = document.getElementById('bde-ui-level');
+        let uType = sessionStorage.getItem('mf_user_type');
+        if (!lvl) return;
+        
+        let zones = JSON.parse(sessionStorage.getItem('mf_cached_zones') || '[]');
+        if (zones.length === 0) {
+            let zMap = JSON.parse(localStorage.getItem('microfin_zMap') || '{}');
+            zones = [...new Set(Object.values(zMap))].filter(Boolean).sort().map(z => ({ id: z, name: z }));
+        }
+        let areas = JSON.parse(sessionStorage.getItem('mf_cached_areas') || '[]');
+        if (areas.length === 0) {
+            let aMap = JSON.parse(localStorage.getItem('microfin_aMap') || '{}');
+            areas = [...new Set(Object.values(aMap))].filter(Boolean).sort().map(a => ({ id: a, name: a }));
+        }
+
+        
+        lvl.innerHTML = '';
+        if (uType === 'BRANCH') {
+            lvl.innerHTML = `<option value="AREA">\u09B6\u09BE\u0996\u09BE</option>`;
+            lvl.disabled = true;
+        } else if (uType === 'AREA') {
+            lvl.innerHTML = `<option value="AREA">\u09B6\u09BE\u0996\u09BE</option>`;
+        } else {
+            let options = `<option value="AREA">\u09B6\u09BE\u0996\u09BE</option>`;
+            if (areas.length > 0) options += `<option value="ZONE">\u0985\u099E\u09CD\u099A\u09B2</option>`;
+            if (zones.length > 0) options += `<option value="HO" selected>\u099C\u09CB\u09A8</option>`;
+            else if (areas.length > 0) options = options.replace(`value="ZONE"`, `value="ZONE" selected`);
+            else options = options.replace(`value="AREA"`, `value="AREA" selected`);
+            lvl.innerHTML = options;
+        }
+        populateTargets();
+    }
+
+    function populateTargets() {
+        let targetSel = document.getElementById('bde-ui-target');
+        let lvlEl = document.getElementById('bde-ui-level');
+        if (!targetSel || !lvlEl) return;
+        let level = lvlEl.value;
+        let uType = sessionStorage.getItem('mf_user_type');
+        
+        targetSel.innerHTML = '';
+        if (uType === 'BRANCH') {
+            let currentBranchName = localStorage.getItem('microfin_entity_name') || 'My Branch';
+            let branchList = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
+            let bObj = branchList.find(b => b.name === currentBranchName) || branchList[0];
+            let val = bObj ? bObj.id : 'SELF';
+            targetSel.innerHTML = `<option value="${val}">${currentBranchName}</option>`;
+            targetSel.disabled = true;
+            return;
+        }
+        
+        targetSel.disabled = false;
+        targetSel.innerHTML = '<option value="ALL" selected>\uD83D\uDE80 Select All</option>';
+        
+        let data = [];
+        if (uType === 'AREA') {
+            data = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
+        } else {
+            if (level === 'HO') {
+                
+                let zMap = JSON.parse(localStorage.getItem('microfin_zMap') || '{}');
+                let zList = [...new Set(Object.values(zMap))].filter(Boolean).sort();
+                data = zList.map(z => ({ id: z, name: z }));
+        
+            } else if (level === 'ZONE') {
+                
+                let aMap = JSON.parse(localStorage.getItem('microfin_aMap') || '{}');
+                let aList = [...new Set(Object.values(aMap))].filter(Boolean).sort();
+                data = aList.map(a => ({ id: a, name: a }));
+        
+            } else if (level === 'AREA') {
+                data = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
+            }
+        }
+        
+        data.forEach(item => {
+            let val = item.id || item.name;
+            if (level === 'HO') val = item.name;
+            if (level === 'ZONE') val = item.name;
+            targetSel.innerHTML += `<option value="${val}">${item.name}</option>`;
+        });
+    }
+
+
     function performRoleWiseSync() {
         window.runGlobalHierarchySync(true, (success) => {
             if(document.getElementById('bde-ui-level')) updateUIForRole();
@@ -624,6 +715,42 @@ try {
     }
 
     let isBdeBtnClosed = false;
+        function escapeXml(unsafe) {
+        return (unsafe || '').replace(/[<>&'"]/g, function (c) {
+            switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '\'': return '&apos;';
+                case '"': return '&quot;';
+            }
+        });
+    }
+
+        function escapeXml(unsafe) {
+        return (unsafe || '').replace(/[<>&'"]/g, function (c) {
+            switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '\'': return '&apos;';
+                case '"': return '&quot;';
+            }
+        });
+    }
+
+        function escapeXml(unsafe) {
+        return (unsafe || '').replace(/[<>&'"]/g, function (c) {
+            switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '\'': return '&apos;';
+                case '"': return '&quot;';
+            }
+        });
+    }
+
     function initFloatingButton() {
         if (isBdeBtnClosed || document.getElementById('bde-ghost-date-toggle')) return;
         
@@ -632,9 +759,9 @@ try {
         container.style.cssText = 'position:fixed; bottom:118px; right:16px; display:flex; align-items:center; background:#2980b9; color:white; border-radius:50px; padding:8px 14px; font-weight:bold; font-size:13px; box-shadow:0 4px 14px rgba(0,0,0,0.4); z-index:999998; font-family:Arial; transition:all 0.3s ease; cursor:pointer;';
         
         let textSpan = document.createElement('span');
-        textSpan.innerText = '\u{1F4C5} Branch Dates';
+        textSpan.innerText = '\uD83D\uDCC5 Branch Dates';
         textSpan.style.cssText = 'margin-right:8px; pointer-events:none;';
-
+        
         let closeBtn = document.createElement('button');
         closeBtn.innerText = '\u2715';
         closeBtn.title = '\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8';
@@ -645,22 +772,25 @@ try {
             e.stopPropagation();
             isBdeBtnClosed = true;
             container.remove();
-            let p = document.getElementById('bde-ghost-date-panel');
-            if(p) p.remove();
         };
 
-        container.onclick = () => openMainPanel();
+        container.onclick = () => {
+            isBdeBtnClosed = false;
+            container.remove();
+            showFloatingPanel();
+        };
+        
         container.appendChild(textSpan);
         container.appendChild(closeBtn);
         document.body.appendChild(container);
     }
 
-    function openMainPanel() {
+    function showFloatingPanel() {
         if (document.getElementById('bde-ghost-date-panel')) return;
 
-        const panel = document.createElement('div');
+        let panel = document.createElement('div');
         panel.id = 'bde-ghost-date-panel';
-        panel.style.cssText = 'position: fixed; top: 5px; bottom: 35px; left: 50%; transform: translateX(-50%); background: #fff; border: 2px solid #2c3e50; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); width: 97vw; max-width: 680px; display:flex; flex-direction:column; font-family: Arial; z-index: 999999; overflow: hidden;';
+        panel.style.cssText = 'position:fixed; top:10px; left:50%; transform:translateX(-50%); background:white; border:2px solid #2980b9; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:95vw; max-width:800px; max-height:90vh; z-index:999999; display:flex; flex-direction:column; font-family:Arial; overflow:hidden;';
 
         document.body.appendChild(panel);
 
@@ -687,10 +817,10 @@ try {
 
                 <button id="bde-start-fetch-btn" style="width:100%; background:#27ae60; color:white; border:none; padding:6px; font-weight:bold; font-size:13px; border-radius:4px; cursor:pointer; margin-bottom:5px; flex-shrink:0;">\u{1F680} Fetch Dates (Auto Engine)</button>
                 
-                <!-- \u{1F31F} \u09B8\u09CD\u09B2\u09BF\u09AE \u09B8\u09CD\u09AE\u09BE\u09B0\u09CD\u099F \u09E8-\u099F\u09CD\u09AF\u09BE\u09AC (\u09AC\u0995\u09CD\u09B8 \u0993 \u099F\u09CD\u09AF\u09BE\u09AC \u098F\u0995\u09A4\u09CD\u09B0\u09BF\u09A4 \u0995\u09B0\u09BE \u09B9\u09B2\u09CB \u099C\u09BE\u09DF\u0997\u09BE \u09AC\u09BE\u0981\u099A\u09BE\u09A4\u09C7) -->
                 <div id="bde-tabs-bar" style="display:flex; gap:6px; margin-bottom:5px; flex-shrink:0;">
-                    <button id="bde-tab-all" style="flex:1; background:#2980b9; color:white; border:none; padding:6px; border-radius:4px; font-size:11.5px; font-weight:bold; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.2);">\u{1F3E2} \u09B8\u0995\u09B2 \u09B6\u09BE\u0996\u09BE (<span id="bde-lbl-all">\u09E6</span>)</button>
-                    <button id="bde-tab-overdue" style="flex:1; background:#fdedec; color:#c0392b; border:1px solid #e74c3c; padding:6px; border-radius:4px; font-size:11.5px; font-weight:bold; cursor:pointer; box-shadow:0 1px 3px rgba(231,76,60,0.15);">\u26A0\uFE0F \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7 (<span id="bde-lbl-overdue">\u09E6</span>)</button>
+                    <button id="bde-tab-all" style="flex:1; background:#2980b9; color:white; border:none; padding:4px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">All (<span id="bde-lbl-all">\u09E6</span>)</button>
+                    <button id="bde-tab-current" style="flex:1; background:#ecf0f1; color:#7f8c8d; border:1px solid #bdc3c7; padding:4px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Current (<span id="bde-lbl-current">\u09E6</span>)</button>
+                    <button id="bde-tab-back" style="flex:1; background:#ecf0f1; color:#7f8c8d; border:1px solid #bdc3c7; padding:4px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Back (<span id="bde-lbl-back">\u09E6</span>)</button>
                 </div>
 
                 <div id="bde-status-msg" style="font-size:11px; font-weight:bold; color:#d35400; text-align:center; min-height:16px; flex-shrink:0;"></div>
@@ -701,48 +831,231 @@ try {
             </div>
         `;
 
-        document.getElementById('bde-close-date-panel').onclick = () => panel.remove();
+        document.getElementById('bde-close-date-panel').onclick = () => {
+            isBdeBtnClosed = true;
+            panel.remove();
+        };
         makeDraggable(panel, document.getElementById('bde-drag-header'));
         document.getElementById('bde-ui-level').onchange = populateTargets;
+        updateUIForRole();
 
         let tabAll = document.getElementById('bde-tab-all');
-        let tabOverdue = document.getElementById('bde-tab-overdue');
+        let tabCurrent = document.getElementById('bde-tab-current');
+        let tabBack = document.getElementById('bde-tab-back');
 
-        function filterTableRows(showOnlyOverdue) {
-            if (showOnlyOverdue) {
-                tabAll.style.background = '#ecf0f1'; tabAll.style.color = '#7f8c8d'; tabAll.style.border = '1px solid #bdc3c7';
-                tabOverdue.style.background = '#e74c3c'; tabOverdue.style.color = 'white'; tabOverdue.style.border = 'none';
-            } else {
+        function filterTableRows(filterType) {
+            [tabAll, tabCurrent, tabBack].forEach(tab => {
+                if (tab) {
+                    tab.style.background = '#ecf0f1'; 
+                    tab.style.color = '#7f8c8d'; 
+                    tab.style.border = '1px solid #bdc3c7';
+                }
+            });
+            
+            if (filterType === 'all' && tabAll) {
                 tabAll.style.background = '#2980b9'; tabAll.style.color = 'white'; tabAll.style.border = 'none';
-                tabOverdue.style.background = '#fdedec'; tabOverdue.style.color = '#c0392b'; tabOverdue.style.border = '1px solid #e74c3c';
+            } else if (filterType === 'current' && tabCurrent) {
+                tabCurrent.style.background = '#27ae60'; tabCurrent.style.color = 'white'; tabCurrent.style.border = 'none';
+            } else if (filterType === 'back' && tabBack) {
+                tabBack.style.background = '#e74c3c'; tabBack.style.color = 'white'; tabBack.style.border = 'none';
             }
+            
+            document.querySelectorAll('#bde-table-output tbody[data-status="header"]').forEach(tbody => {
+                tbody.style.display = (filterType === 'all') ? '' : 'none';
+            });
+
             document.querySelectorAll('#bde-table-output tbody[id^="bde-tr-"]').forEach(tbody => {
                 let status = tbody.getAttribute('data-status');
-                if (showOnlyOverdue) {
-                    tbody.style.display = (status === 'overdue') ? '' : 'none';
-                } else {
+                if (filterType === 'all') {
                     tbody.style.display = '';
+                } else if (filterType === 'current') {
+                    tbody.style.display = (status === 'current') ? '' : 'none';
+                } else if (filterType === 'back') {
+                    tbody.style.display = (status === 'back') ? '' : 'none';
                 }
             });
         }
 
-        if (tabAll && tabOverdue) {
-            tabAll.onclick = () => filterTableRows(false);
-            tabOverdue.onclick = () => filterTableRows(true);
-        }
+        if (tabAll) tabAll.onclick = () => filterTableRows('all');
+        if (tabCurrent) tabCurrent.onclick = () => filterTableRows('current');
+        if (tabBack) tabBack.onclick = () => filterTableRows('back');
 
         document.getElementById('bde-sync-btn').onclick = () => {
-            document.getElementById('bde-status-msg').innerText = "\u23F3 \u09A1\u09BE\u099F\u09BE\u09AC\u09C7\u09B8 \u09B8\u09BF\u0999\u09CD\u0995 \u09B9\u099A\u09CD\u099B\u09C7...";
-            window.runGlobalHierarchySync(true, (success) => {
-                if(success) {
-                    document.getElementById('bde-status-msg').innerHTML = "<span style='color:green;'>\u2705 \u09B8\u09BF\u0999\u09CD\u0995 \u09B8\u09AB\u09B2!</span>";
-                    updateUIForRole();
-                } else {
-                    document.getElementById('bde-status-msg').innerHTML = "<span style='color:red;'>\u274C \u09B8\u09BF\u0999\u09CD\u0995 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5!</span>";
-                }
-            });
+            sessionStorage.removeItem('mf_cached_branches');
+            performRoleWiseSync();
         };
 
+        function formatBdeDate(dtStr) {
+            if (!dtStr || dtStr === "N/A" || dtStr.includes("Not")) return dtStr;
+            try {
+                let parts = dtStr.split("-");
+                if (parts.length === 3) {
+                    let d = new Date(parts[0], parseInt(parts[1])-1, parts[2]);
+                    let months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                    return d.getDate() + " " + months[d.getMonth()] + ", " + d.getFullYear();
+                }
+            } catch(e) {}
+            return dtStr;
+        }
+
+        async function startFetchingDates() {
+            let level = document.getElementById('bde-ui-level').value;
+            let targetId = document.getElementById('bde-ui-target').value;
+            let branchesToProcess = [];
+
+            if (targetId === 'ALL') {
+                branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
+            } else if (level === 'HO') {
+                branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]').filter(b => b.zone === targetId);
+            } else if (level === 'ZONE') {
+                branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]').filter(b => b.area === targetId);
+            } else if (level === 'AREA') {
+                branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]').filter(b => b.id.toString() === targetId);
+            }
+
+            if(branchesToProcess.length === 0) {
+                alert('\u0995\u09CB\u09A8\u09CB \u09B6\u09BE\u0996\u09BE \u09AA\u09BE\u0993\u09DF\u09BE \u09AF\u09BE\u09DF\u09A8\u09BF! \u09B8\u09BF\u0999\u09CD\u0995 \u09AC\u09BE\u099F\u09A8\u09C7 \u0995\u09CD\u09B2\u09BF\u0995 \u0995\u09B0\u09C1\u09A8\u0964');
+                return;
+            }
+
+            let output = document.getElementById('bde-table-output');
+            let startBtn = document.getElementById('bde-start-fetch-btn');
+            let exportBtn = document.getElementById('bde-export-excel-btn');
+            let statusElement = document.getElementById('bde-status-msg');
+
+            if(startBtn) { startBtn.disabled = true; startBtn.style.background = "#7f8c8d"; }
+            if(exportBtn) { exportBtn.style.display = 'none'; }
+
+            let tableHtml = `
+                <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:center; table-layout:fixed;">
+                    <thead style="position: sticky; top: 0; z-index:5;">
+                        <tr>
+                            <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:30%; text-align:left; padding-left:5px;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#34495e; color:white; width:22%; white-space:nowrap;">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:16%; white-space:nowrap;">MIS \u09A1\u09C7\u099F</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:8%; white-space:nowrap;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:16%; white-space:nowrap;">AIS \u09A1\u09C7\u099F</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:8%; white-space:nowrap;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
+                        </tr>
+                    </thead>
+            `;
+
+            branchesToProcess.sort((a, b) => { let z = (a.zone || "").localeCompare(b.zone || ""); if (z !== 0) return z; let ar = (a.area || "").localeCompare(b.area || ""); if (ar !== 0) return ar; return parseInt(a.id || "0") - parseInt(b.id || "0"); }); 
+            
+            let currentZ = ""; 
+            let currentA = ""; 
+            for(let b of branchesToProcess) { 
+                if (b.zone !== currentZ && b.zone && b.zone !== "Branch" && b.zone !== "Assigned Zone") { 
+                    currentZ = b.zone; 
+                    tableHtml += `<tbody data-status="header"><tr style="background:#0277bd; color:white;"><td colspan="6" style="padding:4px; text-align:left;"><b>\u{1F3E2} Zone: ` + currentZ + `</b></td></tr></tbody>`; 
+                } 
+                if (b.area !== currentA && b.area && b.area !== "Branch" && b.area !== "Assigned Area") { 
+                    currentA = b.area; 
+                    tableHtml += `<tbody data-status="header"><tr style="background:#e1f5fe; color:#01579b;"><td colspan="6" style="padding:4px; text-align:left;">&nbsp;&nbsp;<b>\u{1F4CD} Area: ` + currentA + `</b></td></tr></tbody>`; 
+                } 
+                
+                let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, "");
+                tableHtml += `
+                    <tbody id="bde-tr-${safeId}" data-status="pending">
+                        <tr>
+                            <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; white-space:normal; line-height:1.25; font-size:10px; color:#2c3e50;">${b.name}</td>
+                            <td colspan="5" style="padding:3px 2px; border:1px solid #bdc3c7; color:gray; font-size:10px; white-space:nowrap;">\u23F3 \u09AB\u09C7\u099A\u09BF\u0982...</td>
+                        </tr>
+                    </tbody>
+                `;
+            }
+            tableHtml += `</table>`;
+            output.innerHTML = tableHtml;
+
+            try {
+                if(statusElement) statusElement.innerHTML = `<span style="color:#2980b9;">\u23F3 MIS \u09A1\u09BE\u099F\u09BE \u09B8\u09CD\u0995\u09CD\u09B0\u09CD\u09AF\u09BE\u09AA \u09B9\u099A\u09CD\u099B\u09C7...</span>`;
+                let misDataMap = await fetchDatesViaInvisibleFrame('MIS', level, targetId, branchesToProcess);
+
+                if(statusElement) statusElement.innerHTML = `<span style="color:#2980b9;">\u23F3 AIS \u09A1\u09BE\u099F\u09BE \u09B8\u09CD\u0995\u09CD\u09B0\u09CD\u09AF\u09BE\u09AA \u09B9\u099A\u09CD\u099B\u09C7...</span>`;
+                let aisDataMap = await fetchDatesViaInvisibleFrame('AIS', level, targetId, branchesToProcess);
+
+                let allCount = 0;
+                let currentCount = 0;
+                let backCount = 0;
+
+                for (let b of branchesToProcess) {
+                    let bCodeMatch = b.name.match(/(?:^|-|\s)(\d{3,4})(?:$|-|\s)/);
+                    let bCode = bCodeMatch ? bCodeMatch[1] : b.name.replace(/[^a-z]/gi, '').toLowerCase();
+
+                    let aisDate = aisDataMap[bCode] || aisDataMap['mybranch'] || aisDataMap['self'] || aisDataMap['default'] || (branchesToProcess.length === 1 ? Object.values(aisDataMap)[0] : null) || "N/A";
+                    let misDate = misDataMap[bCode] || misDataMap['mybranch'] || misDataMap['self'] || misDataMap['default'] || (branchesToProcess.length === 1 ? Object.values(misDataMap)[0] : null) || "N/A";
+
+                    let aisLag = calculateLag(aisDate);
+                    let misLag = calculateLag(misDate);
+
+                    let mNum = typeof misLag === 'number' ? misLag : 999;
+                    let aNum = typeof aisLag === 'number' ? aisLag : 999;
+
+                    let rowStatus = 'current';
+                    let statusTextHtml = `\u2705 \u0986\u09AA-\u099F\u09C1-\u09A1\u09C7\u099F`;
+                    
+                    if (mNum > 0 && aNum > 0) {
+                        rowStatus = 'back';
+                        statusTextHtml = `\u{1F534} MIS \u098F\u09AC\u0982 AIS \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7`;
+                    } else if (mNum > 0) {
+                        rowStatus = 'back';
+                        statusTextHtml = `\u{1F534} MIS \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7`;
+                    } else if (aNum > 0) {
+                        rowStatus = 'back';
+                        statusTextHtml = `\u{1F534} AIS \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7`;
+                    }
+                    
+                    allCount++;
+                    if (rowStatus === 'current') currentCount++;
+                    else backCount++;
+
+                    let aisLagColor = aNum > 2 ? '#c0392b' : (aNum > 0 ? '#d35400' : '#27ae60');
+                    let misLagColor = mNum > 2 ? '#c0392b' : (mNum > 0 ? '#d35400' : '#27ae60');
+
+                    let rowBg = rowStatus === 'back' ? "background:#fff5f5;" : "";
+                    let formatMis = formatBdeDate(misDate);
+                    let formatAis = formatBdeDate(aisDate);
+                    
+                    let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, '');
+                    let trElement = document.getElementById(`bde-tr-${safeId}`);
+                    if (trElement) {
+                        trElement.setAttribute('data-status', rowStatus);
+                        trElement.innerHTML = `
+                            <tr style="${rowBg}">
+                                <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; color:#2c3e50; white-space:normal; line-height:1.25; font-size:10px;">${b.name}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; font-weight:bold; font-size:9.5px; white-space:nowrap; color:${rowStatus === 'back' ? '#c0392b' : '#27ae60'};">${statusTextHtml}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misDate === 'N/A'?'#e74c3c':'#2980b9'}; font-weight:bold; background:#f4f9f9; font-size:9.5px; white-space:nowrap; overflow:hidden;">${formatMis}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misLagColor}; font-weight:bold; background:#f4f9f9; font-size:10px; white-space:nowrap;">${misLag}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisDate === 'N/A'?'#e74c3c':'#27ae60'}; font-weight:bold; background:#f9fbf9; font-size:9.5px; white-space:nowrap; overflow:hidden;">${formatAis}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisLagColor}; font-weight:bold; background:#f9fbf9; font-size:10px; white-space:nowrap;">${aisLag}</td>
+                            </tr>
+                        `;
+                    }
+                }
+
+                document.getElementById('bde-lbl-all').innerText = allCount;
+                document.getElementById('bde-lbl-current').innerText = currentCount;
+                document.getElementById('bde-lbl-back').innerText = backCount;
+                
+                if (statusElement) statusElement.innerHTML = `<span style="color:#27ae60;">\u2705 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!</span>`;
+            } catch(e) {
+                console.error(e);
+                if(statusElement) statusElement.innerHTML = `<span style="color:red;">\u274C \u09B8\u09CD\u0995\u09CD\u09AF\u09BE\u09A8\u09BF\u0982\u09DF\u09C7 \u09B8\u09AE\u09B8\u09CD\u09AF\u09BE \u09B9\u09DF\u09C7\u099B\u09C7!</span>`;
+            } finally {
+                let finalStartBtn = document.getElementById('bde-start-fetch-btn');
+                let finalExportBtn = document.getElementById('bde-export-excel-btn');
+
+                if (finalStartBtn) {
+                    finalStartBtn.disabled = false; 
+                    finalStartBtn.removeAttribute('disabled');
+                    finalStartBtn.style.background = "#27ae60";
+                }
+                if (finalExportBtn) {
+                    finalExportBtn.style.display = 'block'; 
+                }
+            }
+        }
+        
         document.getElementById('bde-start-fetch-btn').onclick = startFetchingDates;
 
         document.getElementById('bde-export-excel-btn').onclick = () => {
@@ -753,287 +1066,111 @@ try {
             if(statusMsg) statusMsg.innerHTML = "<span style='color:#2980b9;'>\u23F3 Excel \u09AB\u09BE\u0987\u09B2 \u09A4\u09C8\u09B0\u09BF \u09B9\u099A\u09CD\u099B\u09C7...</span>";
 
             try {
-                let allRows = [];
-                let overdueRows = [];
-                
+                let allBranches = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
+                let branchMap = {};
+                allBranches.forEach(b => {
+                    branchMap[b.name.trim()] = b;
+                });
+
+                let dataRowsAll = [];
+                let dataRowsCurrent = [];
+                let dataRowsBack = [];
+
                 table.querySelectorAll('tbody[id^="bde-tr-"]').forEach(tbody => {
                     let tr = tbody.querySelector('tr');
-                    if (tr && tr.cells.length >= 5) {
-                        let isOverdue = tbody.getAttribute('data-status') === 'overdue';
-                        let branch = tr.cells[0].innerText.replace(/[\r\n]+/g, ' ').replace(/\[.*?\]/g, '').trim();
-                        let statusText = isOverdue ? "\u{1F534} \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7" : "\u2705 \u09B8\u09A0\u09BF\u0995";
+                    if (tr && tr.cells.length >= 6) {
+                        let branchName = tr.cells[0].textContent.replace(/🏷️\uFE0F|🏷️|📊/g, '').replace(/&nbsp;/g, '').trim();
+                        let statusText = tr.cells[1].textContent.trim();
+                        let isBack = tbody.getAttribute('data-status') === 'back';
                         
+                        let branchObj = branchMap[branchName];
+                        if (!branchObj) {
+                            let matched = allBranches.find(br => br.name.trim() === branchName || branchName.includes(br.name.trim()) || br.name.trim().includes(branchName));
+                            if (matched) branchObj = matched;
+                        }
+                        
+                        let z = branchObj ? (branchObj.zone || '') : '';
+                        let a = branchObj ? (branchObj.area || '') : '';
+
                         let rowObj = {
-                            branch: branch,
+                            zone: z,
+                            area: a,
+                            branch: branchName,
                             status: statusText,
-                            misDate: tr.cells[1].innerText.trim(),
-                            misLag: tr.cells[2].innerText.trim(),
-                            aisDate: tr.cells[3].innerText.trim(),
-                            aisLag: tr.cells[4].innerText.trim()
+                            misDate: tr.cells[2].textContent.trim(),
+                            misLag: tr.cells[3].textContent.trim(),
+                            aisDate: tr.cells[4].textContent.trim(),
+                            aisLag: tr.cells[5].textContent.trim()
                         };
 
-                        allRows.push(rowObj);
-                        if (isOverdue) overdueRows.push(rowObj);
+                        dataRowsAll.push(rowObj);
+                        if (isBack) dataRowsBack.push(rowObj);
+                        else dataRowsCurrent.push(rowObj);
                     }
                 });
 
-                let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:html="http://www.w3.org/TR/REC-html40">
- <Styles>
-  <Style ss:ID="Default" ss:Name="Normal">
-   <Alignment ss:Vertical="Center" ss:WrapText="1"/>
-   <Borders>
-    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>
-    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>
-    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>
-    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>
-   </Borders>
-   <Font ss:FontName="Calibri" ss:Size="10" ss:Color="#2C3E50"/>
-  </Style>
-  <Style ss:ID="H_Branch"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  <Style ss:ID="H_Status"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  <Style ss:ID="H_MIS"><Interior ss:Color="#2980B9" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  <Style ss:ID="H_AIS"><Interior ss:Color="#27AE60" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  
-  <Style ss:ID="R_Normal_L" ss:Parent="Default"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  <Style ss:ID="R_Normal_C" ss:Parent="Default"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  <Style ss:ID="R_Normal_S" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-
-  <Style ss:ID="R_Delay_L" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  <Style ss:ID="R_Delay_C" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  <Style ss:ID="R_Delay_S" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-
-  <Style ss:ID="Lag_Red" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  <Style ss:ID="Lag_Org" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#D35400"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-  <Style ss:ID="Lag_Grn" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
- </Styles>`;
+                let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:o="urn:schemas-microsoft-com:office:office"\n xmlns:x="urn:schemas-microsoft-com:office:excel"\n xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:html="http://www.w3.org/TR/REC-html40">\n <Styles>\n  <Style ss:ID="Default" ss:Name="Normal">\n   <Alignment ss:Vertical="Center" ss:WrapText="1"/>\n   <Borders>\n    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n   </Borders>\n   <Font ss:FontName="Calibri" ss:Size="10" ss:Color="#2C3E50"/>\n  </Style>\n  <Style ss:ID="sTitle"><Font ss:FontName="Calibri" ss:Size="16" ss:Bold="1" ss:Color="#2980B9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sNormalBold"><Font ss:FontName="Calibri" ss:Size="12" ss:Bold="1" ss:Color="#34495E"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  \n  <Style ss:ID="H_Branch"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="H_Status"><Interior ss:Color="#34495E" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="H_MIS"><Interior ss:Color="#2980B9" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="H_AIS"><Interior ss:Color="#27AE60" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  \n  <Style ss:ID="R_Normal_L" ss:Parent="Default"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Normal_C" ss:Parent="Default"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Normal_S" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#27AE60"/><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n\n  <Style ss:ID="R_Delay_L" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Delay_C" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Delay_S" ss:Parent="Default"><Interior ss:Color="#FFF5F5" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n\n  <Style ss:ID="Lag_Red" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="Lag_Grn" ss:Parent="Default"><Font ss:FontName="Calibri" ss:Size="10" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n </Styles>`;
 
                 function buildWorksheet(sheetName, dataRows) {
-                    let sXml = ` <Worksheet ss:Name="${sheetName}">\n  <Table>\n   <Column ss:Width="240"/>\n   <Column ss:Width="110"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Row ss:Height="22">\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</Data></Cell>\n    <Cell ss:StyleID="H_Status"><Data ss:Type="String">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">MIS \u09A1\u09C7\u099F</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">AIS \u09A1\u09C7\u099F</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</Data></Cell>\n   </Row>`;
-
+                    let sXml = ` <Worksheet ss:Name="${escapeXml(sheetName)}">\n  <Table>\n   <Column ss:Width="45"/>\n   <Column ss:Width="130"/>\n   <Column ss:Width="130"/>\n   <Column ss:Width="160"/>\n   <Column ss:Width="140"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Row ss:Height="30"><Cell ss:MergeAcross="8" ss:StyleID="sTitle"><Data ss:Type="String">DUSHTHA SHASTHYA KENDRA (DSK)</Data></Cell></Row>\n   <Row ss:Height="20"><Cell ss:MergeAcross="8" ss:StyleID="sNormalBold"><Data ss:Type="String">Branch Date Extraction (${escapeXml(sheetName)}) | Generated: ${new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-US', { hour12: true })}</Data></Cell></Row>\n   <Row ss:Height="22">\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u0995\u09CD\u09B0\u09AE\u09BF\u0995</Data></Cell>\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u099C\u09CB\u09A8</Data></Cell>\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u0985\u099E\u09CD\u099A\u09B2</Data></Cell>\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</Data></Cell>\n    <Cell ss:StyleID="H_Status"><Data ss:Type="String">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">MIS \u09A1\u09C7\u099F</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">AIS \u09A1\u09C7\u099F</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</Data></Cell>\n   </Row>\n`;
+                    
+                    let idx = 1;
                     dataRows.forEach(r => {
-                        let isDelay = r.status.includes("\u09AA\u09BF\u099B\u09BF\u09DF\u09C7") || r.status.includes("\u{1F534}");
+                        let isDelay = r.status.includes("\u09AA\u09BF\u099B\u09BF\u09DF\u09C7");
                         let cL = isDelay ? "R_Delay_L" : "R_Normal_L";
                         let cC = isDelay ? "R_Delay_C" : "R_Normal_C";
                         let cS = isDelay ? "R_Delay_S" : "R_Normal_S";
                         
-                        function getLagStyle(valStr, fallbackStyle) {
-                            let v = parseInt(valStr || "0");
-                            if (isNaN(v)) return fallbackStyle;
-                            if (v > 2) return "Lag_Red";
-                            if (v > 0) return "Lag_Org";
+                        function getLagStyle(valStr) {
+                            let n = parseInt(valStr);
+                            if (isNaN(n)) return cC;
+                            if (n > 0) return "Lag_Red";
                             return "Lag_Grn";
                         }
-
-                        let mStyle = getLagStyle(r.misLag, cC);
-                        let aStyle = getLagStyle(r.aisLag, cC);
-
-                        sXml += `\n   <Row ss:Height="18">\n    <Cell ss:StyleID="${cL}"><Data ss:Type="String">${r.branch}</Data></Cell>\n    <Cell ss:StyleID="${cS}"><Data ss:Type="String">${r.status}</Data></Cell>\n    <Cell ss:StyleID="${cC}"><Data ss:Type="String">${r.misDate}</Data></Cell>\n    <Cell ss:StyleID="${mStyle}"><Data ss:Type="String">${r.misLag}</Data></Cell>\n    <Cell ss:StyleID="${cC}"><Data ss:Type="String">${r.aisDate}</Data></Cell>\n    <Cell ss:StyleID="${aStyle}"><Data ss:Type="String">${r.aisLag}</Data></Cell>\n   </Row>`;
+                        
+                        sXml += `   <Row>\n`;
+                        sXml += `    <Cell ss:StyleID="${cC}"><Data ss:Type="Number">${idx++}</Data></Cell>\n`;
+                        sXml += `    <Cell ss:StyleID="${cL}"><Data ss:Type="String">${escapeXml(r.zone)}</Data></Cell>\n`;
+                        sXml += `    <Cell ss:StyleID="${cL}"><Data ss:Type="String">${escapeXml(r.area)}</Data></Cell>\n`;
+                        sXml += `    <Cell ss:StyleID="${cL}"><Data ss:Type="String">${escapeXml(r.branch)}</Data></Cell>\n`;
+                        sXml += `    <Cell ss:StyleID="${cS}"><Data ss:Type="String">${escapeXml(r.status)}</Data></Cell>\n`;
+                        sXml += `    <Cell ss:StyleID="${cC}"><Data ss:Type="String">${escapeXml(r.misDate)}</Data></Cell>\n`;
+                        sXml += `    <Cell ss:StyleID="${getLagStyle(r.misLag)}"><Data ss:Type="Number">${r.misLag === '-' ? 0 : r.misLag}</Data></Cell>\n`;
+                        sXml += `    <Cell ss:StyleID="${cC}"><Data ss:Type="String">${escapeXml(r.aisDate)}</Data></Cell>\n`;
+                        sXml += `    <Cell ss:StyleID="${getLagStyle(r.aisLag)}"><Data ss:Type="Number">${r.aisLag === '-' ? 0 : r.aisLag}</Data></Cell>\n`;
+                        sXml += `   </Row>\n`;
                     });
-
-                    sXml += `\n  </Table>\n </Worksheet>`;
+                    
+                    sXml += `  </Table>\n </Worksheet>\n`;
                     return sXml;
                 }
 
-                xml += buildWorksheet("\u{1F3E2} \u09B8\u0995\u09B2 \u09B6\u09BE\u0996\u09BE", allRows);
-                xml += buildWorksheet("\u26A0\uFE0F \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7", overdueRows);
-                xml += `\n</Workbook>`;
+                xml += buildWorksheet("All Branches", dataRowsAll);
+                xml += buildWorksheet("Current", dataRowsCurrent);
+                xml += buildWorksheet("Back", dataRowsBack);
+                xml += `</Workbook>`;
 
-                let fileName = `Branch_Dates_${new Date().toISOString().split('T')[0]}.xls`;
+                let finalOutput = "\uFEFF" + xml;
+                let blob = new Blob([finalOutput], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+                let fileName = `Branch_Date_Extraction_${new Date().getTime()}.xls`;
 
                 if (window.AndroidDownloader && window.AndroidDownloader.saveExcel) {
-                    window.AndroidDownloader.saveExcel(xml, fileName);
+                    window.AndroidDownloader.saveExcel(finalOutput, fileName);
                 } else {
-                    let blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-                    let url = URL.createObjectURL(blob);
-                    let link = document.createElement("a");
-                    link.href = url;
-                    link.download = fileName;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
+                    let a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
                 }
-
-                if(statusMsg) statusMsg.innerHTML = "<span style='color:green;'>\u2705 Excel \u09AB\u09BE\u0987\u09B2\u099F\u09BF \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u09B9\u09DF\u09C7\u099B\u09C7!</span>";
-            } catch(err) {
-                console.error(err);
-                if(statusMsg) statusMsg.innerHTML = `<span style='color:red;'>\u274C Excel \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1\u09C7 \u09B8\u09AE\u09B8\u09CD\u09AF\u09BE: ${err.message}</span>`;
+                
+                if(statusMsg) statusMsg.innerHTML = "<span style='color:green;'>\u2705 Excel Downloaded!</span>";
+            } catch(e) {
+                console.error(e);
+                if(statusMsg) statusMsg.innerHTML = "<span style='color:red;'>\u274C Export Failed!</span>";
             }
         };
-
-        if (sessionStorage.getItem('mf_cached_branches')) {
-            updateUIForRole();
-        } else {
-            document.getElementById('bde-status-msg').innerHTML = "<span style='color:#2980b9;'>\u23F3 \u09B8\u09CD\u0995\u09CD\u09AF\u09BE\u09A8 \u099A\u09B2\u099B\u09C7, \u098F\u0995\u099F\u09C1 \u0985\u09AA\u09C7\u0995\u09CD\u09B7\u09BE \u0995\u09B0\u09C1\u09A8...</span>";
-        }
-    }
-
-    function updateUIForRole() {
-        let zones = JSON.parse(sessionStorage.getItem('mf_cached_zones') || '[]');
-        let areas = JSON.parse(sessionStorage.getItem('mf_cached_areas') || '[]');
-        let levelDropdown = document.getElementById('bde-ui-level');
-
-        levelDropdown.innerHTML = '';
-        if (zones.length > 0) levelDropdown.innerHTML += '<option value="3">\u099C\u09CB\u09A8 (Zone)</option>';
-        if (areas.length > 0) levelDropdown.innerHTML += '<option value="2">\u0985\u099E\u09CD\u099A\u09B2 (Area)</option>';
-        levelDropdown.innerHTML += '<option value="1">\u09B6\u09BE\u0996\u09BE (Branch)</option>';
-
-        populateTargets();
-    }
-
-    function populateTargets() {
-        let level = document.getElementById('bde-ui-level').value;
-        let targetSel = document.getElementById('bde-ui-target');
-        targetSel.innerHTML = '<option value="ALL" data-name="ALL">\u{1F680} Select All Branches</option>';
-
-        let data = [];
-        if (level === '3') data = JSON.parse(sessionStorage.getItem('mf_cached_zones') || '[]');
-        else if (level === '2') data = JSON.parse(sessionStorage.getItem('mf_cached_areas') || '[]');
-        else if (level === '1') data = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
-
-        data.forEach(item => {
-            targetSel.innerHTML += `<option value="${item.id}" data-name="${item.name}">${item.name}</option>`;
-        });
-    }
-
-    async function startFetchingDates() {
-        let level = document.getElementById('bde-ui-level').value;
-        let targetSel = document.getElementById('bde-ui-target');
-        let targetId = targetSel.value;
-        let targetName = targetSel.options[targetSel.selectedIndex].getAttribute('data-name');
-
-        let allBranches = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
-        let branchesToProcess = [];
-
-        if (targetId === 'ALL') {
-            branchesToProcess = allBranches;
-        } else {
-            if (level === '3') branchesToProcess = allBranches.filter(b => b.zone === targetName);
-            else if (level === '2') branchesToProcess = allBranches.filter(b => b.area === targetName);
-            else if (level === '1') branchesToProcess = allBranches.filter(b => b.id === targetId);
-        }
-
-        if(branchesToProcess.length === 0) {
-            alert("\u274C \u0995\u09CB\u09A8\u09CB \u09B6\u09BE\u0996\u09BE \u09AA\u09BE\u0993\u09AF\u09BC\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF! \u09A6\u09AF\u09BC\u09BE \u0995\u09B0\u09C7 \u09A1\u09BE\u09A8\u09A6\u09BF\u0995\u09C7\u09B0 \u{1F504} \u09AC\u09BE\u099F\u09A8\u09C7 \u099A\u09BE\u09AA \u09A6\u09BF\u09DF\u09C7 \u098F\u0995\u09AC\u09BE\u09B0 \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09C7 \u09A8\u09BF\u09A8\u0964");
-            return;
-        }
-
-        let output = document.getElementById('bde-table-output');
-        let startBtn = document.getElementById('bde-start-fetch-btn');
-        let exportBtn = document.getElementById('bde-export-excel-btn');
-        let statusElement = document.getElementById('bde-status-msg');
-
-        if(startBtn) { startBtn.disabled = true; startBtn.style.background = "#7f8c8d"; }
-        if(exportBtn) { exportBtn.style.display = 'none'; }
-
-        let tableHtml = `
-            <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:center; table-layout:fixed;">
-                <thead style="position: sticky; top: 0; z-index:5;">
-                    <tr>
-                        <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:46%; text-align:left; padding-left:5px;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
-                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:18%; white-space:nowrap;">MIS \u09A1\u09C7\u099F</th>
-                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:9%; white-space:nowrap;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
-                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:18%; white-space:nowrap;">AIS \u09A1\u09C7\u099F</th>
-                        <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:9%; white-space:nowrap;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
-                    </tr>
-                </thead>
-        `;
-
-        for(let b of branchesToProcess) {
-            let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, '');
-            tableHtml += `
-                <tbody id="bde-tr-${safeId}" data-status="current">
-                    <tr>
-                        <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; white-space:normal; line-height:1.25; font-size:10px;">${b.name}</td>
-                        <td colspan="4" style="padding:3px 2px; border:1px solid #bdc3c7; color:gray; font-size:10px; white-space:nowrap;">\u23F3 \u09AB\u09C7\u099A\u09BF\u0982...</td>
-                    </tr>
-                </tbody>
-            `;
-        }
-        tableHtml += `</table>`;
-        output.innerHTML = tableHtml;
-
-        try {
-            if(statusElement) statusElement.innerHTML = `<span style="color:#2980b9;">\u23F3 MIS \u09A1\u09BE\u099F\u09BE \u09B8\u09CD\u0995\u09CD\u09B0\u09CD\u09AF\u09BE\u09AA \u09B9\u099A\u09CD\u099B\u09C7...</span>`;
-            let misDataMap = await fetchDatesViaInvisibleFrame('MIS', level, targetId, branchesToProcess);
-
-            if(statusElement) statusElement.innerHTML = `<span style="color:#2980b9;">\u23F3 AIS \u09A1\u09BE\u099F\u09BE \u09B8\u09CD\u0995\u09CD\u09B0\u09CD\u09AF\u09BE\u09AA \u09B9\u099A\u09CD\u099B\u09C7...</span>`;
-            let aisDataMap = await fetchDatesViaInvisibleFrame('AIS', level, targetId, branchesToProcess);
-
-            let currentCount = 0;
-            let overdueCount = 0;
-
-            for (let b of branchesToProcess) {
-                let bCodeMatch = b.name.match(/(?:^|-|\s)(\d{3,4})(?:$|-|\s)/);
-                let bCode = bCodeMatch ? bCodeMatch[1] : b.name.replace(/[^a-z]/gi, '').toLowerCase();
-
-                let aisDate = aisDataMap[bCode] || aisDataMap['mybranch'] || aisDataMap['self'] || aisDataMap['default'] || (branchesToProcess.length === 1 ? Object.values(aisDataMap)[0] : null) || "N/A";
-                let misDate = misDataMap[bCode] || misDataMap['mybranch'] || misDataMap['self'] || misDataMap['default'] || (branchesToProcess.length === 1 ? Object.values(misDataMap)[0] : null) || "N/A";
-
-                let aisLag = calculateLag(aisDate);
-                let misLag = calculateLag(misDate);
-
-                let isOverdue = (typeof misLag === 'number' && misLag > 0) || (typeof aisLag === 'number' && aisLag > 0) || misDate === "N/A" || aisDate === "N/A";
-                if (isOverdue) overdueCount++; else currentCount++;
-
-                let aisLagColor = aisLag > 2 ? '#c0392b' : (aisLag > 0 ? '#d35400' : '#27ae60');
-                let misLagColor = misLag > 2 ? '#c0392b' : (misLag > 0 ? '#d35400' : '#27ae60');
-
-                let isMismatch = (misDate !== "N/A" && aisDate !== "N/A" && misDate !== aisDate);
-                let rowBg = isMismatch ? "background:#fdedec;" : (isOverdue ? "background:#fff5f5;" : "");
-                
-                let badgeHtml = isOverdue ? `<span style="color:#c0392b; font-weight:bold;">[\u{1F534} \u09AC\u09BF\u09B2\u09AE\u09CD\u09AC] </span>` : `<span style="color:#27ae60; font-weight:bold;">[\u2705] </span>`;
-                let cleanName = `${badgeHtml}${b.name}`;
-
-                let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, '');
-                
-                let trElement = document.getElementById(`bde-tr-${safeId}`);
-                if (trElement) {
-                    trElement.setAttribute('data-status', isOverdue ? 'overdue' : 'current');
-                    trElement.innerHTML = `
-                        <tr style="${rowBg}">
-                            <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; color:#2c3e50; white-space:normal; line-height:1.25; font-size:10px;">${cleanName}</td>
-                            <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misDate === 'N/A'?'#e74c3c':'#2980b9'}; font-weight:bold; background:#f4f9f9; font-size:9.5px; white-space:nowrap; overflow:hidden;">${misDate}</td>
-                            <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misLagColor}; font-weight:bold; background:#f4f9f9; font-size:10px; white-space:nowrap;">${misLag}</td>
-                            <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisDate === 'N/A'?'#e74c3c':'#27ae60'}; font-weight:bold; background:#f9fbf9; font-size:9.5px; white-space:nowrap; overflow:hidden;">${aisDate}</td>
-                            <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisLagColor}; font-weight:bold; background:#f9fbf9; font-size:10px; white-space:nowrap;">${aisLag}</td>
-                        </tr>
-                    `;
-                }
-            }
-
-            // \u{1F31F} Update Slim Tabs Counts
-            let tabsBar = document.getElementById('bde-tabs-bar');
-            if (tabsBar) {
-                tabsBar.style.display = 'flex';
-                document.getElementById('bde-lbl-all').innerText = (currentCount + overdueCount);
-                document.getElementById('bde-lbl-overdue').innerText = overdueCount;
-            }
-
-            if(statusElement) statusElement.innerHTML = `<span style="color:green;">\u2705 \u09B8\u09AC \u09B6\u09BE\u0996\u09BE\u09B0 \u09A1\u09C7\u099F \u0993 Lag \u09B8\u09CD\u0995\u09CD\u09AF\u09BE\u09A8 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!</span>`;
-            
-        } catch(e) {
-            console.error(e);
-            if(statusElement) statusElement.innerHTML = `<span style="color:red;">\u274C \u09B8\u09CD\u0995\u09CD\u09AF\u09BE\u09A8\u09BF\u0982\u09DF\u09C7 \u09B8\u09AE\u09B8\u09CD\u09AF\u09BE \u09B9\u09DF\u09C7\u099B\u09C7!</span>`;
-        } finally {
-            let finalStartBtn = document.getElementById('bde-start-fetch-btn');
-            let finalExportBtn = document.getElementById('bde-export-excel-btn');
-
-            if (finalStartBtn) {
-                finalStartBtn.disabled = false; 
-                finalStartBtn.removeAttribute('disabled');
-                finalStartBtn.style.background = "#27ae60";
-            }
-            if (finalExportBtn) {
-                finalExportBtn.style.display = 'block'; 
-            }
-        }
     }
 
     let hasSyncedThisPageLoad = false;
@@ -1235,11 +1372,13 @@ try {
                             let targetSel = await waitForOptions(doc, targetSelector);
                             if (targetSel && targetId !== 'ALL' && targetSel.value !== targetId) {
                                 triggerVueChange(targetSel, targetId, win);
-                                await new Promise(r => setTimeout(r, 400)); 
+                                await new Promise(r => setTimeout(r, 2500));
                             }
                         }
 
                         if (type === 'mis') {
+                            await new Promise(r => setTimeout(r, 2000));
+
                             let samitySel = doc.querySelector('select[name="cbo_samity"]');
                             if (samitySel && samitySel.value !== "-1") {
                                 triggerVueChange(samitySel, "-1", win); 
@@ -1273,9 +1412,10 @@ try {
                                         iframe.remove(); resolve(data);
                                     }
                                 }, 300);
-                            }, 400);
+                            }, 200);
                         } 
                         else if (type === 'ais') {
+
                             let dateInputAis = doc.querySelector('input[name="txt_as_on_date"]');
                             if(dateInputAis && dateInputAis.value !== targetDate) triggerVueChange(dateInputAis, targetDate, win);
 
@@ -1309,8 +1449,9 @@ try {
                                         iframe.remove(); resolve(data);
                                     }
                                 }, 400);
-                            }, 1000);
-                        } else if (type === 'due_collection') {
+                            }, 200);
+                        } 
+                        else if (type === 'due_collection') {
                             try {
                                 let targetDateFrom = document.getElementById('custom-audit-date-from').value;
                                 let targetDateTo = document.getElementById('custom-audit-date').value;
@@ -1442,16 +1583,47 @@ try {
                             }
                         } else if (type === 'samity') {
                             try {
+                                if (!win._intercepted) {
+                                    const ifrOpen = win.XMLHttpRequest.prototype.open;
+                                    const ifrSetHeader = win.XMLHttpRequest.prototype.setRequestHeader;
+                                    const ifrSend = win.XMLHttpRequest.prototype.send;
+                                    win.XMLHttpRequest.prototype.open = function(m, u) { this._url = u; this._headers = {}; ifrOpen.apply(this, arguments); };
+                                    win.XMLHttpRequest.prototype.setRequestHeader = function(k, v) { this._headers[k] = v; ifrSetHeader.apply(this, arguments); };
+                                    win.XMLHttpRequest.prototype.send = function(body) {
+                                        if (this._url && this._url.includes('samities')) {
+                                            try {
+                                                sessionStorage.setItem('mf_cloned_url', this._url);
+                                                sessionStorage.setItem('mf_cloned_headers', JSON.stringify(this._headers));
+                                            } catch(e){}
+                                            win._samityHeadersCaptured = true;
+                                        }
+                                        ifrSend.apply(this, arguments);
+                                    };
+                                    win._intercepted = true;
+                                }
+
+                                // If it doesn't automatically load, trigger the search button
+                                let searchBtn = doc.querySelector('button[type="submit"]') || doc.querySelector('.btn-primary') || doc.querySelector('.btn-success');
+                                if (searchBtn) {
+                                    searchBtn.dispatchEvent(new MouseEvent('click', { view: win, bubbles: true, cancelable: true }));
+                                    searchBtn.click();
+                                }
+                                
+                                for (let i = 0; i < 30; i++) {
+                                    if (win._samityHeadersCaptured) break;
+                                    await new Promise(r => setTimeout(r, 200));
+                                }
+
                                 let savedHd = sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup');
                                 let clonedHeaders = {};
                                 if (savedHd) clonedHeaders = JSON.parse(savedHd);
                                 
                                 let cUrl = sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup');
-                                let apiBasePath = '/core-service/'; // fallback to core-service because samity API lives there
+                                let apiBasePath = '/core-service/'; // fallback
                                 if (cUrl) {
                                     try {
                                         let urlObj = new URL(cUrl.startsWith('http') ? cUrl : window.location.origin + '/' + cUrl);
-                                        let pathParts = urlObj.pathname.split('index.php');
+                                        let pathParts = urlObj.pathname.split(/index\.php|\/samities|\/reports/);
                                         if (pathParts.length > 0) {
                                             apiBasePath = pathParts[0];
                                             if (!apiBasePath.endsWith('/')) apiBasePath += '/';
@@ -1459,14 +1631,21 @@ try {
                                     } catch(e){}
                                 }
                                 
+                                let debugInfo = '';
                                 let allSamities = [];
                                 let offset = 0;
                                 let limit = 500;
                                 let totalCount = 0;
                                 
                                 while (true) {
-                                    let apiUrl = window.location.origin + apiBasePath + 'index.php/samities/index?limit=' + limit + '&offset=' + offset + '&isSearch=1&cbo_branch=' + (targetId === 'SELF' ? '' : targetId) + '&cbo_status=1&cbo_employee=';
-                                    console.log('DEBUG SAMITY URL:', apiUrl);
+                                    let fetchUrl = new URL(cUrl.startsWith('http') ? cUrl : window.location.origin + '/' + cUrl);
+                                      fetchUrl.searchParams.set('limit', limit);
+                                      fetchUrl.searchParams.set('offset', offset);
+                                      if (targetId !== 'SELF') {
+                                          fetchUrl.searchParams.set('cbo_branch', targetId);
+                                      }
+                                      let apiUrl = fetchUrl.toString();
+                                      debugInfo = apiUrl;
                                     let r = await window.fetch(apiUrl, { method: 'GET', headers: clonedHeaders, credentials: 'include' });
                                     if (!r.ok) throw new Error('HTTP ' + r.status);
                                     let data = await r.json();
@@ -1474,9 +1653,8 @@ try {
                                     if (data.total) totalCount = parseInt(data.total);
                                     else if (data.recordsTotal) totalCount = parseInt(data.recordsTotal);
                                     
-                                    let samitiesArray = Array.isArray(data.samities) ? data.samities : (typeof data.samities === 'object' && data.samities !== null ? Object.values(data.samities) : []);
-                                    if (samitiesArray.length > 0) {
-                                        for (let s of samitiesArray) {
+                                    if (data.samities && data.samities.length > 0) {
+                                        for (let s of data.samities) {
                                             let code = s.code;
                                             let members = parseInt(s.total_member || '0');
                                             // Prevent duplicates
@@ -1484,21 +1662,22 @@ try {
                                                 allSamities.push({ code, members });
                                             }
                                         }
-                                        if (samitiesArray.length < limit) {
+                                        if (data.samities.length < limit) {
                                             break;
                                         }
-                                        offset += samitiesArray.length;
+                                        offset += data.samities.length;
                                     } else {
                                         break;
                                     }
                                 }
                                 
                                 if (totalCount === 0) totalCount = allSamities.length;
-                                
-                                isProcessed = true; clearTimeout(timeout); iframe.remove();
-                                resolve({ totalCount: totalCount, data: allSamities });
-                                return;
-                            } catch (e) {
+
+                                  let finalDebug = totalCount === 0 ? 'Empty Data! URL: ' + debugInfo + ' | cUrl: ' + cUrl + ' | win.captured: ' + win._samityCapturedUrl : undefined;
+                                  isProcessed = true; clearTimeout(timeout); iframe.remove();
+                                  resolve({ totalCount: totalCount, data: allSamities, debug: finalDebug });
+                                  return;
+} catch (e) {
                                 console.error('Samity API Error:', e);
                                 isProcessed = true; clearTimeout(timeout); iframe.remove();
                                 resolve({ totalCount: 0, data: [] });
@@ -1714,8 +1893,16 @@ try {
                 populateTargets();
             } 
             else { 
-                let zones = JSON.parse(sessionStorage.getItem('mf_cached_zones') || '[]');
-                let areas = JSON.parse(sessionStorage.getItem('mf_cached_areas') || '[]');
+                  let zones = JSON.parse(sessionStorage.getItem('mf_cached_zones') || '[]');
+                  if (zones.length === 0) {
+                      let zMap = JSON.parse(localStorage.getItem('microfin_zMap') || '{}');
+                      zones = [...new Set(Object.values(zMap))].filter(Boolean).sort().map(z => ({ id: z, name: z }));
+                  }
+                  let areas = JSON.parse(sessionStorage.getItem('mf_cached_areas') || '[]');
+                  if (areas.length === 0) {
+                      let aMap = JSON.parse(localStorage.getItem('microfin_aMap') || '{}');
+                      areas = [...new Set(Object.values(aMap))].filter(Boolean).sort().map(a => ({ id: a, name: a }));
+                  }
                 
                 let levelOptions = `<option value="1">\u09B6\u09BE\u0996\u09BE</option>`;
                 if (areas.length > 0) levelOptions += `<option value="2">\u0985\u099E\u09CD\u099A\u09B2</option>`;
@@ -1762,8 +1949,10 @@ try {
             if (uType === 'AREA') {
                 data = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
             } else {
-                if (level === '3') data = JSON.parse(sessionStorage.getItem('mf_cached_zones') || '[]');
-                else if (level === '2') data = JSON.parse(sessionStorage.getItem('mf_cached_areas') || '[]');
+                if (level === '3') { let zMap = JSON.parse(localStorage.getItem('microfin_zMap') || '{}'); let zList = [...new Set(Object.values(zMap))].filter(Boolean).sort(); data = zList.map(z => ({ id: z, name: z })); }
+        
+                else if (level === '2') { let aMap = JSON.parse(localStorage.getItem('microfin_aMap') || '{}'); let aList = [...new Set(Object.values(aMap))].filter(Boolean).sort(); data = aList.map(a => ({ id: a, name: a })); }
+        
                 else if (level === '1') data = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
             }
             
@@ -1825,216 +2014,259 @@ try {
         });
 
         document.getElementById('export-excel-btn').onclick = () => {
-            let previousTab = window._misAisCurrentTab;
-            window._misAisCurrentTab = 'ALL';
-            if(window.applyTabFilters) window.applyTabFilters();
+    let previousTab = window._misAisCurrentTab;
+    window._misAisCurrentTab = 'ALL';
+    if(window.applyTabFilters) window.applyTabFilters();
 
-            let table = document.querySelector('.audit-table');
-            if(!table) {
-                window._misAisCurrentTab = previousTab;
-                if(window.applyTabFilters) window.applyTabFilters();
-                return;
-            }
-            if(!table) return;
+    let table = document.querySelector('.audit-table');
+    if(!table) {
+        window._misAisCurrentTab = previousTab;
+        if(window.applyTabFilters) window.applyTabFilters();
+        return;
+    }
 
-            let cloneAll = table.cloneNode(true);
-            cloneAll.querySelectorAll('.manual-retry-btn').forEach(btn => btn.remove());
-            
-            let diffSheetName = window.currentCheckerType === 'EQUITY' ? 'Loss Branches' : 'Differences';
-            let diffClass = window.currentCheckerType === 'EQUITY' ? 'loss-branch' : 'has-diff';
-            
-            let cloneDiff = table.cloneNode(true);
-            cloneDiff.querySelectorAll('.audit-row-group').forEach(tbody => {
-                if (!tbody.classList.contains(diffClass)) { tbody.remove(); return; }
-                
-                if (window.currentCheckerType === 'EQUITY') {
-                    let equityRow = tbody.querySelector('.equity-row');
-                    let surplusRow = tbody.querySelector('.surplus-row');
-                    let branchTdEq = tbody.querySelector('.branch-name-td');
-                    if (equityRow && surplusRow && branchTdEq) {
-                        let eLoss = equityRow.classList.contains('is-loss');
-                        let sLoss = surplusRow.classList.contains('is-loss');
-                        if (eLoss && !sLoss) {
-                            surplusRow.remove();
-                            branchTdEq.rowSpan = 1;
-                        } else if (sLoss && !eLoss) {
-                            equityRow.remove();
-                            branchTdEq.rowSpan = 1;
-                            surplusRow.insertBefore(branchTdEq, surplusRow.firstChild);
-                        }
-                    }
-                }
-            });
-            cloneDiff.querySelectorAll('.manual-retry-btn').forEach(btn => btn.remove());
-
-            let cloneHighCash = null;
-            if (window.currentCheckerType === 'CASH') {
-                cloneHighCash = table.cloneNode(true);
-                cloneHighCash.querySelectorAll('.audit-row-group').forEach(tbody => {
-                    if (!tbody.classList.contains('high-cash')) {
-                        tbody.remove();
-                    } else {
-                        let cashRow = tbody.querySelector('.cash-row');
-                        let bankRow = tbody.querySelector('.bank-row');
-                        let branchTd = tbody.querySelector('.branch-name-td');
-                        
-                        if (cashRow && bankRow && branchTd) {
-                            let cHigh = cashRow.classList.contains('is-high');
-                            let bHigh = bankRow.classList.contains('is-high');
-                            
-                            if (cHigh && !bHigh) {
-                                bankRow.remove();
-                                branchTd.rowSpan = 1;
-                            } else if (bHigh && !cHigh) {
-                                cashRow.remove();
-                                branchTd.rowSpan = 1;
-                                bankRow.insertBefore(branchTd, bankRow.firstChild);
-                            }
-                        }
-                    }
-                });
-                cloneHighCash.querySelectorAll('.manual-retry-btn').forEach(btn => btn.remove());
-            }
-
-            window._misAisCurrentTab = previousTab;
-            if(window.applyTabFilters) window.applyTabFilters();
-
-            let xmlContent = `<?xml version="1.0"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:html="http://www.w3.org/TR/REC-html40">
- <Styles>
-  <Style ss:ID="Default" ss:Name="Normal">
-   <Alignment ss:Vertical="Center" ss:WrapText="1"/>
-   <Borders/>
-   <Font ss:FontName="Arial" ss:Size="10"/>
-   <Interior/>
-   <NumberFormat/>
-   <Protection/>
-  </Style>
-  <Style ss:ID="sHeader">
-   <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
-   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
-   <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1" ss:Color="#FFFFFF"/>
-   <Interior ss:Color="#2c3e50" ss:Pattern="Solid"/>
-  </Style>
-  <Style ss:ID="sRowspan">
-   <Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/>
-   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
-   <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1" ss:Color="#27ae60"/>
-   <Interior ss:Color="#f4f9f4" ss:Pattern="Solid"/>
-  </Style>
-  <Style ss:ID="sNormal">
-   <Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/>
-   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
-  </Style>
-  <Style ss:ID="sNormalBold">
-   <Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/>
-   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
-   <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1"/>
-  </Style>
-  <Style ss:ID="sRed">
-   <Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/>
-   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
-   <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1" ss:Color="#FF0000"/>
-  </Style>
-  <Style ss:ID="sGreen">
-   <Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/>
-   <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
-   <Font ss:FontName="Arial" ss:Size="10" ss:Bold="1" ss:Color="#008000"/>
-  </Style>
- </Styles>`;
-
-            let sheets = [{name: 'All Branches', table: cloneAll}];
-            if (window.currentCheckerType === 'MIS' || window.currentCheckerType === 'EQUITY') {
-                sheets.push({name: diffSheetName, table: cloneDiff});
-            } else if (window.currentCheckerType === 'CASH' && cloneHighCash) {
-                sheets.push({name: 'High Cash-Bank', table: cloneHighCash});
-            }
-            
-            sheets.forEach(sheet => {
-                xmlContent += `\n <Worksheet ss:Name="${sheet.name}">
-  <Table>
-   <Column ss:Width="200"/>
-   <Column ss:Width="100"/>
-   <Column ss:Width="120"/>
-   <Column ss:Width="120"/>
-   <Column ss:Width="120"/>`;
-                
-                sheet.table.querySelectorAll('tr').forEach(tr => {
-                    xmlContent += `\n   <Row>`;
-                    let colIndex = 1;
-                    tr.querySelectorAll('th, td').forEach(td => {
-                        let text = (td.innerText || td.textContent || "").trim();
-                        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                        let style = "sNormal";
-                        
-                        if (td.tagName.toLowerCase() === 'th') style = "sHeader";
-                        else if (td.hasAttribute('rowspan')) style = "sRowspan";
-                        else if (td.style.color === 'red' || td.style.color === 'rgb(255, 0, 0)') style = "sRed";
-                        else if (td.style.color === 'green' || td.style.color === 'rgb(0, 128, 0)') style = "sGreen";
-                        else if (td.style.fontWeight === 'bold') style = "sNormalBold";
-
-                        let rowspan = td.getAttribute('rowspan');
-                        let mergeAttr = (rowspan && parseInt(rowspan) > 1) ? ` ss:MergeDown="${parseInt(rowspan) - 1}"` : '';
-
-                        let type = "String";
-                        let numCheck = text.replace(/,/g, '').replace(/\u09F3/g, '').trim();
-                        if (!isNaN(numCheck) && numCheck !== "") {
-                            type = "Number";
-                            text = numCheck;
-                        }
-                        
-                        // ss:Index helps ensure proper column placement in case Excel's auto-flow with MergeDown gets confused
-                        if (td.tagName.toLowerCase() !== 'th' && !td.hasAttribute('rowspan')) {
-                            // If this row is missing the first column (because of rowspan above), start at col 2
-                            let hasColspan = Array.from(tr.children).some(c => c.hasAttribute('colspan'));
-                            if (window.currentCheckerType !== 'SAMITY' && window.currentCheckerType !== 'DUE_COLLECTION' && !hasColspan && tr.children.length < 5 && colIndex === 1) colIndex = 2;
-                        }
-                        
-                        xmlContent += `<Cell ss:Index="${colIndex}" ss:StyleID="${style}"${mergeAttr}><Data ss:Type="${type}">${text}</Data></Cell>`;
-                        colIndex++;
-                    });
-                    xmlContent += `</Row>`;
-                });
-                xmlContent += `\n  </Table>\n </Worksheet>`;
-            });
-
-            xmlContent += `\n</Workbook>`;
-
-            let uType = sessionStorage.getItem('mf_user_type');
-            let targetName = "Branch";
-            if (uType !== 'BRANCH') {
-                let targetSel = document.getElementById('custom-target');
-                if (targetSel && targetSel.options.length > 0) {
-                    targetName = targetSel.options[targetSel.selectedIndex].text;
-                    if(targetSel.value === 'ALL') targetName = "All_Batch";
+    let cloneAll = table.cloneNode(true);
+    cloneAll.querySelectorAll('.manual-retry-btn').forEach(btn => btn.remove());
+    
+    let diffClass = window.currentCheckerType === 'EQUITY' ? 'loss-branch' : 'has-diff';
+    
+    let cloneDiff = table.cloneNode(true);
+    cloneDiff.querySelectorAll('.audit-row-group').forEach(tbody => {
+        if (!tbody.classList.contains(diffClass)) { tbody.remove(); return; }
+        
+        if (window.currentCheckerType === 'EQUITY') {
+            let equityRow = tbody.querySelector('.equity-row');
+            let surplusRow = tbody.querySelector('.surplus-row');
+            let branchTdEq = tbody.querySelector('.branch-name-td');
+            if (equityRow && surplusRow && branchTdEq) {
+                let eLoss = equityRow.classList.contains('is-loss');
+                let sLoss = surplusRow.classList.contains('is-loss');
+                if (eLoss && !sLoss) {
+                    surplusRow.remove();
+                    branchTdEq.rowSpan = 1;
+                } else if (sLoss && !eLoss) {
+                    equityRow.remove();
+                    branchTdEq.rowSpan = 1;
+                    surplusRow.insertBefore(branchTdEq, surplusRow.firstChild);
                 }
             }
-            
-            let targetDate = document.getElementById('custom-audit-date').value;
-            let fileName = `Audit_Report_${targetName.replace(/\s+/g, '_')}_${targetDate}.xls`;
+        }
+    });
+    cloneDiff.querySelectorAll('.manual-retry-btn').forEach(btn => btn.remove());
 
-            // Strip emojis for clean Excel view and prevent mobile Mojibake
-            xmlContent = xmlContent.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '');
-            let finalOutput = "\uFEFF" + xmlContent; // Add UTF-8 BOM
-
-            if (window.AndroidDownloader && window.AndroidDownloader.saveExcel) {
-                window.AndroidDownloader.saveExcel(finalOutput, fileName);
+    let cloneHighCash = null;
+    if (window.currentCheckerType === 'CASH') {
+        cloneHighCash = table.cloneNode(true);
+        cloneHighCash.querySelectorAll('.audit-row-group').forEach(tbody => {
+            if (!tbody.classList.contains('high-cash')) {
+                tbody.remove();
             } else {
-                let blob = new Blob([finalOutput], {type: 'application/vnd.ms-excel;charset=utf-8;'});
-                let a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
+                let cashRow = tbody.querySelector('.cash-row');
+                let bankRow = tbody.querySelector('.bank-row');
+                let branchTd = tbody.querySelector('.branch-name-td');
+                
+                if (cashRow && bankRow && branchTd) {
+                    let cHigh = cashRow.classList.contains('is-high');
+                    let bHigh = bankRow.classList.contains('is-high');
+                    
+                    if (cHigh && !bHigh) {
+                        bankRow.remove();
+                        branchTd.rowSpan = 1;
+                    } else if (bHigh && !cHigh) {
+                        cashRow.remove();
+                        branchTd.rowSpan = 1;
+                        bankRow.insertBefore(branchTd, bankRow.firstChild);
+                    }
+                }
             }
-        };
+        });
+        cloneHighCash.querySelectorAll('.manual-retry-btn').forEach(btn => btn.remove());
+    }
+
+    window._misAisCurrentTab = previousTab;
+    if(window.applyTabFilters) window.applyTabFilters();
+
+    // FIXED: totalCols includes the 3 injected columns already. Do not add 3 again.
+    let totalCols = window.currentCheckerType === 'MIS' ? 8 : (window.currentCheckerType === 'EQUITY' || window.currentCheckerType === 'SAMITY' ? 7 : 6);
+    
+    let rName = window.currentCheckerType === 'MIS' ? 'MIS Check' : (window.currentCheckerType === 'EQUITY' ? 'Equity Check' : (window.currentCheckerType === 'CASH' ? 'Cash & Bank' : (window.currentCheckerType === 'SAMITY' ? 'Samity Info' : 'Due Collection')));
+    let dt = new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-US', { hour12: true });
+
+    function escapeXml(unsafe) {
+        return (unsafe || '').replace(/[<>&'"]/g, function (c) {
+            switch (c) {
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '&': return '&amp;';
+                case '\'': return '&apos;';
+                case '"': return '&quot;';
+                default: return '';
+            }
+        });
+    }
+
+    function injectSerialZoneArea(clone, sheetTitle) {
+        clone.querySelectorAll('thead tr, tbody tr').forEach(tr => {
+            let text = tr.textContent || tr.innerText;
+            if (text.includes('Report Generated') || text.includes('Report Generated On') || text.includes('Zone:') || text.includes('Area:')) {
+                tr.remove();
+            }
+        });
+
+        clone.querySelectorAll('tbody[data-status="header"]').forEach(tb => tb.remove());
+
+        let theads = clone.querySelectorAll('thead tr');
+        let lastTheadTr = theads[theads.length - 1];
+        if (lastTheadTr) {
+            lastTheadTr.insertAdjacentHTML('afterbegin', '<th>\u0995\u09CD\u09B0\u09AE\u09BF\u0995</th><th>\u099C\u09CB\u09A8</th><th>\u0985\u099E\u09CD\u099A\u09B2</th>');
+        }
+        
+        let idx = 1;
+        clone.querySelectorAll('tbody[id^="tbody-"]').forEach(tbody => {
+            let zone = tbody.getAttribute('data-zone') || '';
+            let area = tbody.getAttribute('data-area') || '';
+            let firstTr = tbody.querySelector('tr');
+            if (firstTr) {
+                let firstTd = firstTr.querySelector('td');
+                if (firstTd) {
+                    firstTd.innerHTML = (firstTd.innerHTML || '').replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/[\u2700-\u27BF]/gu, '').replace(/&nbsp;/g, '').trim();
+                }
+                let rowspan = firstTd && firstTd.hasAttribute('rowspan') ? ' rowspan="' + firstTd.getAttribute('rowspan') + '"' : '';
+                firstTr.insertAdjacentHTML('afterbegin', 
+                    '<td' + rowspan + '>' + idx++ + '</td>' +
+                    '<td' + rowspan + '>' + zone + '</td>' +
+                    '<td' + rowspan + '>' + area + '</td>'
+                );
+            }
+        });
+        
+        clone.querySelectorAll('tbody:not([id^="tbody-"])').forEach(tb => {
+            if (tb.classList.contains('audit-row-group') || tb.querySelector('td[colspan]')) {
+                if (!tb.hasAttribute('id')) tb.remove();
+            }
+        });
+
+        let sXml = ' <Worksheet ss:Name="' + escapeXml(sheetTitle) + '">\n  <Table>\n';
+        
+        // Increased column widths to completely eliminate wrapping.
+        sXml += '   <Column ss:Width="45"/>\n';
+        sXml += '   <Column ss:Width="160"/>\n';
+        sXml += '   <Column ss:Width="160"/>\n';
+        sXml += '   <Column ss:Width="200"/>\n';
+        
+        if (window.currentCheckerType === 'MIS') {
+            sXml += '   <Column ss:Width="80"/>\n';
+            sXml += '   <Column ss:Width="120"/>\n';
+            sXml += '   <Column ss:Width="120"/>\n';
+            sXml += '   <Column ss:Width="120"/>\n';
+        } else if (window.currentCheckerType === 'EQUITY') {
+            sXml += '   <Column ss:Width="80"/>\n';
+            sXml += '   <Column ss:Width="160"/>\n';
+            sXml += '   <Column ss:Width="160"/>\n';
+        } else if (window.currentCheckerType === 'SAMITY') {
+            sXml += '   <Column ss:Width="100"/>\n';
+            sXml += '   <Column ss:Width="130"/>\n';
+            sXml += '   <Column ss:Width="500"/>\n';
+        } else if (window.currentCheckerType === 'DUE_COLLECTION') {
+            sXml += '   <Column ss:Width="160"/>\n';
+            sXml += '   <Column ss:Width="160"/>\n';
+        } else {
+            // CASH
+            sXml += '   <Column ss:Width="80"/>\n';
+            sXml += '   <Column ss:Width="180"/>\n';
+        }
+
+        sXml += '   <Row ss:Height="30"><Cell ss:MergeAcross="' + (totalCols-1) + '" ss:StyleID="sTitle"><Data ss:Type="String">DUSHTHA SHASTHYA KENDRA (DSK)</Data></Cell></Row>\n';
+        sXml += '   <Row ss:Height="22"><Cell ss:MergeAcross="' + (totalCols-1) + '" ss:StyleID="sSubTitle"><Data ss:Type="String">' + escapeXml(rName) + ' (' + escapeXml(sheetTitle) + ') - Generated On: ' + dt + '</Data></Cell></Row>\n';
+        
+        let rIdx = 3; 
+        let grid = {}; 
+
+        clone.querySelectorAll('tr').forEach(tr => {
+            sXml += '   <Row>\n';
+            let cIdx = 1;
+            if (!grid[rIdx]) grid[rIdx] = {};
+
+            tr.querySelectorAll('th, td').forEach(cell => {
+                while(grid[rIdx][cIdx]) {
+                    cIdx++;
+                }
+                
+                let text = (cell.textContent || cell.innerText || '').trim();
+                text = text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/[\u2700-\u27BF]/gu, ''); 
+                
+                let sId = cell.tagName.toLowerCase() === 'th' ? 'sHeader' : 'sRowCenter';
+                if (cell.tagName.toLowerCase() === 'td' && isNaN(Number(text)) && text.length > 3) {
+                    sId = 'sRowLeft';
+                }
+                
+                let cSpan = cell.colSpan > 1 ? cell.colSpan : 1;
+                let rSpan = cell.rowSpan > 1 ? cell.rowSpan : 1;
+                
+                let mAcross = cSpan > 1 ? ' ss:MergeAcross="' + (cSpan - 1) + '"' : '';
+                let mDown = rSpan > 1 ? ' ss:MergeDown="' + (rSpan - 1) + '"' : '';
+                
+                sXml += '    <Cell ss:Index="' + cIdx + '" ss:StyleID="' + sId + '"' + mAcross + mDown + '><Data ss:Type="String">' + escapeXml(text) + '</Data></Cell>\n';
+                
+                for (let r = 0; r < rSpan; r++) {
+                    for (let c = 0; c < cSpan; c++) {
+                        if (!grid[rIdx + r]) grid[rIdx + r] = {};
+                        grid[rIdx + r][cIdx + c] = true;
+                    }
+                }
+                cIdx += cSpan;
+            });
+            sXml += '   </Row>\n';
+            rIdx++;
+        });
+        
+        sXml += '  </Table>\n </Worksheet>\n';
+        return sXml;
+    }
+
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:o="urn:schemas-microsoft-com:office:office"\n xmlns:x="urn:schemas-microsoft-com:office:excel"\n xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:html="http://www.w3.org/TR/REC-html40">\n <Styles>\n  <Style ss:ID="Default" ss:Name="Normal">\n   <Alignment ss:Vertical="Center" ss:WrapText="1"/>\n   <Borders>\n    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n   </Borders>\n   <Font ss:FontName="Calibri" ss:Size="10" ss:Color="#2C3E50"/>\n  </Style>\n  <Style ss:ID="sTitle"><Font ss:FontName="Calibri" ss:Size="16" ss:Bold="1" ss:Color="#2980B9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sSubTitle"><Font ss:FontName="Calibri" ss:Size="12" ss:Bold="1" ss:Color="#34495E"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sHeader"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowCenter" ss:Parent="Default"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowLeft" ss:Parent="Default"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowRight" ss:Parent="Default"><Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/></Style>\n </Styles>\n';
+    
+    xml += injectSerialZoneArea(cloneAll, 'All Branches');
+    
+    let diffSheetName = window.currentCheckerType === 'EQUITY' ? 'Loss Branches' : 'Differences';
+    if (window.currentCheckerType === 'MIS' || window.currentCheckerType === 'EQUITY') {
+        xml += injectSerialZoneArea(cloneDiff, diffSheetName);
+    } else if (window.currentCheckerType === 'CASH' && cloneHighCash) {
+        xml += injectSerialZoneArea(cloneHighCash, 'High Cash-Bank');
+    }
+
+    xml += '</Workbook>';
+
+    let finalOutput = '\uFEFF' + xml; 
+
+    let tN = window.currentCheckerType === 'MIS' ? 'MIS_Check' : (window.currentCheckerType === 'EQUITY' ? 'Equity_Check' : (window.currentCheckerType === 'CASH' ? 'Cash_Bank_Check' : (window.currentCheckerType === 'SAMITY' ? 'Samity_Info' : 'Due_Collection')));
+    let fileName = tN + '_' + new Date().getTime() + '.xls';
+    
+    try {
+        if (window.AndroidDownloader && window.AndroidDownloader.saveExcel) {
+            window.AndroidDownloader.saveExcel(finalOutput, fileName);
+        } else {
+            let blob = new Blob([finalOutput], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    } catch(e) {
+        console.error(e);
+    }
+};
+
+
+
+
+
+
+
+
+
 
         panel.addEventListener('click', async (e) => {
             if(e.target && e.target.classList.contains('manual-retry-btn')) {
@@ -2111,8 +2343,8 @@ try {
                             </tr>
                         `;
                     } else if (window.currentCheckerType === 'CASH') {
-                        let cashColor = aisData.cashInHand > 2000 ? 'red' : '#16a085';
-                        let bankColor = aisData.cashAtBank > 1000000 ? 'red' : '#16a085';
+                        let cashColor = aisData.cashInHand >= 2001 ? 'red' : '#16a085';
+                        let bankColor = aisData.cashAtBank >= 1000001 ? 'red' : '#16a085';
                         htmlRowsSingle = `
                             <tr>
                                 <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
@@ -2143,6 +2375,7 @@ try {
                         let smallSamities = misData && misData.data ? misData.data.filter(s => s.members >= 0 && s.members <= 19) : (misData ? misData.filter(s => s.members >= 0 && s.members <= 19) : []);
                         let smallCount = smallSamities.length;
                         let codesText = smallSamities.map(s => s.code).join(', ');
+                            if (totalCount === 0 && aData && aData.debug) codesText = '<span style="color:red;">' + aData.debug + '</span>';
                         htmlRowsSingle = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
                     } else if (window.currentCheckerType === 'DUE_COLLECTION') {
                         htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (misData ? misData.totalCurrent.toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (misData ? misData.totalMatured.toFixed(2) : '0') + `</td></tr>`;
@@ -2198,14 +2431,6 @@ try {
                     return;
                 }
 
-                let statusMsg = document.getElementById('audit-status');
-                if (window.currentCheckerType === 'SAMITY') {
-                    if (!sessionStorage.getItem('mf_cloned_url') && !localStorage.getItem('mf_cloned_url_backup')) {
-                        if(statusMsg) statusMsg.innerHTML = `<span style="color:#2980b9;">\u23F3 API \u09B9\u09C7\u09A1\u09BE\u09B0 \u09B8\u0982\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09BE \u09B9\u099A\u09CD\u099B\u09C7 (Background)...</span>`;
-                        if (window.ensureApiAndBranchList) await window.ensureApiAndBranchList();
-                    }
-                }
-
                 let output = document.getElementById('audit-output');
                 let tableStyle = `<style>.audit-table { width:100%; border-collapse:collapse; background:white; } .audit-table th, .audit-table td { border:1px solid #bdc3c7; padding:4px; font-family:Arial, sans-serif; } .has-diff {} .no-diff {} .loss-branch {} .high-cash {} .audit-table th { background:#2c3e50; color:white; }</style>`;
                 
@@ -2242,10 +2467,8 @@ try {
                             }
                         </thead>
                 `;
-                for(let b of branchesToProcess) {
-                    let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, '');
-                    tableHtml += `
-                        <tbody id="tbody-${safeId}" class="audit-row-group">
+                branchesToProcess.sort((a, b) => { let z = (a.zone || "").localeCompare(b.zone || ""); if (z !== 0) return z; let ar = (a.area || "").localeCompare(b.area || ""); if (ar !== 0) return ar; return parseInt(a.id || "0") - parseInt(b.id || "0"); }); let currentZ = ""; let currentA = ""; for(let b of branchesToProcess) { if (b.zone !== currentZ && b.zone && b.zone !== "Branch" && b.zone !== "Assigned Zone") { currentZ = b.zone; tableHtml += `<tbody data-status="header"><tr style="background:#0277bd; color:white;"><td colspan="5" style="padding:4px; text-align:left;"><b>\u{1F3E2} Zone: ` + currentZ + `</b></td></tr></tbody>`; } if (b.area !== currentA && b.area && b.area !== "Branch" && b.area !== "Assigned Area") { currentA = b.area; tableHtml += `<tbody data-status="header"><tr style="background:#e1f5fe; color:#01579b;"><td colspan="5" style="padding:4px; text-align:left;">&nbsp;&nbsp;<b>\u{1F4CD} Area: ` + currentA + `</b></td></tr></tbody>`; } let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, ""); tableHtml += `
+                        <tbody id="tbody-${safeId}" class="audit-row-group" data-zone="${b.zone || ''}" data-area="${b.area || ''}">
                             <tr style="background:#fff;">
                                 <td style="text-align:left; font-weight:bold; color:#2c3e50; font-size:9.5px;">${b.name}</td>
                                 <td colspan="${window.currentCheckerType === 'MIS' ? '4' : (window.currentCheckerType === 'EQUITY' ? '3' : '2')}" style="text-align:center; color:gray; font-size:9.5px;">\u23F3 \u0985\u09AA\u09C7\u0995\u09CD\u09B7\u09AE\u09BE\u09A8...</td>
@@ -2363,9 +2586,14 @@ try {
                     if(stEl) stEl.innerText = msg; 
                 };
                 let successCount = 0;
-                for (let i = 0; i < branchesToProcess.length; i++) {
-                    let b = branchesToProcess[i];
-                    let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, '');
+                let currentIndex = 0;
+                const CONCURRENT_LIMIT = 10;
+
+                async function processNextBranch() {
+                    while (currentIndex < branchesToProcess.length) {
+                        let i = currentIndex++;
+                        let b = branchesToProcess[i];
+                        let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, '');
 
                     updateStatus(`[${i+1}/${branchesToProcess.length}] \u0985\u09A1\u09BF\u099F \u099A\u09B2\u099B\u09C7: ${b.name}...`);
                     
@@ -2467,7 +2695,7 @@ try {
                             tbodyAfter.classList.remove('loss-branch');
                         }
 
-                        if (window.currentCheckerType === 'CASH' && (aData.cashInHand > 2000 || aData.cashAtBank > 1000000)) {
+                        if (window.currentCheckerType === 'CASH' && (aData.cashInHand >= 2001 || aData.cashAtBank >= 1000001)) {
                             tbodyAfter.classList.add('high-cash');
                         } else {
                             tbodyAfter.classList.remove('high-cash');
@@ -2501,10 +2729,10 @@ try {
                                 </tr>
                             `;
                         } else if (window.currentCheckerType === 'CASH') {
-                            let cashColor = aData.cashInHand > 2000 ? 'red' : '#16a085';
-                            let bankColor = aData.cashAtBank > 1000000 ? 'red' : '#16a085';
-                            let isHighCashClass = aData.cashInHand > 2000 ? 'is-high' : '';
-                            let isHighBankClass = aData.cashAtBank > 1000000 ? 'is-high' : '';
+                            let cashColor = aData.cashInHand >= 2001 ? 'red' : '#16a085';
+                            let bankColor = aData.cashAtBank >= 1000001 ? 'red' : '#16a085';
+                            let isHighCashClass = aData.cashInHand >= 2001 ? 'is-high' : '';
+                            let isHighBankClass = aData.cashAtBank >= 1000001 ? 'is-high' : '';
                             htmlRowsBatch = `
                                 <tr class="cash-row ${isHighCashClass}">
                                     <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
@@ -2535,6 +2763,7 @@ try {
                             let smallSamities = aData && aData.data ? aData.data.filter(s => s.members >= 0 && s.members <= 19) : (aData ? aData.filter(s => s.members >= 0 && s.members <= 19) : []);
                             let smallCount = smallSamities.length;
                             let codesText = smallSamities.map(s => s.code).join(', ');
+                            if (totalCount === 0 && aData && aData.debug) codesText = '<span style="color:red;">' + aData.debug + '</span>';
                             htmlRowsBatch = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
                         } else if (window.currentCheckerType === 'DUE_COLLECTION') {
                             htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? aData.totalCurrent.toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? aData.totalMatured.toFixed(2) : '0') + `</td></tr>`;
@@ -2552,8 +2781,15 @@ try {
                                 </td>
                             </tr>
                         `;
+                        }
                     }
                 }
+
+                let workers = [];
+                for (let w = 0; w < CONCURRENT_LIMIT; w++) {
+                    workers.push(processNextBranch());
+                }
+                await Promise.all(workers);
 
                 let finalStatus = document.getElementById('audit-status');
                 if(finalStatus) finalStatus.innerHTML = `<span style="color:green;">\u2705 ${successCount} \u099F\u09BF \u09B6\u09BE\u0996\u09BE\u09B0 \u0985\u09A1\u09BF\u099F \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!</span>`;
@@ -2660,7 +2896,7 @@ try {
             } catch(e){}
         }
 
-        if (this._url && this._url.includes('members') && (this._url.includes('limit=') || this._url.includes('ajax') || this._url.includes('list') || this._url.includes('cbo_branch'))) {
+        if (this._url && (this._url.includes('cbo_branch') || this._url.includes('cbo_member_status') || (this._url.includes('members') && (this._url.includes('limit=') || this._url.includes('ajax') || this._url.includes('list'))))) {
             clonedUrl = this._url; 
             isCapturing = false;
             try {
@@ -2741,7 +2977,7 @@ try {
     }
 
     // \u09E9. API \u099F\u09C7\u09AE\u09AA\u09CD\u09B2\u09C7\u099F \u09B8\u0982\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09BE (Background Iframe)
-    window.ensureApiAndBranchList = async function() {
+    async function ensureApiAndBranchList() {
         if (sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup')) {
             return;
         }
@@ -2784,7 +3020,7 @@ try {
                             };
                             
                             win.XMLHttpRequest.prototype.send = function(body) {
-                                if (this._url && this._url.includes('members') && (this._url.includes('limit=') || this._url.includes('ajax') || this._url.includes('list') || this._url.includes('cbo_branch'))) {
+                                if (this._url && (this._url.includes('cbo_branch') || this._url.includes('cbo_member_status') || (this._url.includes('members') && (this._url.includes('limit=') || this._url.includes('ajax') || this._url.includes('list'))))) {
                                     clonedUrl = this._url; 
                                     clonedHeaders = Object.assign({}, this._headers); 
                                     try {
@@ -2816,8 +3052,8 @@ try {
                         if (sBtn) {
                             sBtn.click();
                             let checks = 0;
-                            while (!sessionStorage.getItem('mf_cloned_url') && checks < 50) {
-                                await new Promise(r => setTimeout(r, 200));
+                            while (!sessionStorage.getItem('mf_cloned_url') && checks < 20) {
+                                await new Promise(r => setTimeout(r, 150));
                                 checks++;
                             }
                         }
@@ -3054,6 +3290,9 @@ try {
                 sessionStorage.removeItem('mf_global_hierarchy_synced');
                 sessionStorage.removeItem('mf_auto_synced');
                 sessionStorage.removeItem('mf_cloned_url');
+                    sessionStorage.removeItem('mf_api_template');
+                    sessionStorage.removeItem('mf_cloned_headers');
+                    localStorage.removeItem('mf_cloned_headers_backup');
                 sessionStorage.removeItem('mf_user_type');
                 sessionStorage.removeItem('mf_api_template');
                 localStorage.removeItem('microfin_zMap');
@@ -3255,10 +3494,15 @@ try {
                     }
 
                     status.innerText = "Checking system readiness...";
+                    sessionStorage.removeItem('mf_cloned_url');
+                    sessionStorage.removeItem('mf_api_template');
+                    sessionStorage.removeItem('mf_cloned_headers');
+                    localStorage.removeItem('mf_cloned_headers_backup');
+                    localStorage.removeItem('mf_cloned_url_backup');
                     
                     if (!sessionStorage.getItem('mf_cloned_url') && !localStorage.getItem('mf_cloned_url_backup')) {
                         status.innerText = "Connecting to Data Source (background)...";
-                        if (window.ensureApiAndBranchList) await window.ensureApiAndBranchList();
+                        await ensureApiAndBranchList();
                     }
 
                     if (!sessionStorage.getItem('mf_cloned_url') && !localStorage.getItem('mf_cloned_url_backup')) {
@@ -3309,16 +3553,128 @@ try {
 
                 document.getElementById('export-btn').onclick = () => {
                     let table = document.getElementById('reportTable');
-                    let htmlContent = `<html><head><meta charset="UTF-8"></head><body>${table.outerHTML}</body></html>`;
+                    if (!table) return;
+                    
+                    let clone = table.cloneNode(true);
+                    
+                    let newThead = document.createElement('thead');
+                    let newTbody = document.createElement('tbody');
+                    
+                    let rows = Array.from(clone.querySelectorAll('tr'));
+                    
+                    let allBranches = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
+                    let branchMap = {};
+                    allBranches.forEach(b => {
+                        branchMap[b.name.trim()] = b;
+                    });
+                    
+                    let uniqueZones = [...new Set(allBranches.map(b => b.zone).filter(Boolean))];
+                    let uniqueAreas = [...new Set(allBranches.map(b => b.area).filter(Boolean))];
+                    let globalZone = uniqueZones.length === 1 ? uniqueZones[0] : '';
+                    let globalArea = uniqueAreas.length === 1 ? uniqueAreas[0] : '';
+                    
+                    let currentZone = globalZone;
+                    let currentArea = globalArea;
+                    let idx = 1;
+                    let totalCols = 7; 
+
+                    rows.forEach((tr) => {
+                        let text = tr.innerText || tr.textContent;
+                        
+                        if (text.includes('Report Generated On')) return; 
+                        
+                        // Table headers
+                        if (text.includes('Hierarchy & Branch')) {
+                            // Convert existing headers to have proper background directly on the <th> so Excel renders them
+                            tr.querySelectorAll('th').forEach(th => {
+                                th.style.backgroundColor = '#2c3e50';
+                                th.style.color = 'white';
+                                th.style.border = '1px solid black';
+                            });
+                            tr.insertAdjacentHTML('afterbegin', `<th style="border: 1px solid black; background-color: #2c3e50; color: white; text-align: center;">\u0995\u09CD\u09B0\u09AE\u09BF\u0995</th><th style="border: 1px solid black; background-color: #2c3e50; color: white; text-align: center;">\u099C\u09CB\u09A8</th><th style="border: 1px solid black; background-color: #2c3e50; color: white; text-align: center;">\u0985\u099E\u09CD\u099A\u09B2</th>`);
+                            newThead.appendChild(tr);
+                            return;
+                        }
+
+                        if (text.includes('Zone:')) {
+                            currentZone = text.replace(/.*Zone:\s*/, '').trim();
+                            return;
+                        } else if (text.includes('Area:')) {
+                            currentArea = text.replace(/.*Area:\s*/, '').trim();
+                            return;
+                        }
+                        
+                        let firstTd = tr.querySelector('td');
+                        let cellText = firstTd ? firstTd.innerHTML : '';
+                        
+                        cellText = cellText.replace(/&nbsp;/g, '').replace(/🏷️\uFE0F|🏷️|📊/g, '').replace(/<[^>]*>?/gm, '').trim();
+                        if (firstTd) firstTd.innerHTML = cellText; 
+                        
+                        let z = currentZone;
+                        let a = currentArea;
+                        let serial = '';
+                        
+                        if (text.includes('Total Area')) {
+                            let match = cellText.match(/\(([^)]+)\)/);
+                            if (match) a = match[1];
+                        } else if (text.includes('Total Zone')) {
+                            let match = cellText.match(/\(([^)]+)\)/);
+                            if (match) z = match[1];
+                            a = ''; 
+                        } else if (text.includes('Grand Total')) {
+                            z = '';
+                            a = '';
+                        } else {
+                            // Branch row => gets a serial number
+                            serial = idx++;
+                            let branchObj = branchMap[cellText];
+                            if (!branchObj) {
+                                let matched = allBranches.find(br => br.name.trim() === cellText || cellText.includes(br.name.trim()) || br.name.trim().includes(cellText));
+                                if (matched) branchObj = matched;
+                            }
+                            if (branchObj) {
+                                z = branchObj.zone || z;
+                                a = branchObj.area || a;
+                                currentZone = z; 
+                                currentArea = a; 
+                            }
+                        }
+                        
+                        tr.insertAdjacentHTML('afterbegin', `<td style="border: 1px solid black; text-align: center; font-weight: bold;">${serial}</td><td style="border: 1px solid black; text-align: left;">${z}</td><td style="border: 1px solid black; text-align: left;">${a}</td>`);
+                        newTbody.appendChild(tr);
+                    });
+
+                    clone.innerHTML = '';
+                    clone.appendChild(newThead);
+                    clone.appendChild(newTbody);
+
+                    clone.querySelectorAll('th, td').forEach(el => {
+                        if(!el.style.border) el.style.border = '1px solid black';
+                        if (el.tagName.toLowerCase() === 'th') {
+                            el.style.fontSize = '12pt';
+                        } else {
+                            el.style.fontSize = '11pt';
+                        }
+                    });
+
+                    let dt = new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-US', { hour12: true });
+                    
+                    let h1 = document.createElement('tr');
+                    h1.innerHTML = `<th colspan="${totalCols}" style="font-size: 16pt; color: #2980b9; text-align: center; border: 1px solid black; background-color: #ffffff;">DUSHTHA SHASTHYA KENDRA (DSK)</th>`;
+                    let h2 = document.createElement('tr');
+                    h2.innerHTML = `<th colspan="${totalCols}" style="font-size: 13pt; color: #34495e; text-align: center; border: 1px solid black; background-color: #ffffff;">Member CIB Verification - Generated On: ${dt}</th>`;
+                    newThead.insertBefore(h2, newThead.firstChild);
+                    newThead.insertBefore(h1, newThead.firstChild);
+
+                    let htmlContent = `<html><head><meta charset="UTF-8"></head><body>${clone.outerHTML}</body></html>`;
                     
                     let filterEl = document.getElementById('filter-selection');
                     let name = filterEl && filterEl.value !== 'ALL' ? filterEl.options[filterEl.selectedIndex].text.replace(/\s+/g, '_') : 'All_Branches';
                     let dateSuffix = new Date().toISOString().split('T')[0];
                     let fileName = `Member_Verification_${name}_${dateSuffix}.xls`;
 
-                    // Strip emojis for clean Excel view and prevent mobile Mojibake
-                    htmlContent = htmlContent.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '');
-                    let finalOutput = "\uFEFF" + htmlContent; // Add UTF-8 BOM
+                    htmlContent = htmlContent.replace(/[^\u0980-\u09FFa-zA-Z0-9\s\.,\-\(\)\/\\:;"'=<>&!%]/g, '');
+                    let finalOutput = "\uFEFF" + htmlContent;
 
                     if (window.AndroidDownloader && window.AndroidDownloader.saveExcel) {
                         window.AndroidDownloader.saveExcel(finalOutput, fileName);
@@ -3330,9 +3686,9 @@ try {
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);
-                        URL.revokeObjectURL(a.href);
                     }
                 };
+
             }
         } catch (e) {
             console.error("UI Injection Error: ", e);
