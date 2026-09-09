@@ -37,7 +37,7 @@ try {
     const CURRENT_VERSION = "2.1"; // \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09CD\u09AF\u09BE\u09AA \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8
     
     // \u26A0\uFE0F \u09A8\u09BF\u099A\u09C7 YOUR_USERNAME \u098F\u09B0 \u099C\u09BE\u09DF\u0997\u09BE\u09DF \u0986\u09AA\u09A8\u09BE\u09B0 \u0997\u09BF\u099F\u09B9\u09BE\u09AC\u09C7\u09B0 \u0986\u09B8\u09B2 \u0987\u0989\u099C\u09BE\u09B0\u09A8\u09C7\u09AE \u09AC\u09B8\u09BF\u09DF\u09C7 \u09A6\u09BF\u09A8 
-    const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json";
+    const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json"; 
 
     setTimeout(() => {
         fetch(UPDATE_JSON_URL + "?t=" + new Date().getTime())
@@ -1063,7 +1063,10 @@ try {
                 let lblBack = document.getElementById('bde-lbl-back');
                 if (lblBack) lblBack.innerText = backCount;
                 
-                if (statusElement) statusElement.innerHTML = `<span style="color:#27ae60;">\u2705 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!</span>`;
+                if (statusElement) { 
+                    statusElement.innerHTML = `<span style="color:#27ae60;">\u2705 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!</span>`; 
+                    setTimeout(() => { if(statusElement) statusElement.innerHTML = ''; }, 2000); 
+                }
             } catch(e) {
                 console.error(e);
                 if(statusElement) statusElement.innerHTML = `<span style="color:red;">\u274C \u09B8\u09CD\u0995\u09CD\u09AF\u09BE\u09A8\u09BF\u0982\u09DF\u09C7 \u09B8\u09AE\u09B8\u09CD\u09AF\u09BE \u09B9\u09DF\u09C7\u099B\u09C7!</span>`;
@@ -1191,7 +1194,10 @@ try {
                     document.body.removeChild(a);
                 }
                 
-                if(statusMsg) statusMsg.innerHTML = "<span style='color:green;'>\u2705 Excel Downloaded!</span>";
+                if(statusMsg) {
+                    statusMsg.innerHTML = "<span style='color:green;'>\u2705 Excel Downloaded!</span>";
+                    setTimeout(() => { if(statusMsg) statusMsg.innerHTML = ''; }, 2000);
+                }
             } catch(e) {
                 console.error(e);
                 if(statusMsg) statusMsg.innerHTML = "<span style='color:red;'>\u274C Export Failed!</span>";
@@ -2186,6 +2192,7 @@ try {
                 if(st) {
                     if(success) {
                         st.innerHTML = `<span style="color:#27ae60;">\u2705 \u09B8\u09BF\u09B8\u09CD\u099F\u09C7\u09AE \u09AA\u09CD\u09B0\u09B8\u09CD\u09A4\u09C1\u09A4!</span>`;
+                        setTimeout(() => { if(st) st.innerHTML = ''; }, 2000);
                         document.getElementById('start-audit-btn').disabled = false;
                         populateTargets();
                     } else {
@@ -3277,7 +3284,10 @@ try {
                 await Promise.all(workers);
 
                 let finalStatus = document.getElementById('audit-status');
-                if(finalStatus) finalStatus.innerHTML = `\u2705 ${successCount} \u099F\u09BF \u09B6\u09BE\u0996\u09BE\u09B0 \u0985\u09A1\u09BF\u099F \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!`;
+                if(finalStatus) {
+                    finalStatus.innerHTML = `\u2705 ${successCount} \u099F\u09BF \u09B6\u09BE\u0996\u09BE\u09B0 \u0985\u09A1\u09BF\u099F \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!`;
+                    setTimeout(() => { if(finalStatus) finalStatus.innerHTML = ''; }, 2000);
+                }
                 
                 let finalBtn = document.getElementById('start-audit-btn');
                 if(finalBtn) { finalBtn.disabled = false; finalBtn.style.background = "#27ae60"; }
@@ -4036,6 +4046,7 @@ try {
                     renderTable(currentReportStructure);
                     
                     status.innerText = "\u2705 Report Generated Successfully!";
+                    setTimeout(() => { if(status) status.innerText = ''; }, 2000);
                     document.getElementById('export-btn').style.display = 'block';
                     btn.disabled = false;
                 };
