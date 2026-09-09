@@ -37,7 +37,7 @@ try {
     const CURRENT_VERSION = "2.1"; // \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09CD\u09AF\u09BE\u09AA \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8
     
     // \u26A0\uFE0F \u09A8\u09BF\u099A\u09C7 YOUR_USERNAME \u098F\u09B0 \u099C\u09BE\u09DF\u0997\u09BE\u09DF \u0986\u09AA\u09A8\u09BE\u09B0 \u0997\u09BF\u099F\u09B9\u09BE\u09AC\u09C7\u09B0 \u0986\u09B8\u09B2 \u0987\u0989\u099C\u09BE\u09B0\u09A8\u09C7\u09AE \u09AC\u09B8\u09BF\u09DF\u09C7 \u09A6\u09BF\u09A8 
-    const UPDATE_JSON_URL = "https://raw.githubusercontent.com/User/Microfin360-Status-Apps/main/update.json"; 
+    const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json";
 
     setTimeout(() => {
         fetch(UPDATE_JSON_URL + "?t=" + new Date().getTime())
@@ -828,12 +828,12 @@ try {
             </div>
 
             <div style="padding:6px; display:flex; flex-direction:column; flex:1; overflow:hidden;">
-                <div style="display:flex; gap:6px; margin-bottom:6px; align-items:center; flex-shrink:0;">
-                    <div style="flex:0.8; display:flex; align-items:center; gap:4px;">
+                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; align-items:center; flex-shrink:0;">
+                    <div style="flex:1; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09B2\u09C7\u09AD\u09C7\u09B2:</label>
                         <select id="bde-ui-level" style="flex:1; width:100%; padding:0 4px; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box; margin:0;"></select>
                     </div>
-                    <div style="flex:1.2; display:flex; align-items:center; gap:4px;">
+                    <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
                         <select id="bde-ui-target" style="flex:1; width:100%; padding:0 4px; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box; margin:0;"></select>
                     </div>
@@ -2032,7 +2032,7 @@ try {
             </div>
             
             <div id="ghost-body" style="padding:6px; display:flex; flex-direction:column; height: 100%;">
-                <div style="display:flex; gap:8px; margin-bottom:6px; align-items:center;" id="controls-container">
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px; align-items:center;" id="controls-container">
                 </div>
                 <button id="start-audit-btn" style="width:100%; background:#27ae60; color:white; border:none; height:26px; font-weight:bold; font-size:12px; border-radius:3px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:0.2s; flex-shrink:0;">\u{1F680} Start Audit Process</button>
                 <div id="audit-output" style="margin-top:4px; display:flex; flex-direction:column; flex:1; overflow:hidden;"></div>
@@ -2049,11 +2049,11 @@ try {
             let dateHtml = ``;
             if (window.currentCheckerType === 'DUE_COLLECTION' || window.currentCheckerType === 'DAILY_TRANSACTION') {
                 dateHtml = `
-                <div style="flex:1; display:flex; align-items:center; gap:4px;">
+                <div style="flex:1; min-width:130px; display:flex; align-items:center; gap:4px;">
                     <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">From:</label>
                     <input type="date" id="custom-audit-date-from" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-family: DSK_MixedFont, sans-serif; font-size:12px; height:24px; box-sizing:border-box;" value="${getFirstDayOfMonth()}">
                 </div>
-                <div style="flex:1; display:flex; align-items:center; gap:4px;">
+                <div style="flex:1; min-width:130px; display:flex; align-items:center; gap:4px;">
                     <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">To:</label>
                     <input type="date" id="custom-audit-date" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-family: DSK_MixedFont, sans-serif; font-size:12px; height:24px; box-sizing:border-box;" value="${getToday()}">
                 </div>
@@ -2078,7 +2078,7 @@ try {
                     }
                 }
                 container.innerHTML = dateHtml + `
-                    <div style="flex:1.5; display:flex; align-items:center; gap:4px;">
+                    <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09AC\u09CD\u09B0\u09BE\u099E\u09CD\u099A:</label>
                         <input type="text" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; font-weight:bold; color:#16a085; height:24px; box-sizing:border-box;" value="${currentBranchName}" readonly disabled>
                     </div>
@@ -2086,7 +2086,7 @@ try {
             } 
             else if (uType === 'AREA') {
                 container.innerHTML = dateHtml + `
-                    <div style="flex:1.5; display:flex; align-items:center; gap:4px;">
+                    <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
                         <select id="custom-target" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box;">
                             <option value="ALL">-- \u{1F680} All Branches (Batch) --</option>
@@ -2114,13 +2114,13 @@ try {
                 else levelOptions = levelOptions.replace('value="1"', 'value="1" selected');
 
                 container.innerHTML = dateHtml + `
-                    <div style="flex:0.8; display:flex; align-items:center; gap:4px;">
+                    <div style="flex:1; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09B2\u09C7\u09AD\u09C7\u09B2:</label>
                         <select id="custom-level" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box;">
                             ${levelOptions}
                         </select>
                     </div>
-                    <div style="flex:1.2; display:flex; align-items:center; gap:4px;">
+                    <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
                         <select id="custom-target" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box;">
                             <option value="">\u09B2\u09CB\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</option>
@@ -3694,14 +3694,14 @@ try {
                 }
 
                 filterHtml = `
-                    <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
-                        <div style="flex:1; display:flex; align-items:center; gap:4px;">
+                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; align-items:center;">
+                        <div style="flex:1; min-width:130px; display:flex; align-items:center; gap:4px;">
                             <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09B2\u09C7\u09AD\u09C7\u09B2:</label>
                             <select id="mv-level-selection" style="flex:1; width:100%; padding:0 4px; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box; margin:0;">
                                 ${levelOptions}
                             </select>
                         </div>
-                        <div style="flex:1.5; display:flex; align-items:center; gap:4px;">
+                        <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
                             <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
                             <select id="filter-selection" style="flex:1; width:100%; padding:0 4px; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box; margin:0;">
                             </select>
@@ -4227,14 +4227,3 @@ try {
     }, 1500);
 
 })();
-
-
-
-
-
-
-
-
-
-
-
