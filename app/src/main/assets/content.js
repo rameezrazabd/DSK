@@ -810,18 +810,18 @@ try {
         if (document.getElementById('bde-ghost-date-panel')) return;
 
         let panel = document.createElement('div');
-        panel.id = 'bde-ghost-date-panel';
-        panel.style.cssText = 'position:fixed; top:10px; left:50%; transform:translateX(-50%); background:white; border:2px solid #2980b9; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:95vw; max-width:800px; max-height:90vh; z-index:999999; display:flex; flex-direction:column; font-family: DSK_MixedFont, sans-serif; overflow:hidden;';
+          panel.id = 'bde-ghost-date-panel';
+          panel.style.cssText = 'position:fixed; top:10px; left:50%; transform:translateX(-50%); background:white; border:2px solid #2980b9; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:95vw; max-width:800px; max-height:90vh; z-index:999999; display:flex; flex-direction:column; font-family: SutonnyOMJ, SolaimanLipi, DSK_MixedFont, sans-serif; overflow:hidden;';
 
         document.body.appendChild(panel);
 
         panel.innerHTML = `
             <div id="bde-drag-header" style="background:#2c3e50; color:white; padding:7px 12px; display:flex; justify-content:space-between; align-items:center; cursor:move; flex-shrink:0;">
-                <div style="display:flex; align-items:center; gap:10px;">
+                <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; overflow:hidden;">
                     <strong style="font-size:13px;">\u{1F4C5} Branch Date Extractor</strong>
-                    <span id="bde-status-msg" style="font-size:11px; font-weight:bold; color:#f1c40f; white-space:nowrap;"></span>
+                    <span id="bde-status-msg" style="font-size:11px; font-weight:bold; color:#f1c40f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                 </div>
-                <div style="display:flex; gap:6px; align-items:center;">
+                <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
                     <button id="bde-export-excel-btn" style="display:none; background:#8e44ad; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold; transition:0.2s;">\u{1F4E5} Excel</button>
                     <button id="bde-close-date-panel" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255, 65, 108, 0.45); transition: all 0.2s ease; outline: none; padding: 0;" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 3px 10px rgba(255, 65, 108, 0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 6px rgba(255, 65, 108, 0.45)';" onmousedown="this.style.transform='scale(0.95)';">\u2715</button>
                 </div>
@@ -950,10 +950,10 @@ try {
             if(exportBtn) { exportBtn.style.display = 'none'; }
 
             let tableHtml = `
-                <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:center; table-layout:fixed; font-family: DSK_MixedFont, sans-serif;">
+                <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:center; table-layout:fixed; font-family: 'SutonnyOMJ', 'SolaimanLipi', DSK_MixedFont, sans-serif;">
                     <thead style="position: sticky; top: 0; z-index:5;">
                         <tr>
-                            <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:30%; text-align:left; padding-left:5px;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
+                            <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:30%; text-align:center;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
                             <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#34495e; color:white; width:22%; white-space:nowrap;">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</th>
                             <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:16%; white-space:nowrap;">MIS \u09A1\u09C7\u099F</th>
                             <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:8%; white-space:nowrap;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
@@ -1362,7 +1362,7 @@ try {
 
 
 
-    function scrapeViaGhost(hashUrl, targetDate, reportLevel, targetId, type, statusCallback, transactionType = "0") {
+    function scrapeViaGhost(hashUrl, targetDate, reportLevel, targetId, type, statusCallback, transactionType = "0", serviceChargeMode = "1") {
         return new Promise((resolve) => {
             let iframe = document.createElement('iframe');
             iframe.allow = "geolocation 'none'";
@@ -1519,7 +1519,7 @@ try {
                                   }
 
                                   let scSel = doc.querySelector('select[name="cbo_service_charge"]');
-                                  if (scSel && scSel.value !== "1") triggerVueChange(scSel, "1", win);
+                                  if (scSel && scSel.value !== serviceChargeMode) triggerVueChange(scSel, serviceChargeMode, win);
 
                                   let txSel = doc.querySelector('select[name="cbo_transaction_type"]');
                                   if (txSel && txSel.value !== transactionType) triggerVueChange(txSel, transactionType, win);
@@ -2025,11 +2025,11 @@ try {
 
         panel.innerHTML = `
             <div id="ghost-header" style="background:#2c3e50; color:white; padding:6px 12px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
-                <div style="display:flex; align-items:center; gap:10px;">
+                <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; overflow:hidden;">
                     <strong id="panel-title" style="font-size:13px; pointer-events:none; white-space:nowrap;">${customTitle}</strong>
-                    <span id="audit-status" style="font-size:11px; font-weight:bold; color:#f1c40f; white-space:nowrap;"></span>
+                    <span id="audit-status" style="font-size:11px; font-weight:bold; color:#f1c40f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                 </div>
-                <div style="display:flex; gap:6px; align-items:center;">
+                <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
 
                     <button id="export-excel-btn" style="display:none; background:#8e44ad; border:none; color:white; font-size:11px; cursor:pointer; padding:3px 8px; border-radius:3px; font-weight:bold; transition:0.2s;">\u{1F4E5} Excel</button>
                     <button id="sync-locations-btn" style="background:#f39c12; border:none; color:white; font-size:11px; cursor:pointer; padding:3px 8px; border-radius:3px; font-weight:bold;">\u{1F504} Sync</button>
@@ -2297,7 +2297,7 @@ try {
     if(window.applyTabFilters) window.applyTabFilters();
 
     // FIXED: totalCols includes the 3 injected columns already. Do not add 3 again.
-    let totalCols = window.currentCheckerType === 'MIS' ? 8 : (window.currentCheckerType === 'EQUITY' || window.currentCheckerType === 'SAMITY' ? 7 : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 19 : 6));
+    let totalCols = window.currentCheckerType === 'MIS' ? 8 : (window.currentCheckerType === 'EQUITY' || window.currentCheckerType === 'SAMITY' ? 7 : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 21 : 6));
     
     let rName = window.currentCheckerType === 'MIS' ? 'MIS Check' : (window.currentCheckerType === 'EQUITY' ? 'Equity Check' : (window.currentCheckerType === 'CASH' ? 'Cash & Bank' : (window.currentCheckerType === 'SAMITY' ? 'Samity Info' : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 'Daily Transaction Summary' : 'Due Collection'))));
     let exDate = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : '';
@@ -2373,45 +2373,45 @@ try {
         let sXml = ' <Worksheet ss:Name="' + escapeXml(sheetTitle) + '">\n  <Table>\n';
         
         // Increased column widths to completely eliminate wrapping.
-        sXml += '   <Column ss:Width="45"/>\n';
-        sXml += '   <Column ss:Width="160"/>\n';
-        sXml += '   <Column ss:Width="160"/>\n';
-        sXml += '   <Column ss:Width="200"/>\n';
+        sXml += '   <Column ss:Width="40"/>\n'; // Serial
+        sXml += '   <Column ss:Width="120"/>\n'; // Zone
+        sXml += '   <Column ss:Width="120"/>\n'; // Area
+        sXml += '   <Column ss:Width="150"/>\n'; // Branch
         
         if (window.currentCheckerType === 'MIS') {
             sXml += '   <Column ss:Width="80"/>\n';
-            sXml += '   <Column ss:Width="120"/>\n';
-            sXml += '   <Column ss:Width="120"/>\n';
-            sXml += '   <Column ss:Width="120"/>\n';
+            sXml += '   <Column ss:Width="100"/>\n';
+            sXml += '   <Column ss:Width="100"/>\n';
+            sXml += '   <Column ss:Width="100"/>\n';
         } else if (window.currentCheckerType === 'EQUITY') {
             sXml += '   <Column ss:Width="80"/>\n';
-            sXml += '   <Column ss:Width="160"/>\n';
-            sXml += '   <Column ss:Width="160"/>\n';
+            sXml += '   <Column ss:Width="120"/>\n';
+            sXml += '   <Column ss:Width="120"/>\n';
         } else if (window.currentCheckerType === 'SAMITY') {
+            sXml += '   <Column ss:Width="80"/>\n';
             sXml += '   <Column ss:Width="100"/>\n';
-            sXml += '   <Column ss:Width="130"/>\n';
-            sXml += '   <Column ss:Width="500"/>\n';
+            sXml += '   <Column ss:Width="400"/>\n';
         } else if (window.currentCheckerType === 'DUE_COLLECTION') {
-            sXml += '   <Column ss:Width="200"/>\n';
-            sXml += '   <Column ss:Width="160"/>\n';
-            sXml += '   <Column ss:Width="160"/>\n';
+            sXml += '   <Column ss:Width="120"/>\n';
+            sXml += '   <Column ss:Width="120"/>\n';
         } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
-            sXml += '   <Column ss:Width="180"/>\n'; // Branch
-            sXml += '   <Column ss:Width="80"/>\n'; // Sav Dep
-            sXml += '   <Column ss:Width="80"/>\n'; // Sav Ref
-            sXml += '   <Column ss:Width="80"/>\n'; // Sav Ref Cash
-            sXml += '   <Column ss:Width="80"/>\n'; // Sav Ref Non-Cash
-            sXml += '   <Column ss:Width="100"/>\n'; // Borrower
-            sXml += '   <Column ss:Width="100"/>\n'; // Disb
-            sXml += '   <Column ss:Width="100"/>\n'; // Rec
-            sXml += '   <Column ss:Width="100"/>\n'; // Reg
-            sXml += '   <Column ss:Width="80"/>\n'; // OTR
-            sXml += '   <Column ss:Width="100"/>\n'; // Due
-            sXml += '   <Column ss:Width="100"/>\n'; // Current Due
-            sXml += '   <Column ss:Width="100"/>\n'; // Matured Due
-            sXml += '   <Column ss:Width="100"/>\n'; // Adv
-            sXml += '   <Column ss:Width="100"/>\n'; // Prin
-            sXml += '   <Column ss:Width="100"/>\n'; // SC
+            sXml += '   <Column ss:Width="65"/>\n'; // Sav Dep
+            sXml += '   <Column ss:Width="65"/>\n'; // Sav Ref
+            sXml += '   <Column ss:Width="65"/>\n'; // Sav Ref Cash
+            sXml += '   <Column ss:Width="65"/>\n'; // Sav Ref Non-Cash
+            sXml += '   <Column ss:Width="70"/>\n'; // Borrower
+            sXml += '   <Column ss:Width="80"/>\n'; // Disb
+            sXml += '   <Column ss:Width="80"/>\n'; // Rec
+            sXml += '   <Column ss:Width="80"/>\n'; // Reg
+            sXml += '   <Column ss:Width="60"/>\n'; // OTR
+            sXml += '   <Column ss:Width="75"/>\n'; // Due
+            sXml += '   <Column ss:Width="75"/>\n'; // Current Due
+            sXml += '   <Column ss:Width="75"/>\n'; // Matured Due
+            sXml += '   <Column ss:Width="75"/>\n'; // Adv
+            sXml += '   <Column ss:Width="75"/>\n'; // Prin
+            sXml += '   <Column ss:Width="75"/>\n'; // SC
+            sXml += '   <Column ss:Width="75"/>\n'; // Cash In Hand
+            sXml += '   <Column ss:Width="75"/>\n'; // Cash At Bank
         } else {
             // CASH
             sXml += '   <Column ss:Width="80"/>\n';
@@ -2469,7 +2469,7 @@ try {
         return sXml;
     }
 
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:o="urn:schemas-microsoft-com:office:office"\n xmlns:x="urn:schemas-microsoft-com:office:excel"\n xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:html="http://www.w3.org/TR/REC-html40">\n <Styles>\n  <Style ss:ID="Default" ss:Name="Normal">\n   <Alignment ss:Vertical="Center" ss:WrapText="1"/>\n   <Borders>\n    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D1D8E0"/>\n   </Borders>\n   <Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#2C3E50"/>\n  </Style>\n  <Style ss:ID="sTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="16" ss:Bold="1" ss:Color="#2980B9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sSubTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="12" ss:Bold="1" ss:Color="#34495E"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sHeader"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowCenter" ss:Parent="Default"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowLeft" ss:Parent="Default"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowRight" ss:Parent="Default"><Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sTotalRow" ss:Parent="Default"><Interior ss:Color="#E1F5FE" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Bold="1" ss:Color="#01579B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sTotalRowRight" ss:Parent="sTotalRow"><Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/></Style>\n </Styles>\n';
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:o="urn:schemas-microsoft-com:office:office"\n xmlns:x="urn:schemas-microsoft-com:office:excel"\n xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:html="http://www.w3.org/TR/REC-html40">\n <Styles>\n  <Style ss:ID="Default" ss:Name="Normal">\n   <Alignment ss:Vertical="Center" ss:WrapText="1"/>\n   <Borders>\n    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n   </Borders>\n   <Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#2C3E50"/>\n  </Style>\n  <Style ss:ID="sTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="16" ss:Bold="1" ss:Color="#2980B9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sSubTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="12" ss:Bold="1" ss:Color="#34495E"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sHeader"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowCenter" ss:Parent="Default"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowLeft" ss:Parent="Default"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowRight" ss:Parent="Default"><Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sTotalRow" ss:Parent="Default"><Interior ss:Color="#E1F5FE" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Bold="1" ss:Color="#01579B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sTotalRowRight" ss:Parent="sTotalRow"><Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/></Style>\n </Styles>\n';
     
     xml += injectSerialZoneArea(cloneAll, 'All Branches');
     
@@ -2571,34 +2571,46 @@ try {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
                         if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="20" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         
-                        let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0");
-                        let dCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "1");
-                        let dNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "5");
+                        let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0", "0");
+                          let dAllWith = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0", "1");
+                          let dCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "1", "0");
+                          let dNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "5", "0");
                         let dDue = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', sDate, '1', bId, 'due_collection', updateStatus);
+                        let dBal = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', sDate, '1', bId, 'ais', updateStatus);
 
                         aData = dAll;
-                        if (aData) {
-                            aData.savingsRefundCash = dCash ? dCash.savingsRefund : 0;
+                          if (aData) {
+                              aData.serviceCharge = dAllWith ? dAllWith.serviceCharge : 0;
+                                aData.principal = dAllWith ? dAllWith.principal : (aData.regular + aData.due + aData.advance);
+                                aData.savingsRefundCash = dCash ? dCash.savingsRefund : 0;
                             aData.savingsRefundNonCash = dNonCash ? dNonCash.savingsRefund : 0;
                             aData.currentDue = dDue ? dDue.totalCurrent : 0;
                             aData.maturedDue = dDue ? dDue.totalMatured : 0;
+                            aData.cashInHand = dBal ? dBal.cashInHand : 0;
+                            aData.cashAtBank = dBal ? dBal.cashAtBank : 0;
                         }
                         
-                        if (!aData || !dCash || !dNonCash || !dDue) {
+                        if (!aData || !dCash || !dNonCash || !dDue || !dBal) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
                             if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${bName}</td><td colspan="20" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Daily Transaction \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
                             
-                            let rAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0");
-                            let rCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "1");
-                            let rNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "5");
+                            let rAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0", "0");
+                              let rAllWith = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0", "1");
+                              let rCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "1", "0");
+                              let rNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "5", "0");
                             let rDue = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', sDate, '1', bId, 'due_collection', updateStatus);
+                            let rBal = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', sDate, '1', bId, 'ais', updateStatus);
                             
                             aData = rAll;
-                            if (aData) {
-                                aData.savingsRefundCash = rCash ? rCash.savingsRefund : 0;
+                              if (aData) {
+                                  aData.serviceCharge = rAllWith ? rAllWith.serviceCharge : 0;
+                                    aData.principal = rAllWith ? rAllWith.principal : (aData.regular + aData.due + aData.advance);
+                                    aData.savingsRefundCash = rCash ? rCash.savingsRefund : 0;
                                 aData.savingsRefundNonCash = rNonCash ? rNonCash.savingsRefund : 0;
                                 aData.currentDue = rDue ? rDue.totalCurrent : 0;
                                 aData.maturedDue = rDue ? rDue.totalMatured : 0;
+                                aData.cashInHand = rBal ? rBal.cashInHand : 0;
+                                aData.cashAtBank = rBal ? rBal.cashAtBank : 0;
                             }
                         }
                     } else {
@@ -2616,7 +2628,7 @@ try {
                         
                         htmlRowsSingle = `
                             <tr>
-                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
+                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
                                 <td style="text-align:left; font-size:9px;"><b>Loan</b></td>
                                 <td style="white-space:nowrap; font-size:9px;">${misData ? formatNum(misData.loan) : '0'}</td>
                                 <td style="white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.loan) : '0'}</td>
@@ -2634,7 +2646,7 @@ try {
                         let bankColor = (aisData && aisData.cashAtBank >= 1000001) ? 'red' : '#16a085';
                         htmlRowsSingle = `
                             <tr>
-                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
+                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
                                 <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Cash</b></td>
                                 <td style="color:${cashColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.cashInHand) : '0'}</td>
                             </tr>
@@ -2648,7 +2660,7 @@ try {
                         let sY = isData ? formatNum(isData.surplusYear) : '0';
                         htmlRowsSingle = `
                             <tr class="equity-row">
-                                <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">${targetName}</td>
+                                <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">${targetName}</td>
                                 <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Equity</b></td>
                                 <td style="color:${(aisData && aisData.equity < 0 && aisData.equity !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.equity) : '0'}</td>
                                 <td style="color:${(aisData && aisData.equityPrev < 0 && aisData.equityPrev !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.equityPrev) : '0'}</td>
@@ -2665,15 +2677,15 @@ try {
                         let smallCount = smallSamities.length;
                         let codesText = smallSamities.map(s => s.code).join(', ');
                         if (totalCount === 0 && aData && aData.debug) codesText = '<span style="color:red;">' + aData.debug + '</span>';
-                        htmlRowsSingle = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
+                        htmlRowsSingle = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
                     } else if (window.currentCheckerType === 'DUE_COLLECTION') {
-                        htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
+                        htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
                     } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
-                        let otr = aData && aData.recoverable > 0 ? ((aData.regular * 100) / aData.recoverable).toFixed(2) : '0.00';
-                        let disbCount = aData ? (aData.disbCount || 0) : 0;
-                        htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td></tr>`;
-                    }
-                    tbody.innerHTML = htmlRowsSingle;
+                          let otr = aData && aData.recoverable > 0 ? ((aData.regular * 100) / aData.recoverable).toFixed(2) : '0.00';
+                          let disbCount = aData ? (aData.disbCount || 0) : 0;
+                          htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.cashInHand)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.cashAtBank)||0).toFixed(2) : '0.00') + `</td></tr>`;
+                      }
+                      tbody.innerHTML = htmlRowsSingle;
                 
                 let expBtn = document.getElementById('export-excel-btn');
                 if(expBtn) expBtn.style.display = 'block';
@@ -2769,7 +2781,7 @@ try {
                               (window.currentCheckerType === 'DUE_COLLECTION' ?
                                 `<tr><th style="width:30%; text-align:left;">Branch</th><th style="width:35%; text-align:center;">Current Due</th><th style="width:35%; text-align:center;">Matured Due</th></tr>` :
                               (window.currentCheckerType === 'DAILY_TRANSACTION' ?
-                                `<tr><th style="width:7%; text-align:left; font-size:10px;">Branch</th><th style="width:6%; text-align:center; font-size:10px;">Savings<br>Coll.</th><th style="width:6%; text-align:center; font-size:10px;">Savings<br>Ref.</th><th style="width:6%; text-align:center; font-size:10px;">Sav. Ref.<br>(Cash)</th><th style="width:6%; text-align:center; font-size:10px;">Sav. Ref.<br>(Non-Cash)</th><th style="width:6%; text-align:center; font-size:9.5px;">Borrower<br>Received Loan</th><th style="width:6%; text-align:center; font-size:10px;">Disbursed</th><th style="width:6%; text-align:center; font-size:10px;">Recoverable</th><th style="width:6%; text-align:center; font-size:10px;">Regular</th><th style="width:5%; text-align:center; font-size:10px;">OTR %</th><th style="width:6%; text-align:center; font-size:10px;">Due</th><th style="width:6%; text-align:center; font-size:10px;">Current<br>Due</th><th style="width:6%; text-align:center; font-size:10px;">Matured<br>Due</th><th style="width:6%; text-align:center; font-size:10px;">Advance</th><th style="width:6%; text-align:center; font-size:10px;">Principal</th><th style="width:6%; text-align:center; font-size:10px;">SC</th></tr>` :
+                                `<tr><th style="width:7%; text-align:left; font-size:10px;">Branch</th><th style="width:5%; text-align:center; font-size:10px;">Savings<br>Coll.</th><th style="width:5%; text-align:center; font-size:10px;">Savings<br>Ref.</th><th style="width:5%; text-align:center; font-size:10px;">Sav. Ref.<br>(Cash)</th><th style="width:5%; text-align:center; font-size:10px;">Sav. Ref.<br>(Non-Cash)</th><th style="width:5%; text-align:center; font-size:9.5px;">Borrower<br>Received Loan</th><th style="width:5%; text-align:center; font-size:10px;">Disbursed</th><th style="width:5%; text-align:center; font-size:10px;">Recoverable</th><th style="width:5%; text-align:center; font-size:10px;">Regular</th><th style="width:5%; text-align:center; font-size:10px;">OTR %</th><th style="width:5%; text-align:center; font-size:10px;">Due</th><th style="width:5%; text-align:center; font-size:10px;">Current<br>Due</th><th style="width:5%; text-align:center; font-size:10px;">Matured<br>Due</th><th style="width:5%; text-align:center; font-size:10px;">Advance</th><th style="width:5%; text-align:center; font-size:10px;">Principal</th><th style="width:5%; text-align:center; font-size:10px;">SC</th><th style="width:5%; text-align:center; font-size:10px;">Cash<br>In Hand</th><th style="width:5%; text-align:center; font-size:10px;">Cash<br>At Bank</th></tr>` :
                                 `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:62%; text-align:right;">Balance (AIS)</th></tr>`))))}
                         </thead>
                 `;
@@ -2860,21 +2872,21 @@ try {
                         
                         let zoneTotals = {};
                         let areaTotals = {};
-                        let grandTotals = { savDep: 0, savRef: 0, savRefCash: 0, savRefNon: 0, disbCount: 0, disb: 0, rec: 0, reg: 0, due: 0, curDue: 0, matDue: 0, adv: 0, prin: 0, sc: 0, branchCount: 0 };
+                        let grandTotals = { savDep: 0, savRef: 0, savRefCash: 0, savRefNon: 0, disbCount: 0, disb: 0, rec: 0, reg: 0, due: 0, curDue: 0, matDue: 0, adv: 0, prin: 0, sc: 0, cashIn: 0, cashBank: 0, branchCount: 0 };
                         
                         document.querySelectorAll('.audit-row-group').forEach(tb => {
                             if (tb.style.display === 'none') return;
                             let zone = tb.getAttribute('data-zone') || 'Unknown';
                             let area = tb.getAttribute('data-area') || 'Unknown';
                             
-                            if (!zoneTotals[zone]) zoneTotals[zone] = { savDep: 0, savRef: 0, savRefCash: 0, savRefNon: 0, disbCount: 0, disb: 0, rec: 0, reg: 0, due: 0, curDue: 0, matDue: 0, adv: 0, prin: 0, sc: 0, lastTb: null, branchCount: 0 };
-                            if (!areaTotals[zone + '|' + area]) areaTotals[zone + '|' + area] = { savDep: 0, savRef: 0, savRefCash: 0, savRefNon: 0, disbCount: 0, disb: 0, rec: 0, reg: 0, due: 0, curDue: 0, matDue: 0, adv: 0, prin: 0, sc: 0, lastTb: null, branchCount: 0 };
+                            if (!zoneTotals[zone]) zoneTotals[zone] = { savDep: 0, savRef: 0, savRefCash: 0, savRefNon: 0, disbCount: 0, disb: 0, rec: 0, reg: 0, due: 0, curDue: 0, matDue: 0, adv: 0, prin: 0, sc: 0, cashIn: 0, cashBank: 0, lastTb: null, branchCount: 0 };
+                            if (!areaTotals[zone + '|' + area]) areaTotals[zone + '|' + area] = { savDep: 0, savRef: 0, savRefCash: 0, savRefNon: 0, disbCount: 0, disb: 0, rec: 0, reg: 0, due: 0, curDue: 0, matDue: 0, adv: 0, prin: 0, sc: 0, cashIn: 0, cashBank: 0, lastTb: null, branchCount: 0 };
 
                             let trs = tb.querySelectorAll('tr');
                             let hasValidData = false;
                             trs.forEach(tr => {
                                 let tds = tr.querySelectorAll('td');
-                                if (tds.length >= 16 && tds[0].innerText !== 'Total' && !tds[1].innerText.includes('\u23F3') && !tds[1].innerText.includes('\u274C') && !tds[1].innerText.includes('\u{1F504}')) {
+                                if (tds.length >= 18 && tds[0].innerText !== 'Total' && !tds[1].innerText.includes('\u23F3') && !tds[1].innerText.includes('\u274C') && !tds[1].innerText.includes('\u{1F504}')) {
                                     hasValidData = true;
                                     let v = (i) => parseFloat(tds[i].innerText.replace(/,/g, '')) || 0;
                                     let add = (obj) => {
@@ -2882,18 +2894,19 @@ try {
                                         obj.disbCount += parseInt(tds[5].innerText) || 0;
                                         obj.disb += v(6); obj.rec += v(7); obj.reg += v(8);
                                         obj.due += v(10); obj.curDue += v(11); obj.matDue += v(12); obj.adv += v(13); obj.prin += v(14); obj.sc += v(15);
+                                        obj.cashIn += v(16); obj.cashBank += v(17);
                                     };
                                     add(grandTotals); add(zoneTotals[zone]); add(areaTotals[zone + '|' + area]);
                                 }
                             });
                             
                             if (hasValidData) {
+                                zoneTotals[zone].lastTb = tb;
+                                areaTotals[zone + '|' + area].lastTb = tb;
                                 zoneTotals[zone].branchCount++;
                                 areaTotals[zone + '|' + area].branchCount++;
                                 grandTotals.branchCount++;
                             }
-                            zoneTotals[zone].lastTb = tb;
-                            areaTotals[zone + '|' + area].lastTb = tb;
                         });
 
                         document.querySelectorAll('.dt-subtotal').forEach(e => e.remove());
@@ -2906,8 +2919,8 @@ try {
                             if (level === '1') return; // Hide area totals if branch level
                             if (data.lastTb && key.split('|')[1] !== 'Unknown' && key.split('|')[1] !== '' && data.branchCount > 1) {
                                 let otr = data.rec > 0 ? ((data.reg * 100) / data.rec).toFixed(2) : '0.00';
-                                let html = `<tr style="background:#e1f5fe; color:#01579b; font-weight:bold;">
-                                    <td style="text-align:right; font-size:10px;" class="subtotal-label">Area Total</td>
+                                let html = `<tr style="background:#e1f5fe; color:#01579b; font-weight:bold;" class="dt-subtotal">
+                                    <td style="text-align:right; font-size:10px; white-space:nowrap;" class="subtotal-label">${key.split('|')[1]} (Total)</td>
                                     <td style="text-align:center; font-size:10px;">${data.savDep.toFixed(2)}</td>
                                     <td style="text-align:center; font-size:10px;">${data.savRef.toFixed(2)}</td>
                                     <td style="text-align:center; font-size:10px;">${data.savRefCash.toFixed(2)}</td>
@@ -2923,6 +2936,8 @@ try {
                                     <td style="text-align:center; font-size:10px;">${data.adv.toFixed(2)}</td>
                                     <td style="text-align:center; font-size:10px;">${data.prin.toFixed(2)}</td>
                                     <td style="text-align:center; font-size:10px;">${data.sc.toFixed(2)}</td>
+                                    <td style="text-align:center; font-size:10px;">${data.cashIn.toFixed(2)}</td>
+                                    <td style="text-align:center; font-size:10px;">${data.cashBank.toFixed(2)}</td>
                                 </tr>`;
                                 let tb = document.createElement('tbody');
                                 tb.className = 'dt-subtotal dt-area-total';
@@ -2938,8 +2953,8 @@ try {
                             let areasInZone = Object.keys(areaTotals).filter(k => k.startsWith(z + '|')).length;
                             if (data.lastTb && z !== 'Unknown' && z !== '' && areasInZone > 1) {
                                 let otr = data.rec > 0 ? ((data.reg * 100) / data.rec).toFixed(2) : '0.00';
-                                let html = `<tr style="background:#0277bd; color:white; font-weight:bold;">
-                                    <td style="text-align:right; font-size:10px;" class="subtotal-label">Zone Total</td>
+                                let html = `<tr style="background:#0277bd; color:white; font-weight:bold;" class="dt-subtotal">
+                                    <td style="text-align:right; font-size:10px; white-space:nowrap;" class="subtotal-label">${z} (Total)</td>
                                     <td style="text-align:center; font-size:10px;">${data.savDep.toFixed(2)}</td>
                                     <td style="text-align:center; font-size:10px;">${data.savRef.toFixed(2)}</td>
                                     <td style="text-align:center; font-size:10px;">${data.savRefCash.toFixed(2)}</td>
@@ -2955,7 +2970,9 @@ try {
                                     <td style="text-align:center; font-size:10px;">${data.adv.toFixed(2)}</td>
                                     <td style="text-align:center; font-size:10px;">${data.prin.toFixed(2)}</td>
                                     <td style="text-align:center; font-size:10px;">${data.sc.toFixed(2)}</td>
-                                </tr>`;
+                                    <td style="text-align:center; font-size:10px;">${data.cashIn.toFixed(2)}</td>
+                                    <td style="text-align:center; font-size:10px;">${data.cashBank.toFixed(2)}</td>
+                                  </tr>`;
                                 let tb = document.createElement('tbody');
                                 tb.className = 'dt-subtotal dt-zone-total';
                                 tb.innerHTML = html;
@@ -2985,6 +3002,8 @@ try {
                                 <td style="text-align:center; font-size:10px;">${grandTotals.adv.toFixed(2)}</td>
                                 <td style="text-align:center; font-size:10px;">${grandTotals.prin.toFixed(2)}</td>
                                 <td style="text-align:center; font-size:10px;">${grandTotals.sc.toFixed(2)}</td>
+                                <td style="text-align:center; font-size:10px;">${grandTotals.cashIn.toFixed(2)}</td>
+                                <td style="text-align:center; font-size:10px;">${grandTotals.cashBank.toFixed(2)}</td>
                             </tr>`;
                             tfoot.style.display = '';
                         } else {
@@ -3099,34 +3118,46 @@ try {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
                         if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="20" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         
-                        let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0");
-                        let dCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "1");
-                        let dNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "5");
+                        let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0", "0");
+                          let dAllWith = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0", "1");
+                          let dCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "1", "0");
+                          let dNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "5", "0");
                         let dDue = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', selectedDate, '1', b.id, 'due_collection', updateStatus);
+                        let dBal = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
 
                         aData = dAll;
-                        if (aData) {
-                            aData.savingsRefundCash = dCash ? dCash.savingsRefund : 0;
+                          if (aData) {
+                              aData.serviceCharge = dAllWith ? dAllWith.serviceCharge : 0;
+                                aData.principal = dAllWith ? dAllWith.principal : (aData.regular + aData.due + aData.advance);
+                                aData.savingsRefundCash = dCash ? dCash.savingsRefund : 0;
                             aData.savingsRefundNonCash = dNonCash ? dNonCash.savingsRefund : 0;
                             aData.currentDue = dDue ? dDue.totalCurrent : 0;
                             aData.maturedDue = dDue ? dDue.totalMatured : 0;
+                            aData.cashInHand = dBal ? dBal.cashInHand : 0;
+                            aData.cashAtBank = dBal ? dBal.cashAtBank : 0;
                         }
                         
-                        if (!aData || !dCash || !dNonCash || !dDue) {
+                        if (!aData || !dCash || !dNonCash || !dDue || !dBal) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
                             if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="20" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Daily Transaction \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
                             
-                            let rAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0");
-                            let rCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "1");
-                            let rNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "5");
+                            let rAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0", "0");
+                              let rAllWith = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0", "1");
+                              let rCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "1", "0");
+                              let rNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "5", "0");
                             let rDue = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', selectedDate, '1', b.id, 'due_collection', updateStatus);
+                            let rBal = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
                             
                             aData = rAll;
-                            if (aData) {
-                                aData.savingsRefundCash = rCash ? rCash.savingsRefund : 0;
+                              if (aData) {
+                                  aData.serviceCharge = rAllWith ? rAllWith.serviceCharge : 0;
+                                    aData.principal = rAllWith ? rAllWith.principal : (aData.regular + aData.due + aData.advance);
+                                    aData.savingsRefundCash = rCash ? rCash.savingsRefund : 0;
                                 aData.savingsRefundNonCash = rNonCash ? rNonCash.savingsRefund : 0;
                                 aData.currentDue = rDue ? rDue.totalCurrent : 0;
                                 aData.maturedDue = rDue ? rDue.totalMatured : 0;
+                                aData.cashInHand = rBal ? rBal.cashInHand : 0;
+                                aData.cashAtBank = rBal ? rBal.cashAtBank : 0;
                             }
                         }
                     } else {
@@ -3199,7 +3230,7 @@ try {
                         if (window.currentCheckerType === 'MIS') {
                             htmlRowsBatch = `
                                 <tr>
-                                    <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
+                                    <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
                                     <td style="text-align:left; font-size:9px;"><b>Loan</b></td>
                                     <td style="white-space:nowrap; font-size:9px;">${formatNum(mData.loan)}</td>
                                     <td style="white-space:nowrap; font-size:9px;">${formatNum(aData.loan)}</td>
@@ -3219,7 +3250,7 @@ try {
                             let isHighBankClass = aData.cashAtBank >= 1000001 ? 'is-high' : '';
                             htmlRowsBatch = `
                                 <tr class="cash-row ${isHighCashClass}">
-                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
+                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
                                     <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Cash</b></td>
                                     <td style="color:${cashColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.cashInHand)}</td>
                                 </tr>
@@ -3231,7 +3262,7 @@ try {
                         } else if (window.currentCheckerType === 'EQUITY') {
                             htmlRowsBatch = `
                                 <tr class="equity-row">
-                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">${b.name}</td>
+                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">${b.name}</td>
                                     <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Equity</b></td>
                                     <td style="color:${(aData.equity < 0 && aData.equity !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equity)}</td>
                                     <td style="color:${(aData.equityPrev < 0 && aData.equityPrev !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equityPrev)}</td>
@@ -3248,13 +3279,13 @@ try {
                             let smallCount = smallSamities.length;
                             let codesText = smallSamities.map(s => s.code).join(', ');
                             if (totalCount === 0 && aData && aData.debug) codesText = '<span style="color:red;">' + aData.debug + '</span>';
-                            htmlRowsBatch = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
+                            htmlRowsBatch = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
                         } else if (window.currentCheckerType === 'DUE_COLLECTION') {
-                            htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
+                            htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
                         } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
                             let otr = aData && aData.recoverable > 0 ? ((aData.regular * 100) / aData.recoverable).toFixed(2) : '0.00';
                             let disbCount = aData ? (aData.disbCount || 0) : 0;
-                            htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td></tr>`;
+                              htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.cashInHand)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.cashAtBank)||0).toFixed(2) : '0.00') + `</td></tr>`;
                         }
                         tbodyAfter.innerHTML = htmlRowsBatch;
                         if (window.applyTabFilters) window.applyTabFilters(tbodyAfter);
@@ -3722,11 +3753,11 @@ try {
 
             panel.innerHTML = `
                 <div id="mem-report-header" style="background:#8e44ad; color:white; padding:8px 12px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
-                    <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; overflow:hidden;">
                         <strong style="font-size:14px; pointer-events:none; white-space:nowrap;">\u{1F465} Member CIB Verification Report</strong>
-                        <span id="status-text" style="font-size:11.5px; font-weight:bold; color:#f1c40f; white-space:nowrap;"></span>
+                        <span id="status-text" style="font-size:11.5px; font-weight:bold; color:#f1c40f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                     </div>
-                    <div style="display:flex; gap:6px; align-items:center;">
+                    <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
                         <button id="export-btn" style="display:none; background:#27ae60; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold; transition:0.2s;">\u{1F4E5} Excel</button>
                         <button id="resync-btn" style="background:#f39c12; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold;">\u{1F504} Resync</button>
                         <button id="close-panel-btn" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 25px; height: 25px; border-radius: 50%; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(255, 65, 108, 0.45); transition: 0.2s;">\u2715</button>
