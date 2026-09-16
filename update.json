@@ -1,7 +1,7 @@
 {
-  "version": "2.1",
-  "title": "নতুন আপডেট 2.1! ",
-  "message": "এপ্সটিতে ডেইলী সামারি যুক্ত করা হয়েছে। এগুলি পেতে আপডেট করুন!",
+  "version": "2.2",
+  "title": "নতুন আপডেট 2.2! ",
+  "message": "এপ্সটিতে ডেইলী সামারি যুক্ত করা হয়েছে, এবং অনেক ফিল্ড যুক্ত করা হয়েছে । এগুলি পেতে আপডেট করুন!",
   "download_url": "https://github.com/rameezrazabd/DSK/releases/download/latest/MicrofinApp-Latest.apk",
   "force_update": false
 }
