@@ -915,9 +915,9 @@ try {
         document.body.appendChild(panel);
 
         panel.innerHTML = `
-            <div id="bde-drag-header" style="background:#2c3e50; color:white; padding:7px 12px; display:flex; justify-content:space-between; align-items:center; cursor:move; flex-shrink:0;">
+            <div id="bde-drag-header" style="background:#2c3e50; color:white; padding:4px 8px; display:flex; justify-content:space-between; align-items:center; cursor:move; flex-shrink:0;">
                 <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; overflow:hidden;">
-                    <strong style="font-size:13px;">\u{1F4C5} Branch Date Extractor</strong>
+                    <strong style="font-size:11.5px;">\u{1F4C5} Branch Date Extractor</strong>
                     <span id="bde-status-msg" style="font-size:11px; font-weight:bold; color:#f1c40f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                 </div>
                 <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
@@ -1081,12 +1081,12 @@ try {
                 <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:center; table-layout:fixed; font-family: 'SutonnyOMJ', 'SolaimanLipi', DSK_MixedFont, sans-serif;">
                     <thead style="position: sticky; top: 0; z-index:5;">
                         <tr>
-                            <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:30%; text-align:center;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
-                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#34495e; color:white; width:22%; white-space:nowrap;">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</th>
-                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:16%; white-space:nowrap;">MIS \u09A1\u09C7\u099F</th>
-                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:8%; white-space:nowrap;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
-                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:16%; white-space:nowrap;">AIS \u09A1\u09C7\u099F</th>
-                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:8%; white-space:nowrap;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
+                            <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:30%; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#34495e; color:white; width:22%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:16%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">MIS \u09A1\u09C7\u099F</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:8%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:16%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">AIS \u09A1\u09C7\u099F</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:8%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
                         </tr>
                     </thead>
             `;
@@ -1109,8 +1109,8 @@ try {
                 tableHtml += `
                     <tbody id="bde-tr-${safeId}" data-status="pending">
                         <tr>
-                            <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; white-space:normal; line-height:1.25; font-size:10px; color:#2c3e50;">${b.name}</td>
-                            <td colspan="26" style="padding:3px 2px; border:1px solid #bdc3c7; color:gray; font-size:10px; white-space:nowrap;">\u23F3 \u09AB\u09C7\u099A\u09BF\u0982...</td>
+                            <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; white-space:normal; line-height:1.25; font-size:10px; color:#2c3e50; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${b.name}</td>
+                            <td colspan="5" style="padding:3px 2px; border:1px solid #bdc3c7; color:gray; font-size:10px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u23F3 \u09AB\u09C7\u099A\u09BF\u0982...</td>
                         </tr>
                     </tbody>
                 `;
@@ -1142,18 +1142,22 @@ try {
                     let mNum = typeof misLag === 'number' ? misLag : 999;
                     let aNum = typeof aisLag === 'number' ? aisLag : 999;
 
-                    let rowStatus = 'current';
-                    let statusTextHtml = `\u2705 \u0986\u09AA-\u099F\u09C1-\u09A1\u09C7\u099F`;
-                    
+                                        let rowStatus = 'current';
+                    let statusTextHtml = '\u2705 \u0986\u09AA-\u099F\u09C1-\u09A1\u09C7\u099F';
+
+                    let bnD = ['\u09E6','\u09E7','\u09E8','\u09E9','\u09EA','\u09EB','\u09EC','\u09ED','\u09EE','\u09EF']; let en2bn = (n) => String(n).replace(/[0-9]/g, w => bnD[parseInt(w)]);
+                    let mStr = mNum === 999 ? 'N/A' : (en2bn(mNum) + '\u09A6\u09BF\u09A8');
+                    let aStr = aNum === 999 ? 'N/A' : (en2bn(aNum) + '\u09A6\u09BF\u09A8');
+
                     if (mNum > 0 && aNum > 0) {
                         rowStatus = 'back';
-                        statusTextHtml = `\u{1F534} MIS \u098F\u09AC\u0982 AIS \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7`;
+                        statusTextHtml = '\u{1F534} MIS ' + mStr + ' AIS ' + aStr + ' \u09AA\u09BF\u099B\u09BF\u09DF\u09C7';
                     } else if (mNum > 0) {
                         rowStatus = 'back';
-                        statusTextHtml = `\u{1F534} MIS \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7`;
+                        statusTextHtml = '\u{1F534} MIS ' + mStr + ' \u09AA\u09BF\u099B\u09BF\u09DF\u09C7';
                     } else if (aNum > 0) {
                         rowStatus = 'back';
-                        statusTextHtml = `\u{1F534} AIS \u09AA\u09BF\u099B\u09BF\u09DF\u09C7 \u0986\u099B\u09C7`;
+                        statusTextHtml = '\u{1F534} AIS ' + aStr + ' \u09AA\u09BF\u099B\u09BF\u09DF\u09C7';
                     }
                     
                     allCount++;
@@ -1173,12 +1177,12 @@ try {
                         trElement.setAttribute('data-status', rowStatus);
                         trElement.innerHTML = `
                             <tr style="${rowBg}">
-                                <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; color:#2c3e50; white-space:normal; line-height:1.25; font-size:10px;">${b.name}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; font-weight:bold; font-size:9.5px; white-space:nowrap; color:${rowStatus === 'back' ? '#c0392b' : '#27ae60'};">${statusTextHtml}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misDate === 'N/A'?'#e74c3c':'#2980b9'}; font-weight:bold; background:#f4f9f9; font-size:9.5px; white-space:nowrap; overflow:hidden;">${formatMis}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misLagColor}; font-weight:bold; background:#f4f9f9; font-size:10px; white-space:nowrap;">${misLag}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisDate === 'N/A'?'#e74c3c':'#27ae60'}; font-weight:bold; background:#f9fbf9; font-size:9.5px; white-space:nowrap; overflow:hidden;">${formatAis}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisLagColor}; font-weight:bold; background:#f9fbf9; font-size:10px; white-space:nowrap;">${aisLag}</td>
+                                <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; color:#2c3e50; white-space:normal; line-height:1.25; font-size:10px; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${b.name}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; font-weight:bold; font-size:8.5px; white-space:nowrap; overflow:hidden; color:${rowStatus === 'back' ? '#c0392b' : '#27ae60'}; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${statusTextHtml}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misDate === 'N/A'?'#e74c3c':'#2980b9'}; font-weight:bold; background:#f4f9f9; font-size:9.5px; white-space:nowrap; overflow:hidden; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${formatMis}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misLagColor}; font-weight:bold; background:#f4f9f9; font-size:10px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${misLag}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisDate === 'N/A'?'#e74c3c':'#27ae60'}; font-weight:bold; background:#f9fbf9; font-size:9.5px; white-space:nowrap; overflow:hidden; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${formatAis}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisLagColor}; font-weight:bold; background:#f9fbf9; font-size:10px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${aisLag}</td>
                             </tr>
                         `;
                     }
@@ -1572,7 +1576,7 @@ try {
         });
     }
     
-    async function fetchMemberDataSilently(bId, sDateFrom, sDateTo, type, productId = '') {
+    async function fetchMemberDataSilently(bId, sDateFrom, sDateTo, type, productId = '', retries = 3) {
         try {
             let headers = JSON.parse(sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
             if (!headers || !headers['Authorization']) return { count: 0 };
@@ -1614,13 +1618,10 @@ try {
                 return { count: 0 };
             }
             return { count: (d.total_rows !== undefined ? d.total_rows : (d.total !== undefined ? d.total : (d.recordsTotal !== undefined ? d.recordsTotal : (d.count !== undefined ? d.count : (d.data && Array.isArray(d.data) ? d.data.length : 0))))) };
-        } catch (e) {
-            console.error('fetchMemberDataSilently Error:', e);
-            return { count: 0 };
-        }
+        } catch (e) { if(retries > 0) { await new Promise(r => setTimeout(r, 1000 + Math.random()*1000)); return fetchMemberDataSilently(bId, sDateFrom, sDateTo, type, productId, retries - 1); } console.error('fetchMemberDataSilently Error:', e); return { count: 0 }; }
     }
 
-                                    async function fetchWriteOffColl(bId, fromDate, toDate) {
+                                    async function fetchWriteOffColl(bId, fromDate, toDate, retries = 3) {
         try {
             let h = JSON.parse(sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
             let fd = new FormData();
@@ -2674,7 +2675,7 @@ try {
         createCheckerButton('equity-toggle-btn', '\u{1F4CA} Equity', 286, '#8e44ad', 'EQUITY');
         createCheckerButton('samity-toggle-btn', '\u{1F465} Samity wise member info.', 328, '#2980b9', 'SAMITY');
         createCheckerButton('due-toggle-btn', '\u{1F4B0} Due collection Summary', 370, '#c0392b', 'DUE_COLLECTION');
-        createCheckerButton('daily-toggle-btn', '\u{1F4B0} Daily Transaction Summary', 412, '#f39c12', 'DAILY_TRANSACTION');
+        createCheckerButton('daily-toggle-btn', '\u{1F4B0} Daily Tran. Summ.', 412, '#f39c12', 'DAILY_TRANSACTION');
     }
 
     function openMisAisPanel(customTitle) {
@@ -2687,9 +2688,9 @@ try {
         document.body.appendChild(panel);
 
         panel.innerHTML = `
-            <div id="ghost-header" style="background:#2c3e50; color:white; padding:6px 12px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+            <div id="ghost-header" style="background:#2c3e50; color:white; padding:4px 8px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
                 <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; overflow:hidden;">
-                    <strong id="panel-title" style="font-size:13px; pointer-events:none; white-space:nowrap;">${customTitle}</strong>
+                    <strong id="panel-title" style="font-size:11.5px; pointer-events:none; white-space:nowrap;">${customTitle}</strong>
                     <span id="audit-status" style="font-size:11px; font-weight:bold; color:#f1c40f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                 </div>
                 <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
@@ -2962,7 +2963,7 @@ try {
     // FIXED: totalCols includes the 3 injected columns already. Do not add 3 again.
     let totalCols = window.currentCheckerType === 'MIS' ? 8 : (window.currentCheckerType === 'EQUITY' || window.currentCheckerType === 'SAMITY' ? 7 : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 32 : 6));
     
-    let rName = window.currentCheckerType === 'MIS' ? 'MIS Check' : (window.currentCheckerType === 'EQUITY' ? 'Equity Check' : (window.currentCheckerType === 'CASH' ? 'Cash & Bank' : (window.currentCheckerType === 'SAMITY' ? 'Samity Info' : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 'Daily Transaction Summary' : 'Due Collection'))));
+    let rName = window.currentCheckerType === 'MIS' ? 'MIS Check' : (window.currentCheckerType === 'EQUITY' ? 'Equity Check' : (window.currentCheckerType === 'CASH' ? 'Cash & Bank' : (window.currentCheckerType === 'SAMITY' ? 'Samity Info' : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 'Daily Tran. Summ.' : 'Due Collection'))));
     let exDate = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : '';
     let exDateFrom = document.getElementById('custom-audit-date-from') ? document.getElementById('custom-audit-date-from').value : exDate;
     let exDateStr = '';
@@ -3036,11 +3037,11 @@ try {
 
         let sXml = ' <Worksheet ss:Name="' + escapeXml(sheetTitle) + '">\n  <Table>\n';
         
-        // Increased column widths to completely eliminate wrapping.
-        sXml += '   <Column ss:Width="40"/>\n'; // Serial
-        sXml += '   <Column ss:Width="120"/>\n'; // Zone
-        sXml += '   <Column ss:Width="120"/>\n'; // Area
-        sXml += '   <Column ss:Width="150"/>\n'; // Branch
+        // Tighter column widths to fit on screen and reduce space.
+        sXml += '   <Column ss:Width="35"/>\n'; // Serial
+        sXml += '   <Column ss:Width="85"/>\n'; // Zone
+        sXml += '   <Column ss:Width="85"/>\n'; // Area
+        sXml += '   <Column ss:Width="105"/>\n'; // Branch
         
         if (window.currentCheckerType === 'MIS') {
             sXml += '   <Column ss:Width="80"/>\n';
@@ -3059,27 +3060,7 @@ try {
             sXml += '   <Column ss:Width="120"/>\n';
             sXml += '   <Column ss:Width="120"/>\n';
         } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
-            sXml += '   <Column ss:Width="65"/>\n'; // Sav Dep
-            sXml += '   <Column ss:Width="65"/>\n'; // Sav Ref
-            sXml += '   <Column ss:Width="65"/>\n'; // Sav Ref Cash
-            sXml += '   <Column ss:Width="65"/>\n'; // Sav Ref Non-Cash
-            sXml += '   <Column ss:Width="70"/>\n'; // Borrower
-            sXml += '   <Column ss:Width="70"/>\n'; // Full Paid
-            sXml += '   <Column ss:Width="80"/>\n'; // Disb
-            sXml += '   <Column ss:Width="80"/>\n'; // Rec
-            sXml += '   <Column ss:Width="80"/>\n'; // Reg
-            sXml += '   <Column ss:Width="60"/>\n'; // OTR
-            sXml += '   <Column ss:Width="75"/>\n'; // Due
-            sXml += '   <Column ss:Width="75"/>\n'; // Current Due
-            sXml += '   <Column ss:Width="75"/>\n'; // Matured Due
-            sXml += '   <Column ss:Width="75"/>\n'; // Adv
-            sXml += '   <Column ss:Width="75"/>\n'; // Prin
-            sXml += '   <Column ss:Width="75"/>\n'; // SC
-            sXml += '   <Column ss:Width="75"/>\n'; // Cash In Hand
-            sXml += '   <Column ss:Width="75"/>\n'; // Cash At Bank
-              sXml += '   <Column ss:Width="75"/>\n'; // New Due Borrower
-              sXml += '   <Column ss:Width="75"/>\n'; // New Due Amount
-              sXml += '   <Column ss:Width="75"/>\n'; // WriteOff Coll.
+            for(let i=0; i<22; i++) sXml += '   <Column ss:Width="53"/>\n';
         } else {
             // CASH
             sXml += '   <Column ss:Width="80"/>\n';
@@ -3102,7 +3083,7 @@ try {
                     cIdx++;
                 }
                 
-                let text = (cell.textContent || cell.innerText || '').trim();
+                let text = (cell.innerHTML || '').replace(/<br\s*[\/]?>/gi, '\n').replace(/<[^>]+>/g, '').trim();
                 text = text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/[\u2700-\u27BF]/gu, ''); 
                 
                 let isTotalRow = tr.closest('.dt-subtotal, tfoot') !== null;
@@ -3763,7 +3744,7 @@ try {
                 };
                 let successCount = 0;
                 let currentIndex = 0;
-                const CONCURRENT_LIMIT = 20;
+                const CONCURRENT_LIMIT = window.currentCheckerType === "DAILY_TRANSACTION" ? 10 : 8;
 
                 async function processNextBranch() {
                     while (currentIndex < branchesToProcess.length) {
@@ -4052,7 +4033,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
 
                 let workers = [];
                 for (let w = 0; w < CONCURRENT_LIMIT; w++) {
-                    let staggerDelay = w * 50; // Continuous stagger: 0ms, 250ms, 500ms...
+                    let staggerDelay = w * 200; // Continuous stagger: 0ms, 250ms, 500ms...
                     workers.push(new Promise(resolve => setTimeout(async () => {
                         await processNextBranch();
                         resolve();
@@ -4500,9 +4481,9 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
             }
 
             panel.innerHTML = `
-                <div id="mem-report-header" style="background:#8e44ad; color:white; padding:8px 12px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                <div id="mem-report-header" style="background:#8e44ad; color:white; padding:4px 8px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
                     <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; overflow:hidden;">
-                        <strong style="font-size:14px; pointer-events:none; white-space:nowrap;">\u{1F465} Member CIB Verification Report</strong>
+                        <strong style="font-size:11.5px; pointer-events:none; white-space:nowrap;">\u{1F465} Member CIB Verification</strong>
                         <span id="status-text" style="font-size:11.5px; font-weight:bold; color:#f1c40f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                     </div>
                     <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
@@ -4592,7 +4573,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                     let now = new Date();
                     let dtString = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-                    let html = `<table id="reportTable" border="1" style="width:100%; border-collapse:collapse; font-size:11px; line-height:1.2; font-family: DSK_MixedFont, sans-serif;">
+                    let html = `<table id="reportTable" border="1" style="width:100%; border-collapse:collapse; font-size:${window.currentCheckerType === 'DAILY_TRANSACTION' ? '9px' : '10px'}; line-height:1.2; font-family: DSK_MixedFont, sans-serif;">
                         <tr style="background:#e8f4f8; color:#2980b9;">
                             <td colspan="5" style="padding:6px; font-size:12px; text-align:center; font-weight:bold;">
                                 \u{1F552} Report Generated On: ${dtString}
