@@ -1,4 +1,167 @@
-﻿// ========================================================================
+async function fetchTopsheetDisb(bId, targetDateFrom, targetDateTo) {
+    try {
+        let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+        if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
+        
+        h['Site-Name'] = 'dsk';
+        h['Accept'] = 'application/json, text/plain, */*';
+        if (h['Content-Type']) delete h['Content-Type'];
+        if (h['content-type']) delete h['content-type'];
+        h['X-Requested-With'] = 'XMLHttpRequest';
+
+        let fDate = targetDateFrom;
+        let tDate = targetDateTo;
+        if (fDate && fDate.includes('/')) { let p = fDate.split('/'); fDate = p[2] + '-' + p[1] + '-' + p[0]; }
+        if (tDate && tDate.includes('/')) { let p = tDate.split('/'); tDate = p[2] + '-' + p[1] + '-' + p[0]; }
+
+        let fd = new FormData();
+        let finalBId = await getRealBranchIdFallback(bId);
+        fd.append('cbo_report_level', '1');
+        fd.append('cbo_branch', finalBId);
+        fd.append('cbo_area', '');
+        fd.append('cbo_zone', '');
+        fd.append('cbo_region', '');
+        fd.append('cbo_product_category', '0');
+        fd.append('cbo_product', '0');
+        fd.append('cbo_transfer_member', '1');
+        fd.append('txt_date_from', fDate);
+        fd.append('txt_date_to', tDate);
+        fd.append('controller_name', '');
+        fd.append('method_name', '');
+        fd.append('cbo_funding_organizations', '0');
+
+        let url = '/core-service/index.php/topsheet_loan_disbursement_registers/ajax_for_generate_report';
+        let res = await fetch(url, { method: 'POST', headers: h, body: fd, credentials: 'include' });
+        let text = await res.text();
+        
+        try {
+            let json = JSON.parse(text);
+            let sum = 0;
+            
+            function searchForDisbCount(obj) {
+                if (!obj) return;
+                if (typeof obj === 'object') {
+                    if (Array.isArray(obj)) {
+                        obj.forEach(searchForDisbCount);
+                    } else {
+                        // Look for keys like member_no, borrower_no, loanee, count, etc.
+                        for (let k in obj) {
+                            let kLow = k.toLowerCase();
+                            // Usually topsheets group by product
+                            if (kLow === 'borrower_no' || kLow === 'loanee' || kLow === 'disbursement_borrower_no' || kLow === 'this_period_borrower_no' || kLow === 'member_no') {
+                                sum += parseInt(obj[k]) || 0;
+                            } else {
+                                searchForDisbCount(obj[k]);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            searchForDisbCount(json);
+            
+            if (sum > 0) {
+                return { count: sum };
+            }
+            
+            return { count: 0 };
+        } catch (err) {
+            // It might actually be HTML in some branches/versions
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(text, 'text/html');
+            let grandTotalRow = Array.from(doc.querySelectorAll('tr')).find(tr => {
+                let cells = Array.from(tr.querySelectorAll('td, th'));
+                return cells.some(c => c.textContent.trim().toLowerCase().includes('grand total') || c.textContent.trim().toLowerCase().includes('sub total') || c.textContent.trim().toLowerCase().includes('total'));
+            });
+            
+            if (grandTotalRow) {
+                let cells = Array.from(grandTotalRow.querySelectorAll('td, th'));
+                if (cells.length >= 4) {
+                    let bText = cells[cells.length - 4].textContent.replace(/,/g, '').trim();
+                    return { count: parseInt(bText) || 0 };
+                }
+            }
+        }
+        return { count: 0 };
+    } catch(e) {
+        return { count: 0 };
+    }
+}
+// \u{1F9F9} UNIVERSAL REAL BRANCH ID RESOLVER
+async function getRealBranchIdFallback(fallback) {
+    if (fallback && fallback !== 'SELF' && fallback !== '0' && fallback !== '-1') return fallback;
+    
+    let cached = sessionStorage.getItem('mf_real_branch_id_iframe');
+    if (cached && cached !== 'SELF') return cached;
+    
+    let cUrl = sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup');
+    if (cUrl) {
+        let m = cUrl.match(/[?&]cbo_branch=(-?\d+)/);
+        if (m && m[1] && m[1] !== '-1') {
+            sessionStorage.setItem('mf_real_branch_id_iframe', m[1]);
+            return m[1];
+        }
+    }
+    
+    try {
+        let v = JSON.parse(localStorage.getItem('vuex'));
+        if (v && v.auth && v.auth.user) {
+            if (v.auth.user.branch_id) return v.auth.user.branch_id;
+            if (v.auth.user.branchId) return v.auth.user.branchId;
+        }
+    } catch(e) {}
+    
+    let cbo = document.querySelector('select[name="cbo_branch"]');
+    if (cbo && cbo.value && cbo.value !== '-1') return cbo.value;
+    
+    return sessionStorage.getItem('mf_user_type') === 'BRANCH' ? '' : '-1';
+}
+// \u{1F9F9} XHR INTERCEPTOR FOR MAIN PAGE
+let script = document.createElement('script');
+script.textContent = `
+    (function() {
+        const origOpen = XMLHttpRequest.prototype.open;
+        const origSetHeader = XMLHttpRequest.prototype.setRequestHeader;
+        const origSend = XMLHttpRequest.prototype.send;
+        
+        XMLHttpRequest.prototype.open = function(method, url) { 
+            this._url = url; 
+            this._method = method; 
+            this._headers = {}; 
+            origOpen.apply(this, arguments); 
+        };
+        
+        XMLHttpRequest.prototype.setRequestHeader = function(name, value) { 
+            this._headers[name] = value; 
+            origSetHeader.apply(this, arguments); 
+        };
+        
+        XMLHttpRequest.prototype.send = function(body) {
+            if (this._headers && (this._headers['Authorization'] || this._headers['authorization'])) {
+                try {
+                    sessionStorage.setItem('mf_main_stolen_headers', JSON.stringify(this._headers));
+                    if (this._url && this._url.includes('cbo_branch=')) {
+                        sessionStorage.setItem('mf_cloned_url', this._url);
+                    }
+                } catch(e) {}
+            }
+            this.addEventListener('load', function() {
+                try {
+                    if (this.responseText && this.responseText.includes('"branches_info"')) {
+                        let data = JSON.parse(this.responseText);
+                        if (data && data.branches_info) {
+                            localStorage.setItem('mf_captured_branches_info', JSON.stringify(data.branches_info));
+                        }
+                    }
+                } catch(e) {}
+            });
+            origSend.apply(this, arguments);
+        };
+    })();
+`;
+document.documentElement.appendChild(script);
+script.remove();
+// ========================================================================
 // \u{1F9F9} CLEAN UP LEGACY SNAPSHOT MEMORY (No persistent storage for Extension)
 // ========================================================================
 try {
@@ -17,10 +180,15 @@ try {
         const fontStyle = document.createElement('style');
         fontStyle.id = 'dsk-web-fonts';
         fontStyle.innerHTML = `
-            /* Define a composite font: Calibri/Arial for English, SutonnyOMJ/SolaimanLipi for Bengali */
+            /* Embed SolaimanLipi (Unicode equivalent of SutonnyOMJ) as a webfont fallback */
+            @font-face {
+                font-family: 'SutonnyOMJ_Web';
+                src: local('SutonnyOMJ'), url('https://banglawebfonts.pages.dev/fonts/solaiman-lipi/solaiman-lipi-regular.woff2') format('woff2');
+                unicode-range: U+0980-09FF, U+200C-200D, U+25CC; /* Bengali */
+            }
             @font-face {
                 font-family: DSK_MixedFont;
-                src: local('SutonnyOMJ'), local('SolaimanLipi'), local('Kalpurush');
+                src: local('SutonnyOMJ'), url('https://banglawebfonts.pages.dev/fonts/solaiman-lipi/solaiman-lipi-regular.woff2') format('woff2');
                 unicode-range: U+0980-09FF, U+200C-200D, U+25CC; /* Bengali */
             }
             @font-face {
@@ -34,7 +202,7 @@ try {
 })();
 
 (function checkAppUpdate() {
-    const CURRENT_VERSION = "2.2"; // \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09CD\u09AF\u09BE\u09AA \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8
+    const CURRENT_VERSION = "2.4"; // \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09CD\u09AF\u09BE\u09AA \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8
     
     // \u26A0\uFE0F \u09A8\u09BF\u099A\u09C7 YOUR_USERNAME \u098F\u09B0 \u099C\u09BE\u09DF\u0997\u09BE\u09DF \u0986\u09AA\u09A8\u09BE\u09B0 \u0997\u09BF\u099F\u09B9\u09BE\u09AC\u09C7\u09B0 \u0986\u09B8\u09B2 \u0987\u0989\u099C\u09BE\u09B0\u09A8\u09C7\u09AE \u09AC\u09B8\u09BF\u09DF\u09C7 \u09A6\u09BF\u09A8 
     const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json"; 
@@ -164,7 +332,7 @@ try {
         iframe.onload = () => {
             setTimeout(async () => {
                 try {
-                    let doc = iframe.contentDocument || iframe.contentWindow.document;
+                            let doc = iframe.contentDocument || iframe.contentWindow.document;
                     let win = iframe.contentWindow;
 
                     let reportLvl = null, branchSel = null;
@@ -187,6 +355,29 @@ try {
                     }
 
                     let uType = 'BRANCH';
+                    let isUTypeConfirmed = false;
+                    let foundUser = null;
+                    try {
+                        let v = JSON.parse(localStorage.getItem('vuex') || '{}');
+                        function findUser(obj) {
+                            if (!obj || typeof obj !== 'object') return null;
+                            if (obj.branch_type !== undefined && obj.is_head_office !== undefined) return obj;
+                            for (let key in obj) {
+                                let res = findUser(obj[key]);
+                                if (res) return res;
+                            }
+                            return null;
+                        }
+                        foundUser = findUser(v);
+                        if (foundUser) {
+                            if (String(foundUser.is_head_office) === "1") uType = 'HO';
+                            else if (foundUser.branch_type === "Z") uType = 'ZONE';
+                            else if (foundUser.branch_type === "A") uType = 'AREA';
+                            else if (foundUser.branch_type === "B") uType = 'BRANCH';
+                            isUTypeConfirmed = true;
+                        }
+                    } catch(e) {}
+
                     let zones = [], areas = [], branches = [];
                     let zMap = {}, aMap = {};
                     let currentZone = "Unknown Zone";
@@ -212,14 +403,20 @@ try {
                         }
                     }
 
+                    var hasZone = false, hasArea = false;
+                    if (reportLvl && reportLvl.options && reportLvl.options.length > 0) {
+                        hasZone = Array.from(reportLvl.options).some(o => o.value === '3');
+                        hasArea = Array.from(reportLvl.options).some(o => o.value === '2');
+                        
+                        if (!isUTypeConfirmed) {
+                            if (hasZone) uType = 'HO';
+                            else if (hasArea) uType = 'ZONE';
+                            else uType = 'AREA';
+                        }
+                    }
+
                     if (reportLvl && reportLvl.options && reportLvl.options.length > 0) {
                         let hasZone = Array.from(reportLvl.options).some(o => o.value === '3');
-                        let hasArea = Array.from(reportLvl.options).some(o => o.value === '2');
-                        
-                        if (hasZone) uType = 'HO';
-                        else if (hasArea) uType = 'ZONE';
-                        else uType = 'AREA';
-
                         if (hasZone) {
                             triggerVueChange(reportLvl, '3', win);
                             await new Promise(r => setTimeout(r, 800));
@@ -317,13 +514,137 @@ try {
                         uType = 'BRANCH';
                         let myName = localStorage.getItem('microfin_entity_name') || "My Branch";
                         let myId = "SELF";
-                        if (branchSel && branchSel.options && branchSel.options.length > 0) {
-                            Array.from(branchSel.options).forEach(opt => {
-                                if (opt.value && opt.value !== '-1' && opt.value !== '' && !opt.text.includes('--')) {
-                                    myId = opt.value;
-                                    myName = opt.text.trim();
+                        
+                        try {
+                            if (foundUser) {
+                                let bId = foundUser.branch_id || foundUser.branchId || foundUser.branch;
+                                if (bId) {
+                                    myId = String(bId);
+                                    let rawName = foundUser.branch_name || foundUser.branchName || myName;
+                                    let rawCode = "";
+                                    if (foundUser.login && foundUser.login.includes('.')) {
+                                        rawCode = foundUser.login.split('.')[1];
+                                    } else if (foundUser.branch_code) {
+                                        rawCode = foundUser.branch_code;
+                                    }
+                                    if (rawCode && !rawName.includes(rawCode)) {
+                                        myName = rawName + " (" + rawCode + ")";
+                                    } else {
+                                        myName = rawName;
+                                    }
                                 }
-                            });
+                            }
+                            
+                            if (myId === "SELF") {
+                                let v = JSON.parse(localStorage.getItem('vuex') || '{}');
+                                function findBranch(obj) {
+                                    if (!obj || typeof obj !== 'object') return null;
+                                    if (obj.cbo_branch && obj.cbo_branch !== '-1' && obj.cbo_branch !== '0') return String(obj.cbo_branch);
+                                    if (obj.branch_id && obj.branch_id !== '-1' && obj.branch_id !== '0') return String(obj.branch_id);
+                                    for (let key in obj) {
+                                        let res = findBranch(obj[key]);
+                                        if (res) return res;
+                                    }
+                                    return null;
+                                }
+                                let possibleId = findBranch(v);
+                                if (possibleId) myId = possibleId;
+                            }
+                            
+                            if (myId === "SELF") {
+                                try {
+                                    let headersStr = sessionStorage.getItem('mf_main_stolen_headers') || localStorage.getItem('mf_cloned_headers_backup');
+                                    let headers = {};
+                                    if (headersStr) {
+                                        headers = JSON.parse(headersStr);
+                                    } else {
+                                        let v = JSON.parse(localStorage.getItem('vuex') || '{}');
+                                        function findToken(obj) {
+                                            if (!obj || typeof obj !== 'object') return null;
+                                            if (obj.token && typeof obj.token === 'string' && obj.token.length > 20) return obj.token;
+                                            for (let key in obj) { let res = findToken(obj[key]); if (res) return res; }
+                                            return null;
+                                        }
+                                        let token = findToken(v);
+                                        if (token) headers['Authorization'] = 'Bearer ' + token;
+                                        headers['Site-Name'] = window.location.pathname.split('/')[1] || 'dsk';
+                                    }
+                                    
+                                    if (Object.keys(headers).length > 0) {
+                                        let endpoints = [
+                                            { url: window.location.origin + '/core-service/index.php/po_mis_reports/po_mis_1_index', method: 'GET' },
+                                            { url: window.location.origin + '/core-service/index.php/po_mis_reports/ajax_po_mis_report', method: 'POST' }
+                                        ];
+                                        
+                                        for (let ep of endpoints) {
+                                            if (myId !== "SELF") break;
+                                            try {
+                                                let res = await fetch(ep.url, {
+                                                    method: ep.method,
+                                                    headers: headers
+                                                });
+                                                if (res.ok) {
+                                                    let text = await res.text();
+                                                    let data = null;
+                                                    try { data = JSON.parse(text); } catch(e) {}
+                                                    if (data && data.branches_info && data.branches_info.length > 0) {
+                                                        myId = String(data.branches_info[0].branch_id);
+                                                        let rawName = data.branches_info[0].branch_name || myName;
+                                                        let rawCode = data.branches_info[0].branch_code || "";
+                                                        if (rawCode && !rawName.includes(rawCode)) myName = rawName + " (" + rawCode + ")";
+                                                        else myName = rawName;
+                                                    } else if (text.includes('"branches_info"')) {
+                                                        let bMatch = text.match(/"branches_info"\s*:\s*(\[\s*\{[^}]+\}\s*\])/);
+                                                        if (bMatch && bMatch[1]) {
+                                                            let p = JSON.parse(bMatch[1]);
+                                                            if (p && p.length > 0) {
+                                                                myId = String(p[0].branch_id);
+                                                                let rawName = p[0].branch_name || myName;
+                                                                let rawCode = p[0].branch_code || "";
+                                                                if (rawCode && !rawName.includes(rawCode)) myName = rawName + " (" + rawCode + ")";
+                                                                else myName = rawName;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            } catch (err) {}
+                                        }
+                                    }
+                                } catch(e) {}
+                            }
+                            
+                            if (myId === "SELF") {
+                                let cInfoStr = localStorage.getItem('mf_captured_branches_info');
+                                if (cInfoStr) {
+                                    let cInfo = JSON.parse(cInfoStr);
+                                    if (cInfo && cInfo.length > 0) {
+                                        myId = String(cInfo[0].branch_id);
+                                        let rawName = cInfo[0].branch_name || myName;
+                                        let rawCode = cInfo[0].branch_code || "";
+                                        if (rawCode && !rawName.includes(rawCode)) {
+                                            myName = rawName + " (" + rawCode + ")";
+                                        } else {
+                                            myName = rawName;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch(e) {}
+
+                        if (myId === "SELF") {
+                            if (branchSel && branchSel.options && branchSel.options.length > 0) {
+                                Array.from(branchSel.options).forEach(opt => {
+                                    if (opt.value && opt.value !== '-1' && opt.value !== '' && !opt.text.includes('--')) {
+                                        myId = opt.value;
+                                        myName = opt.text.trim();
+                                    }
+                                });
+                            } else {
+                                let hiddenBranch = doc.querySelector('input[name="cbo_branch"], input[name="branch_id"]');
+                                if (hiddenBranch && hiddenBranch.value && hiddenBranch.value !== '-1') {
+                                    myId = hiddenBranch.value;
+                                }
+                            }
                         }
                         if (myId === "SELF" || myName === "My Branch") {
                             let bInfo = doc.querySelector('.branch_info');
@@ -332,6 +653,33 @@ try {
                                 if (m && m[1]) myName = m[1].trim();
                             }
                         }
+                        let bInfoMatch = doc.documentElement.innerHTML.match(/"branches_info"\s*:\s*(\[\s*\{[^}]+\}\s*\])/);
+                        if (bInfoMatch && bInfoMatch[1]) {
+                            try {
+                                let parsed = JSON.parse(bInfoMatch[1]);
+                                if (parsed && parsed.length > 0) {
+                                    myId = parsed[0].branch_id || myId;
+                                    let rawName = parsed[0].branch_name || myName;
+                                    let rawCode = parsed[0].branch_code || "";
+                                    if (rawCode && !rawName.includes(rawCode)) {
+                                        myName = rawName + " (" + rawCode + ")";
+                                    } else {
+                                        myName = rawName;
+                                    }
+                                }
+                            } catch(e) {}
+                        }
+                        
+                        if (myId === "SELF" || myId === "") {
+                            let match = doc.documentElement.innerHTML.match(/["']?(?:branch_id|branchId|cbo_branch)["']?\s*[:=]\s*["']?(-?\d+)/i);
+                            if (match && match[1] && match[1] !== '0' && match[1] !== '-1') myId = match[1];
+                        }
+                        
+                        let codeMatch = doc.documentElement.innerHTML.match(/"branch_code"\s*:\s*"([^"]+)"/);
+                        if (codeMatch && codeMatch[1] && !myName.includes(codeMatch[1])) {
+                            myName = myName + " (" + codeMatch[1] + ")";
+                        }
+                        
                         branches = [{ id: myId, name: myName, area: 'Branch', zone: 'Branch' }];
                     }
 
@@ -351,8 +699,12 @@ try {
                         localStorage.setItem('microfin_sync_status', 'DONE');
 
                         toast.style.background = '#27ae60';
-                        toast.innerHTML = `<span>\u2705 \u099C\u09CB\u09A8, \u0985\u099E\u09CD\u099A\u09B2, \u09B6\u09BE\u0996\u09BE \u09B8\u09BF\u0982\u0995 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8! (${branches.length}\u099F\u09BF \u09AA\u09CD\u09B0\u09B8\u09CD\u09A4\u09C1\u09A4)</span>`;
-                        setTimeout(() => toast.remove(), 2500);
+                        if (uType === 'BRANCH' && branches.length > 0) {
+                            toast.innerHTML = `<span>\u2705 সিংক সম্পন্ন! শাখা আইডি: ${branches[0].id} (${branches[0].name}) কালেক্ট হয়েছে।</span>`;
+                        } else {
+                            toast.innerHTML = `<span>\u2705 \u099C\u09CB\u09A8, \u0985\u099E\u09CD\u099A\u09B2, \u09B6\u09BE\u0996\u09BE \u09B8\u09BF\u0982\u0995 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8! (${branches.length}\u099F\u09BF \u09AA\u09CD\u09B0\u09B8\u09CD\u09A4\u09C1\u09A4)</span>`;
+                        }
+                        setTimeout(() => toast.remove(), 4000);
                         window.dispatchEvent(new CustomEvent('mf_central_sync_completed'));
                         if (callback) callback(true);
                     } else {
@@ -395,12 +747,35 @@ try {
             localStorage.removeItem('microfin_role');
             localStorage.removeItem('microfin_aMap');
             localStorage.removeItem('microfin_zMap');
+
         } else if (window.location.hash.includes('dashboard')) {
             if (sessionStorage.getItem('mf_global_hierarchy_synced') !== 'TRUE' && !window._isCentralSyncRunning) {
                 window.runGlobalHierarchySync(false);
             }
         }
     }, 1000);
+})();
+
+// ========================================================================
+(function() {
+    try {
+        let v = JSON.parse(localStorage.getItem('vuex') || '{}');
+        let currentToken = (v && v.auth && v.auth.token) ? v.auth.token : '';
+        let lastToken = localStorage.getItem('mf_last_vuex_token');
+        if (currentToken && lastToken && currentToken !== lastToken) {
+            localStorage.setItem('mf_last_vuex_token', currentToken);
+            sessionStorage.removeItem('mf_cached_branches');
+            localStorage.removeItem('microfin_branch_list');
+            localStorage.removeItem('microfin_branch_info');
+            localStorage.removeItem('mf_cloned_headers_backup');
+            localStorage.removeItem('mf_cloned_url_backup');
+            sessionStorage.removeItem('mf_real_branch_id_iframe');
+            sessionStorage.removeItem('mf_global_hierarchy_synced');
+            localStorage.removeItem('microfin_sync_status');
+        } else if (currentToken && !lastToken) {
+            localStorage.setItem('mf_last_vuex_token', currentToken);
+        }
+    } catch(e) {}
 })();
 
 // ========================================================================
@@ -450,166 +825,61 @@ try {
         }
     }
 
-    function fetchDatesViaInvisibleFrame(mode, level, targetId, branchesToProcess) {
-        return new Promise((resolve) => {
-            let iframe = document.createElement('iframe');
-            iframe.allow = "geolocation 'none'";
-            iframe.style.cssText = 'position:fixed; top:0; left:0; width:1000px; height:800px; opacity:0.001; border:none; z-index:-999; pointer-events:none;';
-
-            let uTypePrep = sessionStorage.getItem('mf_user_type') || localStorage.getItem('mf_user_type') || 'HO';
-            let isBranchRolePrep = (uTypePrep === 'BRANCH' || targetId === 'SELF' || (branchesToProcess && branchesToProcess.length === 1 && branchesToProcess[0].id === 'SELF'));
-            let targetHash = mode === 'MIS' ? '#/mis/dashboard' : '#/ais/dashboard';
-            iframe.src = window.location.origin + window.location.pathname + targetHash;
-            document.body.appendChild(iframe);
-
-            let timeout = setTimeout(() => { iframe.remove(); resolve({}); }, 60000);
-            let isProcessed = false;
-
-            iframe.onload = () => {
-                if(isProcessed) return;
-
-                setTimeout(async () => {
-                    try {
-                        let doc = iframe.contentDocument || iframe.contentWindow.document;
-                        let win = iframe.contentWindow;
-                        let uType = sessionStorage.getItem('mf_user_type') || localStorage.getItem('mf_user_type') || 'HO';
-                        let isBranchRole = (uType === 'BRANCH' || targetId === 'SELF' || (branchesToProcess && branchesToProcess.length === 1 && branchesToProcess[0].id === 'SELF'));
-
-                        if (!isBranchRole) {
-                            for(let i=0; i<5; i++) {
-                                let reportLvlDropdown = doc.querySelector('select[name="cbo_report_level"]');
-                                let branchDropdown = doc.querySelector('select[name="cbo_branch"]');
-                                let searchBtn = doc.getElementById('custom-search-btn') || Array.from(doc.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().includes('Search')) || doc.querySelector('button[type="submit"]');
-
-                                if (reportLvlDropdown || branchDropdown) {
-                                    if (reportLvlDropdown) {
-                                        triggerVueChange(reportLvlDropdown, '1', win);
-                                        await new Promise(r => setTimeout(r, 800));
-
-                                        if (level === '3' && targetId !== 'ALL') {
-                                            let zoneSel = await waitForOptions(doc, 'select[name="cbo_zone"]');
-                                            if (zoneSel) { triggerVueChange(zoneSel, targetId, win); await new Promise(r => setTimeout(r, 800)); }
-                                        } 
-                                        else if (level === '2' && targetId !== 'ALL') {
-                                            let areaSel = await waitForOptions(doc, 'select[name="cbo_area"]');
-                                            if (areaSel) { triggerVueChange(areaSel, targetId, win); await new Promise(r => setTimeout(r, 800)); }
-                                        }
-                                    }
-
-                                    if (level === '1' && targetId !== 'ALL') {
-                                        let bSel = await waitForOptions(doc, 'select[name="cbo_branch"]');
-                                        if (bSel) { triggerVueChange(bSel, targetId, win); await new Promise(r => setTimeout(r, 800)); }
-                                    }
-
-                                    if (searchBtn) {
-                                        searchBtn.removeAttribute('disabled');
-                                        searchBtn.click();
-                                        await new Promise(r => setTimeout(r, 1200));
-                                    }
-                                    break;
-                                }
-                                await new Promise(r => setTimeout(r, 350));
-                            }
+    async function fetchDatesViaInvisibleFrame(mode, level, targetId, branchesToProcess) {
+        try {
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { 
+                try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} 
+            }
+            
+            h['Site-Name'] = 'dsk';
+            h['Accept'] = 'application/json, text/plain, */*';
+            h['X-Requested-With'] = 'XMLHttpRequest';
+            
+            let url = mode === 'MIS' 
+                ? 'https://mfnext3.microfin360.com/dashboard-service/branch/branch_performance' 
+                : 'https://mfnext3.microfin360.com/dashboard-service/financial/get_table_ais_info';
+                
+            let response = await fetch(url, { method: 'GET', headers: h });
+            if (!response.ok) throw new Error("API not ok: " + response.status);
+            
+            let json = await response.json();
+            let dataMap = {};
+            
+            // Recursively search for objects containing 'code' and 'branchDate'
+            function extractDates(obj) {
+                if (!obj) return;
+                if (Array.isArray(obj)) {
+                    for (let item of obj) extractDates(item);
+                } else if (typeof obj === 'object') {
+                    if (obj.code && (obj.branchDate || obj.branch_date || obj.date)) {
+                        let code = obj.code.toString().replace(/[^a-z0-9]/gi, '').toLowerCase();
+                        let date = obj.branchDate || obj.branch_date || obj.date;
+                        if (date && date !== "N/A") {
+                            if (date.includes('T')) date = date.split('T')[0];
+                            dataMap[code] = date;
                         }
-
-                        async function clickWhenReady(text, isExact = false, maxWaitMs = 15000) {
-                            let start = Date.now();
-                            return new Promise(resolve => {
-                                let timer = setInterval(async () => {
-                                    let elements = doc.querySelectorAll('a, button, span, li, div');
-                                    let clicked = false;
-                                    for (let el of elements) {
-                                        let txt = (el.innerText || el.textContent || "").toLowerCase().trim();
-                                        if (isExact ? (txt === text) : txt.includes(text)) {
-                                            el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: win }));
-                                            el.click();
-                                            clicked = true;
-                                            await new Promise(r => setTimeout(r, 200));
-                                        }
-                                    }
-                                    if (clicked) {
-                                        clearInterval(timer); resolve(true);
-                                    }
-                                    if (Date.now() - start > maxWaitMs) {
-                                        clearInterval(timer); resolve(false);
-                                    }
-                                }, 400);
-                            });
-                        }
-
-                        if (mode === 'MIS') {
-                            await clickWhenReady('branch performance', false, 15000);
-                            await new Promise(r => setTimeout(r, 1000));
-                            await clickWhenReady('more...', true, 15000);
-                        }
-                        else if (mode === 'AIS') {
-                            await clickWhenReady('branch status', false, 15000);
-                        }
-
-                        let pollCount = 0;
-                        let poll = setInterval(() => {
-                            pollCount++;
-                            if (pollCount > 120) {
-                                clearInterval(poll); clearTimeout(timeout);
-                                iframe.remove(); resolve({}); return;
-                            }
-
-                            let exportContainers = doc.querySelectorAll('#export-data, table');
-                            for (let exportContainer of exportContainers) {
-                                let rows = exportContainer.querySelectorAll('tbody tr');
-
-                                if (rows.length > 0) {
-                                    let bodyText = exportContainer.textContent.toLowerCase();
-                                    let foundTarget = false;
-
-                                    if (targetId === 'ALL' || branchesToProcess.length === 0 || isBranchRole) {
-                                        foundTarget = true;
-                                    } else {
-                                        for (let b of branchesToProcess) {
-                                            let bCodeMatch = b.name.match(/(?:^|-|\s)(\d{3,4})(?:$|-|\s)/);
-                                            let bCode = bCodeMatch ? bCodeMatch[1] : b.name.replace(/[^a-z]/gi, '').toLowerCase();
-                                            if (bodyText.includes(bCode)) {
-                                                foundTarget = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (foundTarget) {
-                                        let dataMap = {};
-                                        for(let tr of rows) {
-                                            let cells = tr.querySelectorAll('td');
-                                            if(cells.length > 2) {
-                                                let branchCellStr = cells[1] ? cells[1].textContent.trim().toLowerCase() : "";
-                                                let bCodeMatch = branchCellStr.match(/(?:^|-|\s)(\d{3,4})(?:$|-|\s)/);
-                                                let bCode = bCodeMatch ? bCodeMatch[1] : branchCellStr.replace(/[^a-z]/g, '');
-
-                                                let match = tr.textContent.match(/\d{1,2}\s+[a-zA-Z]{3},\s+\d{4}|\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4}|\d{2}\/\d{2}\/\d{4}/g);
-                                                if (match && match.length > 0) {
-                                                    let finalDate = match[match.length - 1].replace(/\s+/g, ' ');
-                                                    dataMap[bCode] = finalDate;
-                                                    if (isBranchRole) dataMap['self'] = finalDate;
-                                                }
-                                            }
-                                        }
-                                        
-                                        if (Object.keys(dataMap).length > 0) {
-                                            clearInterval(poll); clearTimeout(timeout);
-                                            isProcessed = true;
-                                            iframe.remove(); resolve(dataMap);
-                                            return;
-                                        }
-                                    }
-                                }
-                            }
-                        }, 400);
-
-                    } catch(e) {
-                        clearTimeout(timeout); iframe.remove(); resolve({});
                     }
-                }, 2500);
-            };
-        });
+                    for (let key in obj) {
+                        extractDates(obj[key]);
+                    }
+                }
+            }
+            
+            extractDates(json);
+
+            let uType = sessionStorage.getItem('mf_user_type') || localStorage.getItem('mf_user_type') || 'HO';
+            let isBranchRole = (uType === 'BRANCH' || targetId === 'SELF' || (branchesToProcess && branchesToProcess.length === 1 && branchesToProcess[0].id === 'SELF'));
+            
+            if (isBranchRole && Object.keys(dataMap).length > 0) {
+                 dataMap['self'] = Object.values(dataMap)[0];
+            }
+
+            return dataMap;
+        } catch (e) {
+            console.error("fetchDatesViaInvisibleFrame API error", e);
+            return {};
+        }
     }
 
     function makeDraggable(elmnt, header) {
@@ -656,8 +926,10 @@ try {
         if (uType === 'BRANCH') {
             lvl.innerHTML = `<option value="AREA">\u09B6\u09BE\u0996\u09BE</option>`;
             lvl.disabled = true;
+
         } else if (uType === 'AREA') {
             lvl.innerHTML = `<option value="AREA">\u09B6\u09BE\u0996\u09BE</option>`;
+
         } else {
             let options = `<option value="AREA">\u09B6\u09BE\u0996\u09BE</option>`;
             if (areas.length > 0) options += `<option value="ZONE">\u0985\u099E\u09CD\u099A\u09B2</option>`;
@@ -693,6 +965,7 @@ try {
         let data = [];
         if (uType === 'AREA') {
             data = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
+
         } else {
             if (level === 'HO') {
                 
@@ -780,7 +1053,7 @@ try {
             master.style.cssText = 'position:fixed; bottom:70px; right:16px; z-index:999999; display:flex; flex-direction:column-reverse; align-items:flex-end;';
             
             let toggleBtn = document.createElement('div');
-            toggleBtn.innerHTML = '\u{1F6E0}\u{FE0F} Microfin360 Status';
+            toggleBtn.innerHTML = '\u{1F6E0}\u{FE0F} Custom Report DSK-IT';
             toggleBtn.style.cssText = 'background: linear-gradient(135deg, #2c3e50, #34495e); color:white; border-radius:50px; padding:8px 16px; font-weight:bold; font-size:13px; box-shadow:0 4px 12px rgba(0,0,0,0.4); cursor:pointer; font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); user-select:none; transform-origin: right bottom; opacity: 1; transform: scale(1);';
             toggleBtn.onmouseover = () => { if(toggleBtn.style.pointerEvents !== 'none'){ toggleBtn.style.transform = 'scale(1.05) translateY(-2px)'; toggleBtn.style.boxShadow = '0 8px 20px rgba(0,0,0,0.5)'; }};
             toggleBtn.onmouseout = () => { if(toggleBtn.style.pointerEvents !== 'none'){ toggleBtn.style.transform = 'scale(1) translateY(0)'; toggleBtn.style.boxShadow = '0 6px 16px rgba(0,0,0,0.4)'; }};
@@ -1002,6 +1275,7 @@ try {
             let zoneHasVisible = false;
             let areaHasVisible = false;
 
+
             for (let i = 0; i < tbodies.length; i++) {
                 let tb = tbodies[i];
                 if (tb.getAttribute('data-status') === 'header') {
@@ -1081,8 +1355,8 @@ try {
                 <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:center; table-layout:fixed; font-family: 'SutonnyOMJ', 'SolaimanLipi', DSK_MixedFont, sans-serif;">
                     <thead style="position: sticky; top: 0; z-index:5;">
                         <tr>
-                            <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:30%; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
-                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#34495e; color:white; width:22%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</th>
+                            <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:25%; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
+                            <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#34495e; color:white; width:27%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</th>
                             <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:16%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">MIS \u09A1\u09C7\u099F</th>
                             <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:8%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
                             <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#27ae60; color:white; width:16%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">AIS \u09A1\u09C7\u099F</th>
@@ -1095,6 +1369,7 @@ try {
             
             let currentZ = ""; 
             let currentA = ""; 
+
             for(let b of branchesToProcess) { 
                 if (b.zone !== currentZ && b.zone && b.zone !== "Branch" && b.zone !== "Assigned Zone") { 
                     currentZ = b.zone; 
@@ -1178,10 +1453,10 @@ try {
                         trElement.innerHTML = `
                             <tr style="${rowBg}">
                                 <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; color:#2c3e50; white-space:normal; line-height:1.25; font-size:10px; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${b.name}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; font-weight:bold; font-size:8.5px; white-space:nowrap; overflow:hidden; color:${rowStatus === 'back' ? '#c0392b' : '#27ae60'}; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${statusTextHtml}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misDate === 'N/A'?'#e74c3c':'#2980b9'}; font-weight:bold; background:#f4f9f9; font-size:9.5px; white-space:nowrap; overflow:hidden; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${formatMis}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; font-weight:bold; font-size:8px; line-height:1.1; color:${rowStatus === 'back' ? '#c0392b' : '#27ae60'}; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${statusTextHtml}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misDate === 'N/A'?'#e74c3c':'#2980b9'}; font-weight:bold; background:#f4f9f9; font-size:9px; white-space:nowrap; overflow:hidden; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${formatMis}</td>
                                 <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misLagColor}; font-weight:bold; background:#f4f9f9; font-size:10px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${misLag}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisDate === 'N/A'?'#e74c3c':'#27ae60'}; font-weight:bold; background:#f9fbf9; font-size:9.5px; white-space:nowrap; overflow:hidden; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${formatAis}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisDate === 'N/A'?'#e74c3c':'#27ae60'}; font-weight:bold; background:#f9fbf9; font-size:9px; white-space:nowrap; overflow:hidden; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${formatAis}</td>
                                 <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisLagColor}; font-weight:bold; background:#f9fbf9; font-size:10px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${aisLag}</td>
                             </tr>
                         `;
@@ -1352,6 +1627,7 @@ try {
                 hasSyncedThisPageLoad = true;
                 performRoleWiseSync();
             }
+
         } else {
             hasSyncedThisPageLoad = false;
             isBdeBtnClosed = false;
@@ -1388,6 +1664,7 @@ try {
         let surplusYear = -2;
         try {
             let cellElements = doc.querySelectorAll('.th_title, .acc_th, td');
+
             for (let cell of cellElements) {
                 if (cell.textContent && cell.textContent.toLowerCase().includes('surplus/deficit')) {
                     let tr = cell.closest('tr');
@@ -1448,6 +1725,7 @@ try {
         let savings = 0, loan = 0;
         try {
             let allElements = doc.querySelectorAll('b, span, div, th, td');
+
             for (let el of allElements) {
                 if (el.textContent && el.textContent.includes('Grand Total Saving Balance')) {
                     let valStr = el.textContent.split('Grand Total Saving Balance')[1] || el.textContent;
@@ -1457,6 +1735,7 @@ try {
             }
 
             let rows = doc.querySelectorAll('tr');
+
             for (let tr of rows) {
                 if (tr.textContent && tr.textContent.includes('Total :') && !tr.textContent.includes('Grand')) {
                     let cells = tr.querySelectorAll('td, th');
@@ -1501,7 +1780,7 @@ try {
         return new Promise(resolve => {
             window._disbMutex = window._disbMutex.then(async () => {
                 try {
-                    let headers = JSON.parse(sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+                    let headers = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
                     let token = headers['Authorization'] || headers['authorization'];
                     if (!token) throw new Error("Missing Token");
                     
@@ -1517,12 +1796,13 @@ try {
               h['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
               let formData = new URLSearchParams();
                     formData.append('cbo_report_level', '1');
-                    formData.append('cbo_branch', bId);
+                    let finalBId = await getRealBranchIdFallback(bId);
+                    formData.append('cbo_branch', finalBId);
                     formData.append('cbo_area', '');
                     formData.append('cbo_zone', '');
                     formData.append('cbo_region', '');
-                    formData.append('cbo_product_category', '-1');
-                    formData.append('cbo_product', '');
+                    formData.append('cbo_product_category', '0');
+                    formData.append('cbo_product', '0');
                     formData.append('cbo_transfer_member', '1');
                     formData.append('txt_date_from', sDateFrom);
                     formData.append('txt_date_to', sDateTo);
@@ -1578,7 +1858,7 @@ try {
     
     async function fetchMemberDataSilently(bId, sDateFrom, sDateTo, type, productId = '', retries = 3) {
         try {
-            let headers = JSON.parse(sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            let headers = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
             if (!headers || !headers['Authorization']) return { count: 0 };
             
             headers['Site-Name'] = 'dsk';
@@ -1586,15 +1866,21 @@ try {
             headers['X-Requested-With'] = 'XMLHttpRequest';
             headers['Accept'] = 'application/json, text/javascript, */*; q=0.01';
 
+            try {
+                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
+                await fetch(preUrl, { method: 'GET', headers: headers, credentials: 'include' });
+            } catch(e) {}
+
             let url = '';
+            let safeBId = await getRealBranchIdFallback(bId);
             if (type === 'member_admission') {
-                url = '/core-service/index.php/members/index?limit=10&offset=0&cbo_branch=' + bId + '&cbo_samity=&txt_from_date=' + sDateFrom + '&txt_to_date=' + sDateTo;
+                url = '/core-service/index.php/members/index?limit=10&offset=0&cbo_branch=' + safeBId + '&cbo_samity=&txt_from_date=' + sDateFrom + '&txt_to_date=' + sDateTo;
             } else if (type === 'member_dropout') {
-                url = '/core-service/index.php/member_closings/index?limit=10&offset=0&search=1&cbo_savings_type=&cbo_branch=' + bId + '&txt_date_from=' + sDateFrom + '&txt_date_to=' + sDateTo;
+                url = '/core-service/index.php/member_closings/index?limit=10&offset=0&search=1&cbo_savings_type=&cbo_branch=' + safeBId + '&txt_date_from=' + sDateFrom + '&txt_date_to=' + sDateTo;
             } else if (type === 'td_open') {
-                url = '/core-service/index.php/savings/index?limit=20&offset=0&cbo_branch=' + bId + (productId ? '&cbo_saving_product_id=' + productId : '') + '&txt_date_from=' + sDateFrom + '&txt_date_to=' + sDateTo + '&cbo_saving_status=-1&is_searched=1';
+                url = '/core-service/index.php/savings/index?limit=20&offset=0&cbo_branch=' + safeBId + (productId ? '&cbo_saving_product_id=' + productId : '') + '&txt_date_from=' + sDateFrom + '&txt_date_to=' + sDateTo + '&cbo_saving_status=-1&is_searched=1';
             } else if (type === 'td_close') {
-                url = '/core-service/index.php/saving_closings/index?limit=20&offset=0&cbo_branch=' + bId + (productId ? '&cbo_saving_products_id=' + productId : '') + '&txt_date_from=' + sDateFrom + '&txt_date_to=' + sDateTo + '&search=1';
+                url = '/core-service/index.php/saving_closings/index?limit=20&offset=0&cbo_branch=' + safeBId + (productId ? '&cbo_saving_products_id=' + productId : '') + '&txt_date_from=' + sDateFrom + '&txt_date_to=' + sDateTo + '&search=1';
             } else {
                 return {count: 0};
             }
@@ -1623,9 +1909,15 @@ try {
 
                                     async function fetchWriteOffColl(bId, fromDate, toDate, retries = 3) {
         try {
-            let h = JSON.parse(sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
+            try {
+                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
+                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
+            } catch(e) {}
             let fd = new FormData();
-            fd.append('cbo_branch', bId);
+            let finalBId = await getRealBranchIdFallback(bId);
+            fd.append('cbo_branch', finalBId);
             fd.append('cbo_report_level', '1');
             fd.append('project_id', '-1');
             fd.append('cbo_ledger_head', '402');
@@ -1643,10 +1935,20 @@ try {
             
             let res = await window.fetch(window.location.origin + '/core-service/index.php/acc_ledger_reports/ledger_report_view', {
                 method: 'POST',
-                headers: h2,
-                body: fd
+                headers: h2, credentials: 'include', body: fd
             });
-            let j = await res.json();
+            let text = await res.text();
+            if (!text || text.trim() === '' || text.trim().startsWith('<')) return 0;
+            let j;
+            try {
+                j = JSON.parse(text);
+            } catch(e) {
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, 1000 + Math.random()*1000));
+                    return fetchWriteOffColl(bId, fromDate, toDate, retries - 1);
+                }
+                return 0; // If it fails completely, assume 0 rather than crashing
+            }
             if (j && j.data_all && j.data_all.length > 0 && j.data_all[0].ledger_reports) {
                 let reps = j.data_all[0].ledger_reports;
                 let totalCr = 0;
@@ -1665,7 +1967,7 @@ try {
     }
 
     async function fetchNewDueData(bId, targetDateFrom, targetDateTo) {
-    let h = JSON.parse(sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+    let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
     h['Site-Name'] = 'dsk';
     h['Accept'] = 'application/json, text/plain, */*';
     if (h['Content-Type']) delete h['Content-Type'];
@@ -1673,13 +1975,20 @@ try {
     h['X-Requested-With'] = 'XMLHttpRequest';
     h['X-Tenant-Geo'] = 'bd';
 
+    try {
+        let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
+        await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
+    } catch(e) {}
+
     let fDate = targetDateFrom;
     let tDate = targetDateTo;
     if (fDate && fDate.includes('/')) { let p = fDate.split('/'); fDate = p[2] + '-' + p[1] + '-' + p[0]; }
     if (tDate && tDate.includes('/')) { let p = tDate.split('/'); tDate = p[2] + '-' + p[1] + '-' + p[0]; }
 
     let formData = new FormData();
-    formData.append('cbo_branch', bId);
+            formData.append('cbo_report_level', '1');
+            let finalBId = await getRealBranchIdFallback(bId);
+            formData.append('cbo_branch', finalBId);
     formData.append('txt_date_from', fDate);
     formData.append('txt_date_to', tDate);
     formData.append('cbo_field_officer', '-1');
@@ -1696,8 +2005,7 @@ try {
         try {
             let req = await fetch(url, {
                 method: 'POST',
-                headers: h,
-                body: formData
+                headers: h, credentials: 'include', body: formData
             });
             if (!req.ok) return { borrower: 0, amount: 0 };
             let text = await req.text();
@@ -1726,9 +2034,450 @@ try {
     }
     return { borrower: 0, amount: 0 };
 }
+async function getRealBranchIdViaIframe() {
+    let cached = sessionStorage.getItem('mf_real_branch_id_iframe'); if (sessionStorage.getItem('mf_real_branch_id_failed')) return '';
+    if (cached) return cached;
+    let failed = sessionStorage.getItem('mf_real_branch_id_failed');
+    if (failed) return '';
+    
+    let cUrl = sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup');
+    if (cUrl) {
+        let m = cUrl.match(/[?&]cbo_branch=(-?\d+)/);
+        if (m && m[1]) {
+            sessionStorage.setItem('mf_real_branch_id_iframe', m[1]);
+            return m[1];
+        }
+    }
+    
+    let apiTmpl = sessionStorage.getItem('mf_api_template');
+    if (apiTmpl) {
+        let m = apiTmpl.match(/[?&"']cbo_branch["']?\s*[:=]\s*["']?(-?\d+)/);
+        if (m && m[1]) {
+            sessionStorage.setItem('mf_real_branch_id_iframe', m[1]);
+            return m[1];
+        }
+    }
+    
+    let bListStr = localStorage.getItem('microfin_branch_list');
+    if (bListStr) {
+        try {
+            let bList = JSON.parse(bListStr);
+            if (bList.length === 1 && bList[0].id && bList[0].id !== 'SELF' && bList[0].id !== '') {
+                sessionStorage.setItem('mf_real_branch_id_iframe', bList[0].id);
+                return bList[0].id;
+            }
+        } catch(e) {}
+    }
 
+    try {
+        let vuexStr = localStorage.getItem('vuex');
+        if (vuexStr) {
+            let v = JSON.parse(vuexStr);
+            let extractedId = '';
+            if (v.auth && v.auth.user && v.auth.user.branch_id) extractedId = String(v.auth.user.branch_id);
+            else if (v.auth && v.auth.user && v.auth.user.branchId) extractedId = String(v.auth.user.branchId);
+            else if (v.auth && v.auth.token) {
+                let payloadStr = atob(v.auth.token.split('.')[1]);
+                let payload = JSON.parse(payloadStr);
+                if (payload.branch_id) extractedId = String(payload.branch_id);
+                else if (payload.branchId) extractedId = String(payload.branchId);
+                else if (payload.branch) extractedId = String(payload.branch);
+            }
+            if (extractedId && extractedId !== 'SELF' && extractedId !== '0') {
+                sessionStorage.setItem('mf_real_branch_id_iframe', extractedId);
+                return extractedId;
+            }
+        }
+    } catch(e) {}
+
+    return new Promise((resolve) => {
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:fixed; top:0; left:-9999px; width:1px; height:1px; border:none; z-index:-1;';
+        iframe.src = window.location.origin + window.location.pathname + '#/reports/acc-balance-sheets/balance-sheet-report-filter';
+        document.body.appendChild(iframe);
+        let timeout = setTimeout(() => { 
+            if (document.body.contains(iframe)) iframe.remove(); 
+            sessionStorage.setItem('mf_real_branch_id_failed', '1');
+            resolve(''); 
+        }, 2000);
+        iframe.onload = () => {
+            let checkCount = 0;
+            let iv = setInterval(() => {
+                checkCount++;
+                try {
+                    let doc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (doc) {
+                        let input = doc.querySelector('[name="cbo_branch"]');
+                        if (input && input.value && input.value !== '?') {
+                            clearInterval(iv);
+                            clearTimeout(timeout);
+                            sessionStorage.setItem('mf_real_branch_id_iframe', input.value);
+                            iframe.remove();
+                            resolve(input.value);
+                            return;
+                        }
+                    }
+                    if (checkCount > 15) {
+                        clearInterval(iv);
+                        clearTimeout(timeout);
+                        sessionStorage.setItem('mf_real_branch_id_failed', '1');
+                        iframe.remove();
+                        resolve('');
+                    }
+                } catch(e) {
+                    clearInterval(iv);
+                    clearTimeout(timeout);
+                    sessionStorage.setItem('mf_real_branch_id_failed', '1');
+                    iframe.remove();
+                    resolve('');
+                }
+            }, 400);
+        };
+    });
+}
+        async function fetchPeriodicalReportApi(bId, targetDateFrom, targetDateTo, transactionType = "0") {
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
+            h['Site-Name'] = 'dsk';
+            h['Accept'] = 'application/json, text/plain, */*';
+            if (h['Content-Type']) delete h['Content-Type'];
+            if (h['content-type']) delete h['content-type'];
+            h['X-Requested-With'] = 'XMLHttpRequest';
+            h['X-Tenant-Geo'] = 'bd';
+
+            try {
+                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
+                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
+            } catch(e) {}
+
+            let fDate = targetDateFrom;
+            let tDate = targetDateTo;
+            if (fDate && fDate.includes('/')) { let p = fDate.split('/'); fDate = p[2] + '-' + p[1] + '-' + p[0]; }
+            if (tDate && tDate.includes('/')) { let p = tDate.split('/'); tDate = p[2] + '-' + p[1] + '-' + p[0]; }
+
+            let formData = new FormData();
+            let finalBId = await getRealBranchIdFallback(bId);
+            formData.append('cbo_branch', finalBId);
+            formData.append('cbo_field_officer', '0');
+            formData.append('cbo_funding_org_id', '0');
+            formData.append('cbo_product_category', '0');
+            formData.append('cbo_product', '0');
+            formData.append('cbo_transaction_type', transactionType);
+            formData.append('txt_date_from', fDate);
+            formData.append('txt_date_to', tDate);
+            formData.append('cbo_loan_type', '0');
+            formData.append('cbo_service_charge', '1');
+            formData.append('cbo_round_up', '0');
+
+            let url = '/core-service/index.php/periodical_reports/ajax_periodical_report';
+            
+            let fetchRetries = 0;
+            while (fetchRetries < 3) {
+                try {
+                    let req = await fetch(url, {
+                        method: 'POST',
+                        headers: h, credentials: 'include', body: formData
+                    });
+                    if (!req.ok) return null;
+                    let json = await req.json();
+                    
+                    if (json && json.report_data && json.report_data.infos && json.report_data.infos.total) {
+                        let t = json.report_data.infos.total;
+                        let result = { savingsDeposit:0, savingsRefund:0, disbAmount:0, recoverable:0, regular:0, due:0, advance:0, principal:0, serviceCharge:0 };
+                        
+                        if (t.savings) {
+                            for (let k in t.savings) {
+                                result.savingsDeposit += parseFloat(t.savings[k].deposit_amount || 0);
+                                result.savingsRefund += parseFloat(t.savings[k].withdraw_amount || 0);
+                            }
+                        }
+                        if (t.loans) {
+                            result.disbAmount += parseFloat(t.loans.disbursement_amount || 0);
+                            result.recoverable += parseFloat(t.loans.recoverable_principle || 0);
+                            result.regular += parseFloat(t.loans.principle_regular_recovery || 0);
+                            result.due += parseFloat(t.loans.principle_due || 0);
+                            result.advance += parseFloat(t.loans.principle_advance || 0);
+                            result.principal += parseFloat(t.loans.principle_recovery || t.loans.principal_recovery || 0);
+                            result.serviceCharge += parseFloat(t.loans.interest_recovery || 0);
+                        }
+                        return result;
+                    }
+                    return null;
+                } catch(err) {
+                    fetchRetries++;
+                    if (fetchRetries >= 3) return null;
+                    await new Promise(r => setTimeout(r, 1000 + Math.random()*1000));
+                }
+            }
+            return null;
+        }
+
+        async function fetchBalanceSheetApi(bId, targetDateTo) {
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
+            h['Site-Name'] = 'dsk';
+            h['Accept'] = 'application/json, text/plain, */*';
+            if (h['Content-Type']) delete h['Content-Type'];
+            if (h['content-type']) delete h['content-type'];
+            h['X-Requested-With'] = 'XMLHttpRequest';
+            h['X-Tenant-Geo'] = 'bd';
+
+            try {
+                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
+                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
+            } catch(e) {}
+
+            let tDate = targetDateTo;
+            if (tDate && tDate.includes('/')) { let p = tDate.split('/'); tDate = p[2] + '-' + p[1] + '-' + p[0]; }
+
+            let formData = new FormData();
+            formData.append('cbo_report_level', '1');
+            let finalBId = await getRealBranchIdFallback(bId);
+            formData.append('cbo_branch', finalBId);
+            formData.append('txt_as_on_date', tDate);
+            formData.append('project_id', '-1');
+            formData.append('cbo_is_fraction_contain', '1');
+            formData.append('cbo_report_options', 'P');
+            formData.append('txt_date_from', tDate);
+            formData.append('txt_date_to', tDate);
+            formData.append('chk_show_ledger_code', 'yes');
+
+            let url = '/core-service/index.php/acc_balance_sheets/ajax_balance_sheet_report';
+            
+            let fetchRetries = 0;
+            while (fetchRetries < 3) {
+                try {
+                    let req = await fetch(url, {
+                        method: 'POST',
+                        headers: h, credentials: 'include', body: formData
+                    });
+                    if (!req.ok) return null;
+                    let json = await req.json();
+                    
+                    let result = { cashInHand: 0, cashAtBank: 0, equity: 0, equityPrev: 0, savings: 0, loan: 0, debugLog: "" };
+                    
+                    // First search cash balances in the structured nodes
+                    function searchCash(node) {
+                        if (!node) return;
+                        let amtStr = (node.cumulative_amount_current || 0).toString().replace(/,/g, '');
+                        let currentAmt = parseFloat(amtStr);
+                        if (node.code === "132000") result.cashInHand = currentAmt;
+                        else if (node.code === "134000") result.cashAtBank = currentAmt;
+                        
+                        if (node.children) {
+                            for (let k in node.children) {
+                                searchCash(node.children[k]);
+                            }
+                        }
+                    }
+                    if (json && json.balancesheets) {
+                        for (let type in json.balancesheets) {
+                            for (let key in json.balancesheets[type]) {
+                                searchCash(json.balancesheets[type][key]);
+                            }
+                        }
+                    }
+
+                    // Then find the HTML string in the JSON and parse Equity, Savings, Loan from it
+                    for (let key in json) {
+                        if (typeof json[key] === 'string' && json[key].includes('<table')) {
+                            let div = document.createElement('div');
+                            div.innerHTML = json[key];
+                            div.querySelectorAll('tr').forEach(tr => {
+                                let rowText = (tr.textContent || "").toLowerCase();
+                                let cells = tr.querySelectorAll('td, th');
+                                if (cells.length >= 2) {
+                                    let vals = [];
+                                    for (let i = 1; i < cells.length; i++) {
+                                        let textVal = cells[i].textContent.replace(/[^\d.-]/g, '');
+                                        if (textVal && textVal !== '-') {
+                                            let parsed = parseFloat(textVal);
+                                            if (!isNaN(parsed)) vals.push(parsed);
+                                        }
+                                    }
+                                    let val = vals.length > 0 ? vals[0] : 0;
+                                    
+                                    if (rowText.includes('total equity/capital fund') || rowText.includes('total equity')) {
+                                        result.equity = val;
+                                        result.equityPrev = vals.length > 1 ? vals[1] : 0;
+                                    }
+                                    else if (rowText.includes('members savings deposit')) {
+                                        result.savings = val;
+                                    }
+                                    else if (rowText.includes('loan to beneficiries') || rowText.includes('loan to members')) {
+                                        result.loan = val;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    
+                    return result;
+                } catch(err) {
+                    fetchRetries++;
+                    if (fetchRetries >= 3) return null;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+            return null;
+        }
+
+        async function fetchIncomeStatementApi(bId, targetDateTo) {
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
+            h['Site-Name'] = 'dsk';
+            h['Accept'] = 'application/json, text/plain, */*';
+            if (h['Content-Type']) delete h['Content-Type'];
+            if (h['content-type']) delete h['content-type'];
+            h['X-Requested-With'] = 'XMLHttpRequest';
+            h['X-Tenant-Geo'] = 'bd';
+
+            let tDate = targetDateTo;
+            if (tDate && tDate.includes('/')) { let p = tDate.split('/'); tDate = p[2] + '-' + p[1] + '-' + p[0]; }
+
+            let formData = new FormData();
+            formData.append('cbo_report_level', '1');
+            let finalBId = await getRealBranchIdFallback(bId);
+            formData.append('cbo_branch', finalBId);
+            formData.append('txt_as_on_date', tDate);
+            formData.append('txt_date_from', tDate);
+            formData.append('txt_date_to', tDate);
+            formData.append('project_id', '-1');
+            formData.append('cbo_is_fraction_contain', '1');
+            formData.append('cbo_report_options', 'P');
+
+            let url = '/core-service/index.php/acc_income_statements/ajax_income_statment';
+            
+            let fetchRetries = 0;
+            while (fetchRetries < 3) {
+                try {
+                    let req = await fetch(url, {
+                        method: 'POST',
+                        headers: h, credentials: 'include', body: formData
+                    });
+                    if (!req.ok) return null;
+                    let json = await req.json();
+                    
+                    let incomeMonth = 0, incomeYear = 0;
+                    let expenseMonth = 0, expenseYear = 0;
+                    
+                    if (json && json.income_staments) {
+                        if (json.income_staments.income) {
+                            let incomeRoot = Object.values(json.income_staments.income)[0];
+                            if (incomeRoot) {
+                                incomeMonth = parseFloat(incomeRoot.amount_current_month || 0);
+                                incomeYear = parseFloat(incomeRoot.amount_current_year || 0);
+                            }
+                        }
+                        if (json.income_staments.expense) {
+                            let expenseRoot = Object.values(json.income_staments.expense)[0];
+                            if (expenseRoot) {
+                                expenseMonth = parseFloat(expenseRoot.amount_current_month || 0);
+                                expenseYear = parseFloat(expenseRoot.amount_current_year || 0);
+                            }
+                        }
+                    }
+                    
+                    return {
+                        surplusMonth: incomeMonth - expenseMonth,
+                        surplusYear: incomeYear - expenseYear
+                    };
+                } catch(err) {
+                    fetchRetries++;
+                    if (fetchRetries >= 3) return null;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+            return null;
+        }
+        async function fetchDueCollectionApi(bId, targetDateFrom, targetDateTo) {
+            let h = {};
+            try { 
+                let saved = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+                Object.assign(h, saved);
+            } catch(e) {}
+            
+            // CRITICAL FIX: Only use vuex if the interceptor hasn't already provided a fresh Authorization token!
+            if (!h['Authorization'] && !h['authorization']) {
+                try { 
+                    let v = JSON.parse(localStorage.getItem('vuex')); 
+                    if (v && v.auth && v.auth.token) { 
+                        h['Authorization'] = 'Bearer ' + v.auth.token; 
+                    } 
+                } catch(e) {}
+            }
+            
+            h['Site-Name'] = 'dsk';
+            h['X-Tenant-Geo'] = 'bd';
+            h['Accept'] = 'application/json, text/plain, */*';
+            
+            // Remove problematic headers that cause 401 or 500 for multipart
+            if (h['Content-Type']) delete h['Content-Type'];
+            if (h['content-type']) delete h['content-type'];
+            if (h['x-requested-with']) delete h['x-requested-with'];
+            h['X-Requested-With'] = 'XMLHttpRequest';
+            if (h['x-requested-with']) delete h['x-requested-with'];
+            h['X-Requested-With'] = 'XMLHttpRequest';
+            try {
+                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
+                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
+            } catch(e) {}
+            if (h['Isme-Token']) delete h['Isme-Token'];
+            if (h['isme-token']) delete h['isme-token'];
+            if (h['Device-Key']) delete h['Device-Key'];
+            if (h['device-key']) delete h['device-key'];
+
+            try {
+                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
+                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
+            } catch(e) {}
+
+            let fDate = targetDateFrom;
+            let tDate = targetDateTo;
+            if (fDate && fDate.includes('/')) { let p = fDate.split('/'); fDate = p[2] + '-' + p[1] + '-' + p[0]; }
+            if (tDate && tDate.includes('/')) { let p = tDate.split('/'); tDate = p[2] + '-' + p[1] + '-' + p[0]; }
+
+            let formData = new FormData();
+            formData.append('cbo_report_level', '1');
+            let finalBId = await getRealBranchIdFallback(bId);
+            formData.append('cbo_branch', finalBId);
+            formData.append('cbo_samity_id', '-1');
+            formData.append('cbo_product', '-1');
+            formData.append('txt_date_from', fDate);
+            formData.append('txt_date_to', tDate);
+            formData.append('cbo_service_charge', '0');
+
+            let url = '/core-service/index.php/register_reports/ajax_due_collection_register';
+            
+            let fetchRetries = 0;
+            while (fetchRetries < 3) {
+                try {
+                    let req = await fetch(url, {
+                        method: 'POST',
+                        headers: h, credentials: 'include', body: formData
+                    });
+                    if (!req.ok) return null;
+                    let json = await req.json();
+                    
+                    let result = { totalCurrent: 0, totalMatured: 0 };
+                    if (json && json.due_collection) {
+                        for (let k in json.due_collection) {
+                            result.totalCurrent += parseFloat(json.due_collection[k].regular_due_collection_amount || 0);
+                            result.totalMatured += parseFloat(json.due_collection[k].expired_due_collection_amount || 0);
+                        }
+                    }
+                    return result;
+                } catch(err) {
+                    fetchRetries++;
+                    if (fetchRetries >= 3) return null;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+            return null;
+        }
                                 async function fetchFullPaidData(bId, targetDateFrom, targetDateTo) {
-              let h = JSON.parse(sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+              let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
               h['Site-Name'] = 'dsk';
               h['Accept'] = 'application/json, text/plain, */*';
               if (h['Content-Type']) delete h['Content-Type'];
@@ -1736,14 +2485,23 @@ try {
               h['X-Requested-With'] = 'XMLHttpRequest';
                 h['X-Tenant-Geo'] = 'bd';
     
+                try {
+    
+                    let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
+    
+                    await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
+    
+                } catch(e) {}
+    
                 let fDate = targetDateFrom;
                 let tDate = targetDateTo;
                 if (fDate && fDate.includes('/')) { let p = fDate.split('/'); fDate = p[2] + '-' + p[1] + '-' + p[0]; }
                 if (tDate && tDate.includes('/')) { let p = tDate.split('/'); tDate = p[2] + '-' + p[1] + '-' + p[0]; }
     
                 let formData = new FormData();
-              formData.append('cbo_report_level', '1');
-              formData.append('cbo_branch', bId);
+            let finalBId = await getRealBranchIdFallback(bId);
+            formData.append('cbo_report_level', '1');
+            formData.append('cbo_branch', finalBId);
               formData.append('cbo_area', '-1');
               formData.append('cbo_zone', '-1');
               formData.append('cbo_region', '-1');
@@ -1760,8 +2518,7 @@ try {
                   try {
                       let req = await fetch(url, {
                           method: 'POST',
-                          headers: h,
-                          body: formData
+                          headers: h, credentials: 'include', body: formData
                       });
                       if (!req.ok) return "HttpErr";
                       let text = await req.text();
@@ -1808,8 +2565,10 @@ try {
               let tRows = 0;
               
               while (hasMore) {
-                  let url = '/core-service/index.php/saving_closings/index?limit=20&offset=' + offset + '&search=1&cbo_savings_type=&cbo_branch=' + bId + '&txt_date_from=' + fDate + '&txt_date_to=' + tDate + '&cbo_saving_products_id=-1';
-                    let h = JSON.parse(sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+                  let safeBId = await getRealBranchIdFallback(bId);
+                  let url = '/core-service/index.php/saving_closings/index?limit=20&offset=' + offset + '&search=1&cbo_savings_type=&cbo_branch=' + safeBId + '&txt_date_from=' + fDate + '&txt_date_to=' + tDate + '&cbo_saving_products_id=-1';
+                    let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
                     h['Site-Name'] = 'dsk';
                     h['Accept'] = 'application/json, text/plain, */*';
                     let req;
@@ -1870,8 +2629,78 @@ try {
           };
       }
 
+    async function fetchMisReportApi(bId, targetDate, retries = 2) {
+        try {
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
+            
+            h['Site-Name'] = 'dsk';
+            h['Accept'] = 'application/json, text/plain, */*';
+            if (h['Content-Type']) delete h['Content-Type'];
+            if (h['content-type']) delete h['content-type'];
+            h['X-Requested-With'] = 'XMLHttpRequest';
+
+            let fDate = targetDate;
+            if (fDate && fDate.includes('/')) { let p = fDate.split('/'); fDate = p[2] + '-' + p[1] + '-' + p[0]; }
+
+            let fd = new FormData();
+            let finalBId = await getRealBranchIdFallback(bId);
+            fd.append('cbo_branch', finalBId);
+            fd.append('cbo_samity', '-1');
+            fd.append('cbo_funding_organization', '-1');
+            fd.append('cbo_service_charge', '1');
+            fd.append('txt_date', fDate);
+
+            let url = '/core-service/index.php/member_migration_balances/ajax_member_migration_balance_report';
+            let res = await fetch(url, { method: 'POST', headers: h, body: fd, credentials: 'include' });
+            
+            let text = await res.text();
+            let json = null;
+            try {
+                json = JSON.parse(text);
+            } catch(e) {}
+            
+            let htmlStr = '';
+            if (json && typeof json === 'object') {
+                for (let key in json) {
+                    if (typeof json[key] === 'string' && (json[key].includes('<table') || json[key].includes('Grand Total Saving Balance'))) {
+                        htmlStr = json[key];
+                        break;
+                    }
+                }
+            } else {
+                htmlStr = text;
+            }
+
+            if (htmlStr && (htmlStr.includes('<table') || htmlStr.includes('Grand Total Saving Balance'))) {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(htmlStr, 'text/html');
+                let data = parseMis(doc);
+                if(data.loan === 0 && data.savings === 0 && htmlStr.includes('Data Not Found')) {
+                    return null;
+                }
+                return data;
+            }
+            
+            if(retries > 0) {
+                await new Promise(r => setTimeout(r, 1000));
+                return fetchMisReportApi(bId, targetDate, retries - 1);
+            }
+            
+            return null;
+        } catch(e) {
+            if(retries > 0) {
+                await new Promise(r => setTimeout(r, 1000));
+                return fetchMisReportApi(bId, targetDate, retries - 1);
+            }
+            return null;
+        }
+    }
+
     function scrapeViaGhost(hashUrl, targetDate, reportLevel, targetId, type, statusCallback, transactionType = "0", serviceChargeMode = "1") {
-        return new Promise((resolve) => {
+
+
+    return new Promise((resolve) => {
             let iframe = document.createElement('iframe');
             iframe.allow = "geolocation 'none'";
             let isLive = false;
@@ -1897,7 +2726,7 @@ try {
                 
                 setTimeout(async () => {
                     try {
-                        let doc = iframe.contentDocument || iframe.contentWindow.document;
+                            let doc = iframe.contentDocument || iframe.contentWindow.document;
                         let win = iframe.contentWindow;
                         let btn = doc.querySelector('button[type="submit"]') || doc.querySelector('.rep_btn button.btn-primary');
 
@@ -2399,9 +3228,10 @@ try {
                                         await new Promise(r => setTimeout(r, 400));
                                         
                                         let cboBranch = doc.querySelector('select[name="cbo_branch"]');
-                                        if (cboBranch) {
-                                            cboBranch.value = targetId;
-                                            triggerVueChange(cboBranch, targetId, win);
+                                        if (cboBranch && targetId !== 'SELF' && targetId && targetId !== '0' && targetId !== '-1') {
+                                                                                    let safeTargetId = targetId;
+                                                                                    cboBranch.value = safeTargetId;
+                                                                                    triggerVueChange(cboBranch, safeTargetId, win);
                                             await new Promise(r => setTimeout(r, 400));
                                         }
                                         
@@ -2421,15 +3251,15 @@ try {
                                                 let cells = Array.from(tr.querySelectorAll('td, th'));
                                                 return cells.some(c => c.textContent.trim().toLowerCase().includes('grand total'));
                                             });
-                                            if (grandTotalRow) {
+                                            if (grandTotalRow && win._reqCompleted && win._activeReqs === 0) {
                                                 clearInterval(poll);
                                                 clearTimeout(timeout);
                                                 isProcessed = true;
                                                 let disbCount = 0;
                                                 let cells = grandTotalRow.querySelectorAll('td, th');
-                                                if (cells.length > 1) {
-                                                    disbCount = parseInt(cells[1].textContent.replace(/,/g, '').trim()) || 0;
-                                                }
+                                                if (cells.length >= 4) {
+                                                    disbCount = parseInt(cells[cells.length - 4].textContent.replace(/,/g, '').trim()) || 0;
+                                                    }
                                                 if(document.body.contains(iframe)) iframe.remove();
                                                 resolve({ count: disbCount });
                                             } else {
@@ -2468,11 +3298,16 @@ try {
                                     win._intercepted = true;
                                 }
 
-                                // If it doesn't automatically load, trigger the search button
-                                let searchBtn = doc.getElementById('custom-search-btn') || Array.from(doc.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().includes('Search')) || doc.querySelector('button[type="submit"]');
-                                if (searchBtn) {
-                                    searchBtn.dispatchEvent(new MouseEvent('click', { view: win, bubbles: true, cancelable: true }));
-                                    searchBtn.click();
+
+                                // Poll for the search button since Vue might take a moment to render
+                                for (let i = 0; i < 15; i++) {
+                                    let searchBtn = doc.getElementById('custom-search-btn') || Array.from(doc.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().includes('Search')) || doc.querySelector('button[type="submit"]');
+                                    if (searchBtn) {
+                                        searchBtn.dispatchEvent(new MouseEvent('click', { view: win, bubbles: true, cancelable: true }));
+                                        searchBtn.click();
+                                        break;
+                                    }
+                                    await new Promise(r => setTimeout(r, 400));
                                 }
                                 
                                 for (let i = 0; i < 30; i++) {
@@ -2480,21 +3315,20 @@ try {
                                     await new Promise(r => setTimeout(r, 200));
                                 }
 
-                                let savedHd = sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup');
+                                let savedHd = sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup');
                                 let clonedHeaders = {};
                                 if (savedHd) clonedHeaders = JSON.parse(savedHd);
+                                clonedHeaders['X-Requested-With'] = 'XMLHttpRequest';
+                                clonedHeaders['Accept'] = 'application/json, text/plain, */*';
                                 
                                 let cUrl = sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup');
-                                let apiBasePath = '/core-service/'; // fallback
-                                if (cUrl) {
-                                    try {
-                                        let urlObj = new URL(cUrl.startsWith('http') ? cUrl : window.location.origin + '/' + cUrl);
-                                        let pathParts = urlObj.pathname.split(/index\.php|\/samities|\/reports/);
-                                        if (pathParts.length > 0) {
-                                            apiBasePath = pathParts[0];
-                                            if (!apiBasePath.endsWith('/')) apiBasePath += '/';
-                                        }
-                                    } catch(e){}
+                                let possibleUrls = [];
+                                if (cUrl && cUrl.includes('samities')) {
+                                    possibleUrls.push(cUrl);
+                                } else {
+                                    possibleUrls.push('/core-service/index.php/samities/ajax_list');
+                                    possibleUrls.push('/core-service/index.php/samities/index');
+                                    possibleUrls.push('/core-service/index.php/samities');
                                 }
                                 
                                 let debugInfo = '';
@@ -2502,36 +3336,55 @@ try {
                                 let offset = 0;
                                 let limit = 500;
                                 let totalCount = 0;
+                                let successUrl = null;
                                 
                                 while (true) {
-                                    let fetchUrl = new URL(cUrl.startsWith('http') ? cUrl : window.location.origin + '/' + cUrl);
-                                      fetchUrl.searchParams.set('limit', limit);
-                                      fetchUrl.searchParams.set('offset', offset);
-                                      if (targetId !== 'SELF') {
-                                          fetchUrl.searchParams.set('cbo_branch', targetId);
-                                      }
-                                      let apiUrl = fetchUrl.toString();
-                                      debugInfo = apiUrl;
-                                    let r = await window.fetch(apiUrl, { method: 'GET', headers: clonedHeaders, credentials: 'include' });
-                                    if (!r.ok) throw new Error('HTTP ' + r.status);
-                                    let data = await r.json();
+                                    let data = null;
+                                    let fetchUrlObj = null;
+                                    
+                                    for (let candidateUrl of possibleUrls) {
+                                        let fetchUrl = new URL(candidateUrl.startsWith('http') ? candidateUrl : window.location.origin + candidateUrl);
+                                        fetchUrl.searchParams.set('limit', limit);
+                                        fetchUrl.searchParams.set('offset', offset);
+                                        fetchUrl.searchParams.set('isSearch', '1');
+                                        fetchUrl.searchParams.set('cbo_status', '1');
+                                        fetchUrl.searchParams.set('cbo_employee', '-1');
+                                        if (targetId !== 'SELF') fetchUrl.searchParams.set('cbo_branch', targetId);
+                                        
+                                        let apiUrl = fetchUrl.toString();
+                                        debugInfo = apiUrl;
+                                        try {
+                                            let r = await window.fetch(apiUrl, { method: 'GET', headers: clonedHeaders, credentials: 'include' });
+                                            if (r.ok) {
+                                                let temp = await r.json();
+                                                if (temp && (temp.samities || temp.data || Array.isArray(temp))) {
+                                                    data = temp;
+                                                    successUrl = candidateUrl;
+                                                    break;
+                                                }
+                                            }
+                                        } catch(e) {}
+                                    }
+                                    
+                                    if (!data) throw new Error("Could not fetch samity data from any candidate URL");
+                                    
+                                    // If we found a working URL, only use that one for next pagination loops
+                                    possibleUrls = [successUrl];
                                     
                                     if (data.total) totalCount = parseInt(data.total);
                                     else if (data.recordsTotal) totalCount = parseInt(data.recordsTotal);
                                     
-                                    if (data.samities && data.samities.length > 0) {
-                                        for (let s of data.samities) {
-                                            let code = s.code;
-                                            let members = parseInt(s.total_member || '0');
-                                            // Prevent duplicates
-                                            if (!allSamities.some(x => x.code === code)) {
+                                    let dataArr = data.samities || data.data || data;
+                                    if (Array.isArray(dataArr) && dataArr.length > 0) {
+                                        for (let s of dataArr) {
+                                            let code = s.code || s.samity_code || s.name;
+                                            let members = parseInt(s.total_member || s.member_count || '0');
+                                            if (code && !allSamities.some(x => x.code === code)) {
                                                 allSamities.push({ code, members });
                                             }
                                         }
-                                        if (data.samities.length < limit) {
-                                            break;
-                                        }
-                                        offset += data.samities.length;
+                                        if (dataArr.length < limit) break;
+                                        offset += dataArr.length;
                                     } else {
                                         break;
                                     }
@@ -2681,6 +3534,21 @@ try {
     function openMisAisPanel(customTitle) {
         customTitle = customTitle || '\u{1F680} MIS & AIS Checker-DSK_IT';
         if (document.getElementById('ghost-audit-panel')) return;
+        
+        try {
+            let vuexStr = localStorage.getItem('vuex');
+            if (vuexStr) {
+                let v = JSON.parse(vuexStr);
+                if (v.auth && v.auth.token) {
+                    let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {}
+                    h['Authorization'] = 'Bearer ' + v.auth.token;
+                    h['authorization'] = 'Bearer ' + v.auth.token;
+                    sessionStorage.setItem('mf_cloned_headers', JSON.stringify(h));
+                    localStorage.setItem('mf_cloned_headers_backup', JSON.stringify(h));
+                }
+            }
+        } catch(e) {}
 
         const panel = document.createElement('div');
         panel.id = 'ghost-audit-panel';
@@ -2750,7 +3618,7 @@ try {
                 container.innerHTML = dateHtml + `
                     <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09AC\u09CD\u09B0\u09BE\u099E\u09CD\u099A:</label>
-                        <input type="text" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; font-weight:bold; color:#16a085; height:24px; box-sizing:border-box;" value="${currentBranchName}" readonly disabled>
+                        <select id="custom-target" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; font-weight:bold; color:#16a085; height:24px; box-sizing:border-box;"><option value="ALL">\u09B8\u0995\u09B2 \u09B6\u09BE\u0996\u09BE (Select All)</option></select>
                     </div>
                 `;
             } 
@@ -3048,17 +3916,21 @@ try {
             sXml += '   <Column ss:Width="100"/>\n';
             sXml += '   <Column ss:Width="100"/>\n';
             sXml += '   <Column ss:Width="100"/>\n';
+
         } else if (window.currentCheckerType === 'EQUITY') {
             sXml += '   <Column ss:Width="80"/>\n';
             sXml += '   <Column ss:Width="120"/>\n';
             sXml += '   <Column ss:Width="120"/>\n';
+
         } else if (window.currentCheckerType === 'SAMITY') {
             sXml += '   <Column ss:Width="80"/>\n';
             sXml += '   <Column ss:Width="100"/>\n';
             sXml += '   <Column ss:Width="400"/>\n';
+
         } else if (window.currentCheckerType === 'DUE_COLLECTION') {
             sXml += '   <Column ss:Width="120"/>\n';
             sXml += '   <Column ss:Width="120"/>\n';
+
         } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
             for(let i=0; i<22; i++) sXml += '   <Column ss:Width="53"/>\n';
         } else {
@@ -3139,6 +4011,7 @@ try {
     try {
         if (window.AndroidDownloader && window.AndroidDownloader.saveExcel) {
             window.AndroidDownloader.saveExcel(finalOutput, fileName);
+
         } else {
             let blob = new Blob([finalOutput], { type: 'application/vnd.ms-excel;charset=utf-8;' });
             let a = document.createElement('a');
@@ -3176,8 +4049,8 @@ try {
 
                 tbody.innerHTML = `
                     <tr>
-                        <td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${bName}</td>
-                        <td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} \u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987 \u099A\u09B2\u099B\u09C7...</td>
+                        <td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${bName}</td>
+                        <td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} \u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987 \u099A\u09B2\u099B\u09C7...</td>
                     </tr>
                 `;
 
@@ -3192,49 +4065,60 @@ try {
                 let aData = null;
                 let iData = null;
                 if (window.currentCheckerType === 'MIS') {
-                    mData = await scrapeViaGhost('#/reports/member-migration-balances/member-migration-balance-index', sDate, '1', bId, 'mis', updateStatus);
+                    mData = await fetchMisReportApi(bId, sDate);
                     if (mData) {
                         let t2 = document.getElementById(`tbody-${safeId}`);
-                        if(t2) t2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
-                        aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', sDate, '1', bId, 'ais', updateStatus);
+                        if(t2) t2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        aData = await fetchBalanceSheetApi(bId, sDate);
                     }
                     } else if (window.currentCheckerType === 'SAMITY') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
-                        aData = await scrapeViaGhost('#/samity/samities/index', sDate, '1', bId, 'samity', updateStatus);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        aData = await scrapeViaGhost( '#/samity/samities/index', sDate, '1', bId, 'samity', updateStatus);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${bName}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
-                            aData = await scrapeViaGhost('#/samity/samities/index', sDate, '1', bId, 'samity', updateStatus);
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09BE\u0987...</td></tr>`;
+                            aData = await scrapeViaGhost( '#/samity/samities/index', sDate, '1', bId, 'samity', updateStatus);
                         }
                     } else if (window.currentCheckerType === 'DUE_COLLECTION') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
-                        aData = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', sDate, '1', bId, 'due_collection', updateStatus);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        
+                        let safeBId = typeof bId !== 'undefined' ? bId : b.id;
+                        let safeDateFrom = typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate);
+                        let safeDateTo = typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate);
+                        
+                        aData = await fetchDueCollectionApi(safeBId, safeDateFrom, safeDateTo);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${bName}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Due Collection \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
-                            aData = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', sDate, '1', bId, 'due_collection', updateStatus);
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} Due Collection \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09BE\u0987...</td></tr>`;
+                            aData = await fetchDueCollectionApi(safeBId, safeDateFrom, safeDateTo);
+                        }
+                        if (aData) {
+                            let dWriteOff = await fetchWriteOffColl(safeBId, safeDateFrom, safeDateTo);
+                            aData.writeOffColl = dWriteOff;
                         }
                     } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         
                         let targetDateFrom = document.getElementById('custom-audit-date-from') ? document.getElementById('custom-audit-date-from').value : sDate;
                         let targetDateTo = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : sDate;
 
-                          let dDisbCount = await scrapeViaGhost('#/reports/topsheet-loan-disbursement-registers/index', targetDateFrom + '|' + targetDateTo, '1', bId, 'topsheet_disb', updateStatus);
+                          let dDisbCount = await fetchTopsheetDisb(bId, targetDateFrom, targetDateTo);
                             let dAdmission = await fetchMemberDataSilently(bId, targetDateFrom, targetDateTo, 'member_admission');
                             let dDropout = await fetchMemberDataSilently(bId, targetDateFrom, targetDateTo, 'member_dropout');
                             let tdData = await fetchTermDepositData(bId, targetDateFrom, targetDateTo);
                             let dFullPaid = await fetchFullPaidData(bId, targetDateFrom, targetDateTo);
                               let dNewDue = await fetchNewDueData(bId, targetDateFrom, targetDateTo); let dWriteOff = await fetchWriteOffColl(bId, targetDateFrom, targetDateTo);
-                            let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0", "0");
-                          let dAllWith = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0", "1");
-                          let dCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "1", "0");
-                          let dNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "5", "0");
-                        let dDue = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', sDate, '1', bId, 'due_collection', updateStatus);
-                        let dBal = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', sDate, '1', bId, 'ais', updateStatus);
+                            
+                            let dAll = await fetchPeriodicalReportApi(bId, targetDateFrom, targetDateTo, "0");
+                            let dAllWith = dAll;
+                            let dCash = await fetchPeriodicalReportApi(bId, targetDateFrom, targetDateTo, "1");
+                            let dNonCash = await fetchPeriodicalReportApi(bId, targetDateFrom, targetDateTo, "5");
+                            
+                        let dDue = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate), typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
+                        let dBal = await fetchBalanceSheetApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
 
                         aData = dAll;
                           if (aData) {
@@ -3257,6 +4141,7 @@ try {
                             aData.savingsRefundNonCash = dNonCash ? dNonCash.savingsRefund : 0;
                             aData.currentDue = dDue ? dDue.totalCurrent : 0;
                             aData.maturedDue = dDue ? dDue.totalMatured : 0;
+aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) || 0);
                               aData.newDueBorrower = dNewDue ? dNewDue.borrower : 0;
                               aData.newDueAmount = dNewDue ? dNewDue.amount : 0; aData.writeOffColl = dWriteOff || 0;
                             aData.cashInHand = dBal ? dBal.cashInHand : 0;
@@ -3265,14 +4150,14 @@ try {
                         
                         if (!aData || !dCash || !dNonCash || !dDue || !dBal) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${bName}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Daily Transaction \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} Daily Transaction \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09BE\u0987...</td></tr>`;
                             
-                            let rAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0", "0");
-                              let rAllWith = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "0", "1");
-                              let rCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "1", "0");
-                              let rNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', sDate, '1', bId, 'daily_transaction', updateStatus, "5", "0");
-                            let rDue = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', sDate, '1', bId, 'due_collection', updateStatus);
-                            let rBal = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', sDate, '1', bId, 'ais', updateStatus);
+                            let rAll = await fetchPeriodicalReportApi(bId, targetDateFrom, targetDateTo, "0");
+                            let rAllWith = rAll;
+                            let rCash = await fetchPeriodicalReportApi(bId, targetDateFrom, targetDateTo, "1");
+                            let rNonCash = await fetchPeriodicalReportApi(bId, targetDateFrom, targetDateTo, "5");
+                            let rDue = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate), typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
+                            let rBal = await fetchBalanceSheetApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
                             
                             aData = rAll;
                               if (aData) {
@@ -3295,6 +4180,7 @@ try {
                                 aData.savingsRefundNonCash = rNonCash ? rNonCash.savingsRefund : 0;
                                 aData.currentDue = rDue ? rDue.totalCurrent : 0;
                                 aData.maturedDue = rDue ? rDue.totalMatured : 0;
+aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) || 0);
                                   aData.newDueBorrower = dNewDue ? dNewDue.borrower : 0;
                                   aData.newDueAmount = dNewDue ? dNewDue.amount : 0; aData.writeOffColl = dWriteOff || 0;
                                 aData.cashInHand = rBal ? rBal.cashInHand : 0;
@@ -3316,7 +4202,7 @@ try {
                         
                         htmlRowsSingle = `
                             <tr>
-                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
+                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${targetName}</td>
                                 <td style="text-align:left; font-size:9px;"><b>Loan</b></td>
                                 <td style="white-space:nowrap; font-size:9px;">${misData ? formatNum(misData.loan) : '0'}</td>
                                 <td style="white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.loan) : '0'}</td>
@@ -3334,7 +4220,7 @@ try {
                         let bankColor = (aisData && aisData.cashAtBank >= 1000001) ? 'red' : '#16a085';
                         htmlRowsSingle = `
                             <tr>
-                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9.5px;">${targetName}</td>
+                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${targetName}</td>
                                 <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Cash</b></td>
                                 <td style="color:${cashColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.cashInHand) : '0'}</td>
                             </tr>
@@ -3348,7 +4234,7 @@ try {
                         let sY = isData ? formatNum(isData.surplusYear) : '0';
                         htmlRowsSingle = `
                             <tr class="equity-row">
-                                <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">${targetName}</td>
+                                <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">${targetName}</td>
                                 <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Equity</b></td>
                                 <td style="color:${(aisData && aisData.equity < 0 && aisData.equity !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.equity) : '0'}</td>
                                 <td style="color:${(aisData && aisData.equityPrev < 0 && aisData.equityPrev !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.equityPrev) : '0'}</td>
@@ -3365,19 +4251,25 @@ try {
                         let smallCount = smallSamities.length;
                         let codesText = smallSamities.map(s => s.code).join(', ');
                         if (totalCount === 0 && aData && aData.debug) codesText = '<span style="color:red;">' + aData.debug + '</span>';
-                        htmlRowsSingle = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
+                        htmlRowsSingle = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
                     } else if (window.currentCheckerType === 'DUE_COLLECTION') {
-                        htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
+                        htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
                     } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
                           let otr = aData && aData.recoverable > 0 ? ((aData.regular * 100) / aData.recoverable).toFixed(2) : '0.00';
                           let disbCount = aData ? (aData.disbCount || 0) : 0;
-                          htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData && aData.admissions ? aData.admissions : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData && aData.dropouts ? aData.dropouts : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData && aData.tdOpen ? aData.tdOpen : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">` + (aData && aData.tdClose ? aData.tdClose : '0') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + (aData && aData.fullPaidCount ? aData.fullPaidCount : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.cashInHand)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.cashAtBank)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData && aData.newDueBorrower ? aData.newDueBorrower : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.newDueAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.writeOffColl)||0).toFixed(2) : '0.00') + `</td></tr>`;
+                          htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData && aData.admissions ? aData.admissions : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData && aData.dropouts ? aData.dropouts : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData && aData.tdOpen ? aData.tdOpen : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">` + (aData && aData.tdClose ? aData.tdClose : '0') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + (aData && aData.fullPaidCount ? aData.fullPaidCount : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.cashInHand)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.cashAtBank)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData && aData.newDueBorrower ? aData.newDueBorrower : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.newDueAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.writeOffColl)||0).toFixed(2) : '0.00') + `</td></tr>`;
                       }
                       tbody.innerHTML = htmlRowsSingle;
                 
                 let expBtn = document.getElementById('export-excel-btn');
                 if(expBtn) expBtn.style.display = 'block';
             } else if (e.target && e.target.id === 'start-audit-btn') {
+                let st = document.getElementById('audit-status');
+                if (st) st.innerText = "Connecting to Data Source (background)...";
+                if (typeof ensureApiAndBranchList === 'function') {
+                    await ensureApiAndBranchList();
+                }
+                if (st) st.innerText = "";
                 let uType = sessionStorage.getItem('mf_user_type');
                 let targetId = 'SELF';
                 let targetName = localStorage.getItem('microfin_entity_name') || 'My Branch';
@@ -3408,8 +4300,26 @@ try {
                     if(bData.id) {
                         bData.name = currentBranchName;
                         branchesToProcess = [bData];
+                    } else if (allBranches && allBranches.length > 0 && allBranches[0].id && allBranches[0].id !== 'SELF' && allBranches[0].id !== '0') {
+                        branchesToProcess = [allBranches[0]];
                     } else {
-                        branchesToProcess = [{id: 'SELF', name: currentBranchName}];
+                        let extractedId = 'SELF';
+                        try {
+                            let vuexStr = localStorage.getItem('vuex');
+                            if (vuexStr) {
+                                let v = JSON.parse(vuexStr);
+                                if (v.auth && v.auth.user && v.auth.user.branch_id) extractedId = String(v.auth.user.branch_id);
+                                else if (v.auth && v.auth.user && v.auth.user.branchId) extractedId = String(v.auth.user.branchId);
+                                else if (v.auth && v.auth.token) {
+                                    let payloadStr = atob(v.auth.token.split('.')[1]);
+                                    let payload = JSON.parse(payloadStr);
+                                    if (payload.branch_id) extractedId = String(payload.branch_id);
+                                    else if (payload.branchId) extractedId = String(payload.branchId);
+                                    else if (payload.branch) extractedId = String(payload.branch);
+                                }
+                            }
+                        } catch(e) {}
+                        branchesToProcess = [{id: extractedId, name: currentBranchName}];
                     }
                 } else if (targetId === 'ALL') {
                     branchesToProcess = allBranches;
@@ -3469,15 +4379,15 @@ try {
                               (window.currentCheckerType === 'DUE_COLLECTION' ?
                                 `<tr><th style="width:30%; text-align:left;">Branch</th><th style="width:35%; text-align:center;">Current Due</th><th style="width:35%; text-align:center;">Matured Due</th></tr>` :
                               (window.currentCheckerType === 'DAILY_TRANSACTION' ?
-                                `<tr style="height:32px;"><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; text-align:left; width:7%;">Branch</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Member<br>Admission</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Member<br>DropOut</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Term Deposit<br>Open</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Term Deposit<br>Close</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Savings<br>Coll.</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Savings<br>Ref.</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Sav. Ref.<br>(Cash)</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Sav. Ref.<br>(Non-Cash)</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%; font-size:9.5px;">Borrower<br>Rec. Loan</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%; font-size:9.5px;">Full<br>Paid</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Disbursed</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Recoverable</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Regular</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:3%;">OTR %</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Due</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Current<br>Due</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Matured<br>Due</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Advance</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Total<br>Collection</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">SC</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Cash<br>In Hand</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Cash<br>At Bank</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">New Due<br>Borrower</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">New Due<br>Amount</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">WriteOff<br>Coll.</th></tr>` :
+                                `<tr style="height:32px;"><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; text-align:left; width:7%;">Branch</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Member<br>Admission</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Member<br>DropOut</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Term Deposit<br>Open</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Term Deposit<br>Close</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Savings<br>Coll.</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Savings<br>Ref.</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Sav. Ref.<br>(Cash)</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Sav. Ref.<br>(Non-Cash)</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%; font-size:9px;">Borrower<br>Rec. Loan</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%; font-size:9px;">Full<br>Paid</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Disbursed</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Recoverable</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Regular</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:3%;">OTR %</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Due</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Current<br>Due</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Matured<br>Due</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Advance</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Total<br>Collection</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">SC</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Cash<br>In Hand</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Cash<br>At Bank</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">New Due<br>Borrower</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">New Due<br>Amount</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">WriteOff<br>Coll.</th></tr>` :
                                 `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:62%; text-align:right;">Balance (AIS)</th></tr>`))))}
                         </thead>
                 `;
                 branchesToProcess.sort((a, b) => { let z = (a.zone || "").localeCompare(b.zone || ""); if (z !== 0) return z; let ar = (a.area || "").localeCompare(b.area || ""); if (ar !== 0) return ar; return parseInt(a.id || "0") - parseInt(b.id || "0"); }); let currentZ = ""; let currentA = ""; for(let b of branchesToProcess) { if (b.zone !== currentZ && b.zone && b.zone !== "Branch" && b.zone !== "Assigned Zone") { currentZ = b.zone; tableHtml += `<tbody data-status="header"><tr style="background:#0277bd; color:white;"><td colspan="26" style="padding:4px; text-align:left;"><b>\u{1F3E2} Zone: ` + currentZ + `</b></td></tr></tbody>`; } if (b.area !== currentA && b.area && b.area !== "Branch" && b.area !== "Assigned Area") { currentA = b.area; tableHtml += `<tbody data-status="header"><tr style="background:#e1f5fe; color:#01579b;"><td colspan="26" style="padding:4px; text-align:left;">&nbsp;&nbsp;<b>\u{1F4CD} Area: ` + currentA + `</b></td></tr></tbody>`; } let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, ""); tableHtml += `
                         <tbody id="tbody-${safeId}" class="audit-row-group" data-zone="${b.zone || ''}" data-area="${b.area || ''}">
                             <tr style="background:#fff;">
-                                <td style="text-align:left; font-weight:bold; color:#2c3e50; font-size:9.5px;">${b.name}</td>
-                                <td colspan="26" style="text-align:center; color:gray; font-size:9.5px;">\u23F3 \u0985\u09AA\u09C7\u0995\u09CD\u09B7\u09AE\u09BE\u09A8...</td>
+                                <td style="text-align:left; font-weight:bold; color:#2c3e50; font-size:9px;">${b.name}</td>
+                                <td colspan="26" style="text-align:center; color:gray; font-size:9px;">\u23F3 \u0985\u09AA\u09C7\u0995\u09CD\u09B7\u09AE\u09BE\u09A8...</td>
                             </tr>
                         </tbody>
                     `;
@@ -3758,8 +4668,8 @@ try {
                     if(tbodyBefore) {
                         tbodyBefore.innerHTML = `
                             <tr>
-                                <td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td>
-                                <td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} MIS \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td>
+                                <td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td>
+                                <td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} MIS \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td>
                             </tr>
                         `;
                     }
@@ -3768,59 +4678,59 @@ try {
                     let aData = null;
                     let iData = null;
                     if (window.currentCheckerType === 'MIS') {
-                        mData = await scrapeViaGhost('#/reports/member-migration-balances/member-migration-balance-index', selectedDate, '1', b.id, 'mis', updateStatus);
+                        mData = await fetchMisReportApi(b.id, selectedDate);
                         if (!mData) {
                             let tRetry1 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry1) tRetry1.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} MIS \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
-                            mData = await scrapeViaGhost('#/reports/member-migration-balances/member-migration-balance-index', selectedDate, '1', b.id, 'mis', updateStatus);
+                            if(tRetry1) tRetry1.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} MIS \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            mData = await fetchMisReportApi(b.id, selectedDate);
                         }
                         if (mData) {
                             let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
-                            aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
+                            if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                            aData = await fetchBalanceSheetApi(b.id, selectedDate);
                             if (!aData) {
                                 let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                                if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Balance Sheet \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
-                                aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
+                                if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} Balance Sheet \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                                aData = await fetchBalanceSheetApi(b.id, selectedDate);
                             }
                         }
                     } else if (window.currentCheckerType === 'SAMITY') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
-                        aData = await scrapeViaGhost('#/samity/samities/index', selectedDate, '1', b.id, 'samity', updateStatus);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        aData = await scrapeViaGhost( '#/samity/samities/index', selectedDate, '1', b.id, 'samity', updateStatus);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
-                            aData = await scrapeViaGhost('#/samity/samities/index', selectedDate, '1', b.id, 'samity', updateStatus);
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            aData = await scrapeViaGhost( '#/samity/samities/index', selectedDate, '1', b.id, 'samity', updateStatus);
                         }
                     } else if (window.currentCheckerType === 'DUE_COLLECTION') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
-                        aData = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', selectedDate, '1', b.id, 'due_collection', updateStatus);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        aData = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate), typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Due Collection \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
-                            aData = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', selectedDate, '1', b.id, 'due_collection', updateStatus);
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} Due Collection \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            aData = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate), typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
                         }
                     } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         
                         let targetDateFrom = document.getElementById('custom-audit-date-from') ? document.getElementById('custom-audit-date-from').value : selectedDate;
                         let targetDateTo = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : selectedDate;
 
-                          let dDisbCount = await scrapeViaGhost('#/reports/topsheet-loan-disbursement-registers/index', targetDateFrom + '|' + targetDateTo, '1', b.id, 'topsheet_disb', updateStatus);
+                          let dDisbCount = await fetchTopsheetDisb(b.id, targetDateFrom, targetDateTo);
                             let dAdmission = await fetchMemberDataSilently(b.id, targetDateFrom, targetDateTo, 'member_admission');
                             let dDropout = await fetchMemberDataSilently(b.id, targetDateFrom, targetDateTo, 'member_dropout');
                             let tdData = await fetchTermDepositData(b.id, targetDateFrom, targetDateTo);
                               let dFullPaid = await fetchFullPaidData(b.id, targetDateFrom, targetDateTo);
                               let dNewDue = await fetchNewDueData(b.id, targetDateFrom, targetDateTo); let dWriteOff = await fetchWriteOffColl(b.id, targetDateFrom, targetDateTo);
-let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0", "0");
-                          let dAllWith = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0", "1");
-                          let dCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "1", "0");
-                          let dNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "5", "0");
-                        let dDue = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', selectedDate, '1', b.id, 'due_collection', updateStatus);
-                        let dBal = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
+                              let dAll = await fetchPeriodicalReportApi(b.id, targetDateFrom, targetDateTo, "0");
+                              let dAllWith = dAll;
+                              let dCash = await fetchPeriodicalReportApi(b.id, targetDateFrom, targetDateTo, "1");
+                              let dNonCash = await fetchPeriodicalReportApi(b.id, targetDateFrom, targetDateTo, "5");
+                        let dDue = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate), typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
+                        let dBal = await fetchBalanceSheetApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
 
                         aData = dAll;
                           if (aData) {
@@ -3843,6 +4753,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                             aData.savingsRefundNonCash = dNonCash ? dNonCash.savingsRefund : 0;
                             aData.currentDue = dDue ? dDue.totalCurrent : 0;
                             aData.maturedDue = dDue ? dDue.totalMatured : 0;
+aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) || 0);
                               aData.newDueBorrower = dNewDue ? dNewDue.borrower : 0;
                               aData.newDueAmount = dNewDue ? dNewDue.amount : 0; aData.writeOffColl = dWriteOff || 0;
                             aData.cashInHand = dBal ? dBal.cashInHand : 0;
@@ -3851,14 +4762,14 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                         
                         if (!aData || !dCash || !dNonCash || !dDue || !dBal) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Daily Transaction \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} Daily Transaction \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
                             
-                            let rAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0", "0");
-                              let rAllWith = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "0", "1");
-                              let rCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "1", "0");
-                              let rNonCash = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-index', selectedDate, '1', b.id, 'daily_transaction', updateStatus, "5", "0");
-                            let rDue = await scrapeViaGhost('#/reports/register-reports/due-collection-register-index', selectedDate, '1', b.id, 'due_collection', updateStatus);
-                            let rBal = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
+                              let rAll = await fetchPeriodicalReportApi(b.id, targetDateFrom, targetDateTo, "0");
+                              let rAllWith = rAll;
+                              let rCash = await fetchPeriodicalReportApi(b.id, targetDateFrom, targetDateTo, "1");
+                              let rNonCash = await fetchPeriodicalReportApi(b.id, targetDateFrom, targetDateTo, "5");
+                            let rDue = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate), typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
+                            let rBal = await fetchBalanceSheetApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
                             
                             aData = rAll;
                               if (aData) {
@@ -3881,6 +4792,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                                 aData.savingsRefundNonCash = rNonCash ? rNonCash.savingsRefund : 0;
                                 aData.currentDue = rDue ? rDue.totalCurrent : 0;
                                 aData.maturedDue = rDue ? rDue.totalMatured : 0;
+aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) || 0);
                                   aData.newDueBorrower = dNewDue ? dNewDue.borrower : 0;
                                   aData.newDueAmount = dNewDue ? dNewDue.amount : 0; aData.writeOffColl = dWriteOff || 0;
                                 aData.cashInHand = rBal ? rBal.cashInHand : 0;
@@ -3889,21 +4801,21 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                         }
                     } else {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
-                        aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        aData = await fetchBalanceSheetApi(b.id, selectedDate);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Balance Sheet \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
-                            aData = await scrapeViaGhost('#/reports/acc-balance-sheets/balance-sheet-report-filter', selectedDate, '1', b.id, 'ais', updateStatus);
+                            if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} Balance Sheet \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                            aData = await fetchBalanceSheetApi(b.id, selectedDate);
                         }
                         if (window.currentCheckerType === 'EQUITY') {
                             let tRetry4 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry4) tRetry4.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9.5px;">\u{1F504} Income Statement \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
-                            iData = await scrapeViaGhost('#/reports/acc-income-statements/income-statment-filter', selectedDate, '1', b.id, 'is', updateStatus);
+                            if(tRetry4) tRetry4.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Income Statement \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                            iData = await fetchIncomeStatementApi(b.id, selectedDate);
                             if (!iData) {
                                 let tRetry5 = document.getElementById(`tbody-${safeId}`);
-                                if(tRetry5) tRetry5.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9.5px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9.5px;">\u{1F504} Income Statement \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
-                                iData = await scrapeViaGhost('#/reports/acc-income-statements/income-statment-filter', selectedDate, '1', b.id, 'is', updateStatus);
+                                if(tRetry5) tRetry5.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} Income Statement \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
+                                iData = await fetchIncomeStatementApi(b.id, selectedDate);
                             }
                         }
                     }
@@ -3957,7 +4869,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                         if (window.currentCheckerType === 'MIS') {
                             htmlRowsBatch = `
                                 <tr>
-                                    <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
+                                    <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${b.name}</td>
                                     <td style="text-align:left; font-size:9px;"><b>Loan</b></td>
                                     <td style="white-space:nowrap; font-size:9px;">${formatNum(mData.loan)}</td>
                                     <td style="white-space:nowrap; font-size:9px;">${formatNum(aData.loan)}</td>
@@ -3977,7 +4889,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                             let isHighBankClass = aData.cashAtBank >= 1000001 ? 'is-high' : '';
                             htmlRowsBatch = `
                                 <tr class="cash-row ${isHighCashClass}">
-                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9.5px;">${b.name}</td>
+                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${b.name}</td>
                                     <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Cash</b></td>
                                     <td style="color:${cashColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.cashInHand)}</td>
                                 </tr>
@@ -3989,7 +4901,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                         } else if (window.currentCheckerType === 'EQUITY') {
                             htmlRowsBatch = `
                                 <tr class="equity-row">
-                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">${b.name}</td>
+                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">${b.name}</td>
                                     <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Equity</b></td>
                                     <td style="color:${(aData.equity < 0 && aData.equity !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equity)}</td>
                                     <td style="color:${(aData.equityPrev < 0 && aData.equityPrev !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equityPrev)}</td>
@@ -4006,13 +4918,13 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                             let smallCount = smallSamities.length;
                             let codesText = smallSamities.map(s => s.code).join(', ');
                             if (totalCount === 0 && aData && aData.debug) codesText = '<span style="color:red;">' + aData.debug + '</span>';
-                            htmlRowsBatch = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
+                            htmlRowsBatch = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
                         } else if (window.currentCheckerType === 'DUE_COLLECTION') {
-                            htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
+                            htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
                         } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
                             let otr = aData && aData.recoverable > 0 ? ((aData.regular * 100) / aData.recoverable).toFixed(2) : '0.00';
                             let disbCount = aData ? (aData.disbCount || 0) : 0;
-                              htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9.5px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData && aData.admissions ? aData.admissions : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData && aData.dropouts ? aData.dropouts : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData && aData.tdOpen ? aData.tdOpen : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">` + (aData && aData.tdClose ? aData.tdClose : '0') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + (aData && aData.fullPaidCount ? aData.fullPaidCount : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.cashInHand)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.cashAtBank)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData && aData.newDueBorrower ? aData.newDueBorrower : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.newDueAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.writeOffColl)||0).toFixed(2) : '0.00') + `</td></tr>`;
+                              htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData && aData.admissions ? aData.admissions : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData && aData.dropouts ? aData.dropouts : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData && aData.tdOpen ? aData.tdOpen : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">` + (aData && aData.tdClose ? aData.tdClose : '0') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + (aData && aData.fullPaidCount ? aData.fullPaidCount : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.cashInHand)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.cashAtBank)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData && aData.newDueBorrower ? aData.newDueBorrower : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.newDueAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.writeOffColl)||0).toFixed(2) : '0.00') + `</td></tr>`;
                         }
                         tbodyAfter.innerHTML = htmlRowsBatch;
                         if (window.applyTabFilters) window.applyTabFilters(tbodyAfter);
@@ -4020,10 +4932,10 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                     } else {
                         tbodyAfter.innerHTML = `
                             <tr>
-                                <td style="text-align:left; font-weight:bold; color:#e74c3c; font-size:9.5px;">${b.name}</td>
-                                <td colspan="${window.currentCheckerType === 'MIS' ? 3 : (window.currentCheckerType === 'EQUITY' || window.currentCheckerType === 'SAMITY' ? 2 : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 26 : 4))}" style="text-align:center; color:red; font-size:9.5px;">\u274C \u09A1\u09BE\u099F\u09BE \u09A8\u09C7\u0987</td>
+                                <td style="text-align:left; font-weight:bold; color:#e74c3c; font-size:9px;">${b.name}</td>
+                                <td colspan="${window.currentCheckerType === 'MIS' ? 3 : (window.currentCheckerType === 'EQUITY' || window.currentCheckerType === 'SAMITY' ? 2 : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 26 : 4))}" style="text-align:center; color:red; font-size:9px;">\u274C \u09A1\u09BE\u099F\u09BE \u09A8\u09C7\u0987</td>
                                 <td style="text-align:center; vertical-align:middle;">
-                                    <button class="manual-retry-btn" data-id="${b.id}" data-name="${b.name}" style="background:#e74c3c; color:white; border:none; padding:2px 6px; font-size:9.5px; border-radius:2px; cursor:pointer; font-weight:bold;">\u{1F504} Retry</button>
+                                    <button class="manual-retry-btn" data-id="${b.id}" data-name="${b.name}" style="background:#e74c3c; color:white; border:none; padding:2px 6px; font-size:9px; border-radius:2px; cursor:pointer; font-weight:bold;">\u{1F504} Retry</button>
                                 </td>
                             </tr>
                         `;
@@ -4066,6 +4978,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
     setInterval(() => {
         if (window.location.hash.includes('dashboard')) {
             initMisAisToggleBtn();
+
         } else {
             isMisAisBtnClosed = false;
             let btn1 = document.getElementById('mis-ais-toggle-btn');
@@ -4147,7 +5060,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
             clonedHeaders = Object.assign({}, this._headers); 
             try {
                 sessionStorage.setItem('mf_cloned_headers', JSON.stringify(clonedHeaders));
-                localStorage.setItem('mf_cloned_headers_backup', JSON.stringify(clonedHeaders));
+                localStorage.setItem('mf_cloned_headers_backup', JSON.stringify(clonedHeaders)); sessionStorage.setItem('mf_session_refreshed', '1');
             } catch(e){}
         }
 
@@ -4190,7 +5103,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                     }
                     try {
                         sessionStorage.setItem('mf_cloned_headers', JSON.stringify(clonedHeaders));
-                        localStorage.setItem('mf_cloned_headers_backup', JSON.stringify(clonedHeaders));
+                        localStorage.setItem('mf_cloned_headers_backup', JSON.stringify(clonedHeaders)); sessionStorage.setItem('mf_session_refreshed', '1');
                     } catch(e){}
                 }
             }
@@ -4233,11 +5146,33 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
 
     // \u09E9. API \u099F\u09C7\u09AE\u09AA\u09CD\u09B2\u09C7\u099F \u09B8\u0982\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09BE (Background Iframe)
     async function ensureApiAndBranchList() {
-        if (sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup')) {
-            return;
-        }
+        if ((sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup')) && sessionStorage.getItem('mf_session_refreshed')) { return; }
 
-        return new Promise((resolve) => {
+        try {
+            let vuexStr = localStorage.getItem('vuex');
+            if (vuexStr) {
+                let v = JSON.parse(vuexStr);
+                let extractedId = '';
+                if (v.auth && v.auth.user && v.auth.user.branch_id) extractedId = String(v.auth.user.branch_id);
+                else if (v.auth && v.auth.user && v.auth.user.branchId) extractedId = String(v.auth.user.branchId);
+                else if (v.auth && v.auth.token) {
+                    let payloadStr = atob(v.auth.token.split('.')[1]);
+                    let payload = JSON.parse(payloadStr);
+                    if (payload.branch_id) extractedId = String(payload.branch_id);
+                    else if (payload.branchId) extractedId = String(payload.branchId);
+                    else if (payload.branch) extractedId = String(payload.branch);
+                }
+                if (extractedId && extractedId !== 'SELF' && extractedId !== '0') {
+                    sessionStorage.setItem('mf_real_branch_id_iframe', extractedId);
+                    // Do NOT return immediately if we haven't captured headers OR haven't refreshed session
+                    if ((sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup')) && sessionStorage.getItem('mf_session_refreshed')) {
+                        return extractedId;
+                    }
+                }
+            }
+        } catch(e) {}
+
+    return new Promise((resolve) => {
             isCapturing = true;
             let ifr = document.createElement('iframe');
             ifr.allow = "geolocation 'none'";
@@ -4248,14 +5183,38 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
             let timer = setTimeout(() => {
                 isCapturing = false;
                 if(ifr.parentNode) ifr.remove();
-                resolve();
-            }, 25000);
+                sessionStorage.setItem('mf_session_refreshed', '1'); resolve(); }, 25000);
 
             ifr.onload = () => {
                 setTimeout(async () => {
                     try {
                         let doc = ifr.contentDocument || ifr.contentWindow.document;
                         let win = ifr.contentWindow;
+
+                        if (win && win.fetch) {
+                            const origFetch = win.fetch;
+                            win.fetch = async function(resource, options) {
+                                let method = (options && options.method) ? options.method : 'GET';
+                                let url = typeof resource === 'string' ? resource : (resource && resource.url ? resource.url : '');
+                                let h = (options && options.headers) ? options.headers : {};
+                                if (url && (url.includes('cbo_branch') || url.includes('cbo_member_status') || (url.includes('members') && (url.includes('limit=') || url.includes('ajax') || url.includes('list'))))) {
+                                    clonedUrl = url; sessionStorage.setItem('mf_cloned_url', clonedUrl);
+                                    
+                                    let hd = {};
+                                    if (h instanceof Headers) {
+                                        h.forEach((v, k) => hd[k] = v);
+                                    } else {
+                                        hd = JSON.parse(JSON.stringify(h));
+                                    }
+                                    try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { hd['Authorization'] = 'Bearer ' + v.auth.token; hd['Isme-Token'] = v.auth.token; } } catch(e) {}
+                                    
+                                    clonedHeaders = hd;
+                                    sessionStorage.setItem('mf_cloned_headers', JSON.stringify(clonedHeaders));
+                                    clearTimeout(timer); isCapturing = false; if (document.body.contains(ifr)) ifr.remove(); resolve(clonedUrl);
+                                }
+                                return origFetch.apply(this, arguments);
+                            };
+                        }
 
                         if (win && win.XMLHttpRequest) {
                             const ifrOpen = win.XMLHttpRequest.prototype.open;
@@ -4275,24 +5234,20 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                             };
                             
                             win.XMLHttpRequest.prototype.send = function(body) {
-                                if (this._url && (this._url.includes('cbo_branch') || this._url.includes('cbo_member_status') || (this._url.includes('members') && (this._url.includes('limit=') || this._url.includes('ajax') || this._url.includes('list'))))) {
+                                if (this._url && this._url.includes('/core-service/index.php/')) {
                                     clonedUrl = this._url; 
                                     clonedHeaders = Object.assign({}, this._headers); 
                                     try {
                                         sessionStorage.setItem('mf_cloned_url', clonedUrl);
                                         localStorage.setItem('mf_cloned_url_backup', clonedUrl);
                                         sessionStorage.setItem('mf_cloned_headers', JSON.stringify(clonedHeaders));
-                                        localStorage.setItem('mf_cloned_headers_backup', JSON.stringify(clonedHeaders));
-                                        
-                                        let bodyStr = body;
-                                        if (body instanceof win.FormData || body instanceof FormData) {
-                                            let p = new URLSearchParams();
-                                            for (let [k,v] of body.entries()) p.append(k, v);
-                                            bodyStr = p.toString();
-                                        }
-                                        let template = { url: clonedUrl, method: this._method || 'POST', headers: clonedHeaders, body: bodyStr };
-                                        sessionStorage.setItem('mf_api_template', JSON.stringify(template));
+                                        localStorage.setItem('mf_cloned_headers_backup', JSON.stringify(clonedHeaders)); 
+                                        sessionStorage.setItem('mf_session_refreshed', '1');
                                     } catch(e){}
+                                    
+                                    if (this._headers && (this._headers['Authorization'] || this._headers['authorization'])) {
+                                        clearTimeout(timer); isCapturing = false; if (document.body.contains(ifr)) ifr.remove(); resolve(clonedUrl);
+                                    }
                                 }
                                 ifrSend.apply(this, arguments);
                             };
@@ -4301,17 +5256,19 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                         let filterBtn = doc.querySelector('.filter-btn') || doc.querySelector('.fa-filter') || doc.querySelector('[title="Filter"]');
                         if (filterBtn) filterBtn.click();
 
-                        await new Promise(r => setTimeout(r, 200));
-
-                        let sBtn = doc.querySelector('#custom-search-btn') || doc.querySelector('.search-btn') || doc.querySelector('button[type="submit"]');
-                        if (sBtn) {
-                            sBtn.click();
-                            let checks = 0;
-                            while (!sessionStorage.getItem('mf_cloned_url') && checks < 20) {
-                                await new Promise(r => setTimeout(r, 150));
-                                checks++;
+                        let tryClick = setInterval(() => {
+                            if (sessionStorage.getItem('mf_cloned_url')) {
+                                clearInterval(tryClick);
+                                return;
                             }
-                        }
+                            let btn = doc.getElementById('custom-search-btn') || Array.from(doc.querySelectorAll('button')).find(b => b.innerText && b.innerText.trim().includes('Search')) || doc.querySelector('button[type="submit"]');
+                            if (btn) {
+                                btn.dispatchEvent(new MouseEvent('click', { view: win, bubbles: true, cancelable: true }));
+                                btn.click();
+                            }
+                        }, 300);
+                        
+                        setTimeout(() => clearInterval(tryClick), 10000); // Stop clicking after 10s
 
                         clearTimeout(timer);
                         isCapturing = false;
@@ -4330,66 +5287,35 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
 
     // \u09EA. API \u09A1\u09C7\u099F\u09BE \u09AB\u09C7\u099A\u09BE\u09B0 (High Speed - Main Window Execution)
     async function fetchMemberCount(branchId, nidStatus) {
-        let tmplStr = sessionStorage.getItem('mf_api_template');
-        if (!tmplStr) {
-            // Fallback to GET method if template not found but URL is
-            let cUrl = sessionStorage.getItem('mf_cloned_url') || localStorage.getItem('mf_cloned_url_backup');
-            if(!cUrl) return 0;
-            try { 
-                let savedHd = sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup');
-                if(savedHd) clonedHeaders = JSON.parse(savedHd); 
-            } catch(e){}
-            let basePath = window.location.pathname.replace('/#/', '/').replace('/#', '/');
-            if (!basePath.endsWith('/')) basePath += '/';
-            let urlObj = new URL(cUrl.startsWith('http') ? cUrl : window.location.origin + basePath + cUrl);
-            urlObj.searchParams.set('cbo_branch', (branchId && branchId !== 'SELF' && branchId !== '0') ? branchId : '');
-            urlObj.searchParams.set('cbo_nid_status', nidStatus);
-            urlObj.searchParams.set('cbo_member_status', 'A');
-            try {
-                let r = await fetch(urlObj.toString(), { method: 'GET', headers: clonedHeaders });
-                let d = await r.json();
-                return d.total || d.total_rows || d.count || d.recordsTotal || d.recordsFiltered || 0;
-            } catch(e) { return 0; }
-        }
-
         try {
-            let t = JSON.parse(tmplStr);
-            let url = t.url;
-            let options = { method: t.method || 'POST', headers: Object.assign({}, t.headers || {}) };
-            
-            if (t.body) {
-                if (typeof t.body === 'string') {
-                    let p = new URLSearchParams(t.body);
-                    p.set('cbo_branch', (branchId && branchId !== 'SELF' && branchId !== '0') ? branchId : '');
-                    p.set('cbo_nid_status', nidStatus);
-                    p.set('cbo_member_status', 'A');
-                    options.body = p.toString();
-                    
-                    // Force content-type if not present for URLSearchParams
-                    if (!options.headers['Content-Type'] && !options.headers['content-type']) {
-                        options.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
-                    }
-                } else {
-                    let u = new URLSearchParams();
-                    for(let k in t.body) u.append(k, t.body[k]);
-                    u.set('cbo_branch', (branchId && branchId !== 'SELF' && branchId !== '0') ? branchId : '');
-                    u.set('cbo_nid_status', nidStatus);
-                    u.set('cbo_member_status', 'A');
-                    options.body = u.toString();
-                    options.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
-                }
-            } else {
-                let u = new URL(url.startsWith('http') ? url : (window.location.origin + url));
-                u.searchParams.set('cbo_branch', (branchId && branchId !== 'SELF' && branchId !== '0') ? branchId : '');
-                u.searchParams.set('cbo_nid_status', nidStatus);
-                u.searchParams.set('cbo_member_status', 'A');
-                url = u.toString();
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { 
+                try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; } } catch(e) {} 
             }
+            h['Site-Name'] = window.location.pathname.split('/')[1] || 'dsk';
+            h['x-tenant-geo'] = 'bd';
+            h['X-Requested-With'] = 'XMLHttpRequest';
+            h['Accept'] = 'application/json, text/javascript, */*; q=0.01';
             
-            let r = await window.fetch(url, options);
+            try {
+                let preUrl = window.location.origin + '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
+                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
+            } catch(e) {}
+
+            let safeBId = branchId;
+            if (safeBId === 'SELF' || !safeBId) {
+                let v = JSON.parse(localStorage.getItem('vuex') || '{}');
+                function findId(obj) { if(!obj || typeof obj!=='object') return null; if(obj.branch_id) return obj.branch_id; for(let k in obj) { let r=findId(obj[k]); if(r) return r; } return null; }
+                safeBId = findId(v) || '';
+            }
+
+            let url = window.location.origin + '/core-service/index.php/members/index?limit=1&offset=0&cbo_branch=' + safeBId + '&cbo_nid_status=' + nidStatus + '&cbo_member_status=A';
+            let r = await fetch(url, { method: 'GET', headers: h });
+            if (!r.ok) return 0;
             let d = await r.json();
-            return d.total || d.total_rows || d.count || d.recordsTotal || d.recordsFiltered || 0;
-        } catch(e) {
+            return d.total !== undefined ? d.total : (d.total_rows !== undefined ? d.total_rows : (d.recordsTotal !== undefined ? d.recordsTotal : (d.count !== undefined ? d.count : 0)));
+        } catch (e) {
+            console.error('fetchMemberCount Error:', e);
             return 0;
         }
     }
@@ -4748,7 +5674,15 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                             };
                         });
                     } else {
-                        rawBranches = [{ id: '', name: localStorage.getItem('microfin_entity_name') || "My Branch", area: 'Branch', zone: 'Branch' }];
+                        let singleId = '';
+                        let cbo = document.querySelector('select[name="cbo_branch"]');
+                        if (cbo && cbo.value && cbo.value !== '-1' && cbo.value !== '') {
+                            singleId = cbo.value;
+                        } else {
+                            let bData = JSON.parse(sessionStorage.getItem('mf_user_branch') || '{}');
+                            if (bData.id) singleId = bData.id;
+                        }
+                        rawBranches = [{ id: singleId, name: localStorage.getItem('microfin_entity_name') || "My Branch", area: 'Branch', zone: 'Branch' }];
                     }
 
                     if(selectedVal !== 'ALL') {
@@ -4764,6 +5698,8 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
 
                     status.innerText = "Checking system readiness...";
                     
+                    // We no longer need to check mf_cloned_url or ensureApiAndBranchList because fetchMemberCount is pure API now!
+                    /*
                     if (!sessionStorage.getItem('mf_cloned_url') && !localStorage.getItem('mf_cloned_url_backup')) {
                         status.innerText = "Connecting to Data Source (background)...";
                         await ensureApiAndBranchList();
@@ -4774,6 +5710,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                         setTimeout(() => { if(!status || !status.parentNode) return; status.innerText = "Ready"; btn.disabled = false; }, 6000);
                         return;
                     }
+                    */
 
                     let currentReportStructure = { 
                         maps: maps, 
@@ -4983,6 +5920,7 @@ let dAll = await scrapeViaGhost('#/reports/periodical-reports/periodical-report-
                     console.error("Failed to inject UI: ", e);
                 }
             }
+
         } else {
             hasSyncedThisPageLoad = false;
             isToggleClosed = false; 
