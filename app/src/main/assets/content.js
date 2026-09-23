@@ -1,3 +1,10 @@
+    window.fmtNum = function(num, decimals = 0) {
+    if (num == null || num === '' || isNaN(num)) {
+        if (decimals > 0) return Number(0).toFixed(decimals);
+        return '0';
+    }
+    return Number(num).toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+};
 async function fetchTopsheetDisb(bId, targetDateFrom, targetDateTo) {
     try {
         let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
@@ -171,7 +178,6 @@ try {
     localStorage.removeItem('mf_cached_dates_v2');
     localStorage.removeItem('mf_user_type');
 } catch(e) {}
-
 // ========================================================================
 // \u{1F514} 0. AUTO UPDATE NOTIFICATION SYSTEM & WEB FONTS
 // ========================================================================
@@ -202,7 +208,7 @@ try {
 })();
 
 (function checkAppUpdate() {
-    const CURRENT_VERSION = "2.4"; // \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09CD\u09AF\u09BE\u09AA \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8
+    const CURRENT_VERSION = "2.5"; // \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09CD\u09AF\u09BE\u09AA \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8
     
     // \u26A0\uFE0F \u09A8\u09BF\u099A\u09C7 YOUR_USERNAME \u098F\u09B0 \u099C\u09BE\u09DF\u0997\u09BE\u09DF \u0986\u09AA\u09A8\u09BE\u09B0 \u0997\u09BF\u099F\u09B9\u09BE\u09AC\u09C7\u09B0 \u0986\u09B8\u09B2 \u0987\u0989\u099C\u09BE\u09B0\u09A8\u09C7\u09AE \u09AC\u09B8\u09BF\u09DF\u09C7 \u09A6\u09BF\u09A8 
     const UPDATE_JSON_URL = "https://raw.githubusercontent.com/rameezrazabd/DSK/main/update.json"; 
@@ -253,7 +259,6 @@ try {
         }
     }
 })();
-
 // ========================================================================
 // \u{1F310} 0.5 CENTRAL HIERARCHY MASTER SCANNER (UNIFIED SYSTEM SYNC FOR ALL UIs)
 // ========================================================================
@@ -308,10 +313,10 @@ try {
         if (!toast) {
             toast = document.createElement('div');
             toast.id = 'central-sync-toast';
-            toast.style.cssText = 'position:fixed; bottom:20px; right:16px; background:rgba(44, 62, 80, 0.9); color:white; padding:6px 12px; z-index:9999999; border-radius:50px; font-weight:bold; font-size:11px; font-family: DSK_MixedFont, sans-serif; box-shadow:0 2px 8px rgba(0,0,0,0.3); transition:all 0.3s ease; display:flex; align-items:center; gap:6px; pointer-events:none; border:1px solid #34495e;';
+            toast.style.cssText = 'position:fixed; bottom:20px; right:16px; background:#ffffff; color:#192a56; padding:6px 16px; z-index:9999999; border-radius:50px; font-weight:bold; font-size:12px; font-family: DSK_MixedFont, sans-serif; box-shadow:0 4px 12px rgba(0,0,0,0.1); transition:all 0.3s ease; display:flex; align-items:center; gap:6px; pointer-events:none; border:1px solid #dcdde1;';
             document.body.appendChild(toast);
         }
-        toast.style.background = '#f39c12';
+        
         toast.innerHTML = '<span>\u2699\uFE0F \u099C\u09CB\u09A8, \u0985\u099E\u09CD\u099A\u09B2, \u09B6\u09BE\u0996\u09BE \u09B8\u09BF\u0982\u0995 \u09B9\u099A\u09CD\u099B\u09C7...</span>';
 
         const iframe = document.createElement('iframe');
@@ -323,7 +328,7 @@ try {
         let timeout = setTimeout(() => {
             if (document.body.contains(iframe)) iframe.remove();
             window._isCentralSyncRunning = false;
-            toast.style.background = '#e74c3c';
+            
             toast.innerHTML = '<span>\u26A0\uFE0F \u09B8\u09BF\u0982\u0995 \u09B9\u09A4\u09C7 \u09B8\u09AE\u09DF \u09B2\u09BE\u0997\u099B\u09C7... \u09AA\u09B0\u09C7 \u0986\u09AC\u09BE\u09B0 \u099A\u09C7\u09B7\u09CD\u099F\u09BE \u0995\u09B0\u09BE \u09B9\u09AC\u09C7!</span>';
             setTimeout(() => toast.remove(), 3000);
             if (callback) callback(false);
@@ -392,7 +397,7 @@ try {
                         let zoneMatch = bText.match(/Zone\s*:\s*(.*?)(?=\s+Area|\s+Date|\s+Branch|$)/i);
                         if (zoneMatch && zoneMatch[1]) currentZone = zoneMatch[1].trim();
                         
-                        let headerNameMatch = bText.match(/Branch\s*:\s*(.*?)\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)/i);
+                        let headerNameMatch = bText.match(/Branch\s*:\s*(.*?)(?=\s+Date|\s+Zone|\s+Area|$|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)/i);
                         if (headerNameMatch && headerNameMatch[1]) {
                             let hName = headerNameMatch[1].trim();
                             localStorage.setItem('microfin_entity_name', hName);
@@ -649,7 +654,7 @@ try {
                         if (myId === "SELF" || myName === "My Branch") {
                             let bInfo = doc.querySelector('.branch_info');
                             if (bInfo && bInfo.innerText.includes('Branch:')) {
-                                let m = bInfo.innerText.match(/Branch:\s*(.*?)\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)/i);
+                                let m = bInfo.innerText.match(/Branch:\s*(.*?)(?=\s+Date|\s+Zone|\s+Area|$|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)/i);
                                 if (m && m[1]) myName = m[1].trim();
                             }
                         }
@@ -683,6 +688,18 @@ try {
                         branches = [{ id: myId, name: myName, area: 'Branch', zone: 'Branch' }];
                     }
 
+                    // --- Global Exclusion List ---
+                    const excludedCodes = ['181', '0181', '292', '0292', '0000', '0', '256', '0256'];
+                    const excludedNames = ['nizampur', 'karerhat', 'head office', 'akua'];
+                    branches = branches.filter(b => {
+                        let bId = (b.id || '').toString();
+                        let bName = (b.name || '').toLowerCase();
+                        if (excludedCodes.includes(bId)) return false;
+                        if (excludedNames.some(en => bName.includes(en))) return false;
+                        return true;
+                    });
+                    // -----------------------------
+
                     if (branches.length > 0) {
                         // Save simultaneously for ALL UIs & extensions
                         sessionStorage.setItem('mf_user_type', uType);
@@ -698,7 +715,7 @@ try {
                         localStorage.setItem('microfin_zMap', JSON.stringify(zMap));
                         localStorage.setItem('microfin_sync_status', 'DONE');
 
-                        toast.style.background = '#27ae60';
+                        
                         if (uType === 'BRANCH' && branches.length > 0) {
                             toast.innerHTML = `<span>\u2705 সিংক সম্পন্ন! শাখা আইডি: ${branches[0].id} (${branches[0].name}) কালেক্ট হয়েছে।</span>`;
                         } else {
@@ -719,7 +736,7 @@ try {
                     clearTimeout(timeout);
                     if (document.body.contains(iframe)) iframe.remove();
                     window._isCentralSyncRunning = false;
-                    toast.style.background = '#e74c3c';
+                    
                     toast.innerHTML = '<span>\u26A0\uFE0F \u09B8\u09BE\u09AE\u09DF\u09BF\u0995 \u09B8\u09AE\u09B8\u09CD\u09AF\u09BE\u0964 \u098F\u0995\u099F\u09C1 \u09AA\u09B0\u09C7 \u0986\u09AC\u09BE\u09B0 \u099A\u09C7\u09B7\u09CD\u099F\u09BE \u0995\u09B0\u09BE \u09B9\u09AC\u09C7!</span>';
                     setTimeout(() => toast.remove(), 3000);
                     if (callback) callback(false);
@@ -755,7 +772,6 @@ try {
         }
     }, 1000);
 })();
-
 // ========================================================================
 (function() {
     try {
@@ -777,7 +793,6 @@ try {
         }
     } catch(e) {}
 })();
-
 // ========================================================================
 // EXTENSION 1: \u{1F4C5} Branch Date Extractor (Compact Mobile Edition)
 // ========================================================================
@@ -960,7 +975,9 @@ try {
         }
         
         targetSel.disabled = false;
-        targetSel.innerHTML = '<option value="ALL" selected>\uD83D\uDE80 Select All</option>';
+        
+targetSel.innerHTML = '<option value="ALL" selected>\uD83D\uDE80 Select All</option>';
+
         
         let data = [];
         if (uType === 'AREA') {
@@ -1053,14 +1070,14 @@ try {
             master.style.cssText = 'position:fixed; bottom:70px; right:16px; z-index:999999; display:flex; flex-direction:column-reverse; align-items:flex-end;';
             
             let toggleBtn = document.createElement('div');
-            toggleBtn.innerHTML = '\u{1F6E0}\u{FE0F} Custom Report DSK-IT';
-            toggleBtn.style.cssText = 'background: linear-gradient(135deg, #2c3e50, #34495e); color:white; border-radius:50px; padding:8px 16px; font-weight:bold; font-size:13px; box-shadow:0 4px 12px rgba(0,0,0,0.4); cursor:pointer; font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); user-select:none; transform-origin: right bottom; opacity: 1; transform: scale(1);';
-            toggleBtn.onmouseover = () => { if(toggleBtn.style.pointerEvents !== 'none'){ toggleBtn.style.transform = 'scale(1.05) translateY(-2px)'; toggleBtn.style.boxShadow = '0 8px 20px rgba(0,0,0,0.5)'; }};
-            toggleBtn.onmouseout = () => { if(toggleBtn.style.pointerEvents !== 'none'){ toggleBtn.style.transform = 'scale(1) translateY(0)'; toggleBtn.style.boxShadow = '0 6px 16px rgba(0,0,0,0.4)'; }};
+            toggleBtn.innerHTML = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAAB3CAYAAABPA20BAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAj0SURBVHhe7V1nyB1FFD3/7YJGRbGgWIiIDSyoYEGs0WgUscSGDQsoKlau2GJDEARjVKxYQFDEhmhQiY3YC3bFnkSi2Lty5s2+b/a+O7Pz3veEt++bAwfyvr135u7Z6bszAQoKxgRyLiBfAXKgvlLgINsA8hEg/wLyECCraIsCyPGA/ONF+g6QzbRFAeRaL1DFo7VFAeQOJdIt2mKKQ1YC5GEl0nuAbKgtpyBkbUBmADIXkMVKJJLCHQ7IdO05hSDnGcJYPEd7TiHIloBcD8hvhjDkUkAEkI205xSE7A3Ic0qg+YDsrC2nAGQrQM4AZFdAllXX1gLkakC+AGQOIGuq6+sAciggJwGycv3a2EA2AeQNQH4BZAkgrwBytrYCZF31m363+tH494D8BMi8us1YQFYH5FmjzWFbdKW2noCsCsiLgPyt/P4E5DJt3WLI8n4upgWq+Dwga2ivDmQfQH4wfMhfO1V3LCC3BXMyza8BOUx7TEBW8P4sOdqXZO+X8G8F5CpA/jJujuTg8UjtYUNuTqTDhn4v7dESyFmJ8c+3gBwb2K4MyPqdRrtL/g56QM7lokJ9CMhOE7atAGfw0baEVeQ4ZX+2773eBuQtT974DGXHEqXTq/gyIJvW7UcWsr9va/RNkFwnOkF7+FG3tiWD0ubsljVWC0I+Bch6dZ+RA4u8fGwET3KMc7z26MC1XdqenK0t/YrB3YZtxQdGeLDJoi5vGkGT7K5VFQvhRtraJyISIdMAuc+wr3ij9hgRuPGODpZkY3u6tq6jX5GIRqEu1x4jgJ4gSY6PztKWvRhEJMIJdb/hRy7W1iOAniD/sOdmFgYViXBC3Wv4LtKWI4CeIK/QFnFMRiTCzQ2fVr5faqsRQM8NHq4tJqB7H05ye/xVGrJcp2eLwU1fWieSeiXkViGv86sBXDJ5qdMLuZeSFxv+5CGA7A7IPYAs9H4cC10KyAYqfT1+aoVIxwTXTvFTET3R5W+uLXF0rf3J1/z6kf47/T7riNjN405l0wqR/OTVvd+Pzbkmyx8BmenzuV1da4VIR/m/cx73uXF9EHLeF47H3u0sBbt8WilSWN328lVHrwv9Dsj7vrpZVfF1QD4JViZv8tOSJ3wbtW2QRyurWyCSu86ljwv83IqNL+dfnP1v3tBwbwvIRYDcBcgePi2/nFJLfxxECsEVx9pvvh3R/l6kXIydSBpyjeFPZq5cEuMv0iRH3EQRKQNFpAwUkTJQRMpAESkDRaQMFJEyMP4ixV4pHaEt4xhLkWQ7QC7x3x9daPiTB/qv4LjcsrpOoY6xE8l9/b8IkG86X/7zw9Eef3Lfzhtf9+8nAdlBpzSBsRKJLwi6Nnz3v3HiK1x+vnyEf/PC39ycc4BOsYOxEcl9SRvavOOrW0qk2X7dqfobS6BfaKulPQ4iuXUhLreGNoOIRLLqLaPSHwuRDjZudlCRXu3d6jUeIu3nv7wNbQYV6QXj3V0RSf29iBSwiFREKiJZ6LnBIlIvem6wH5HON/zJIlIgkh6JV5xZROq8y58OyCy/3+1xQB4F5DFAFvjPcvgtwZQWid8AbF6303CrANUEt4hko4hURFLXi0hFpCwUkTJQRMpAESkDRaQMFJEy0COS/0S5e/3/FqmVOwLU945FJEukBzv7SbrX+bp6WCLxg3e/05tiuQkyJ8utE4nkfhJuluE33HsC8rMh0hY6pTrkREOkZ7w42/vNOTrfVolUkdvR+bG6XvL4tF7aLLjNO3pvCo8ym+cfgs6r4hKd0gigJ8gccjvXajqlOmQ3dQiD3l4R40huL2VJ0YGmyFJ1qk7Fhjxi+KfIcwlO1qmMANzBBlzQt/anWWTju6JOxYZre7htXqdhkRsH99QpjBjkIEA+MIIPyYZYjaOakDwwoSI39zT0liMD2dpvt9I3UXGB9miG+yolVkrZTvG7p2naa8ThtqJbZ5CwLRrwlGS5wUiP3yu1+QhY106d5s8pqW5qvrbKhyuhYWniuXA7aquWQnbxI2KOdybZqLqDhFm9eGDCOvpqy8GRde6JEym4l5lnps8IKCgomBpwR2nwSNYEJwu3pf04v3mZY62K/M2/J44jM+NL2WvbYdxDcoAYkocc8ACoPjN0W+Dpq9PT5JkAxsleZnyRzsIJom3JOdqyT5hBNJFiNfRErvSkTtWKUT0EM76YSBRa2/IBNcTaCDOIHDKgRObuZHftk8MBRXLVVtuRRunsG2YQuXxCp9aBW3rVtrkcQCRXaqv/HyVkJL6+YQbBDKvG1SrCiYCjabLYs30KSp8TU5e4QURiutqGbFghzUZWEOsl2hejzvfYkIli73qw6mH0KZKLzeoYJttYh2gKIkTPU68YCBDrYZrgqgzT71ckKybjwU0KTUFomHV/YXA9IlJqbJNCKj5XAvU1MlFqB0IqCAux+t+9HhOJ+QzwdFPxmdeG1ViHMDNKicQ2QNuT1elZrDb6Wki2bQ2j7BCx+KI96LAa6xCxIFIwG8qwXbKqpMXIKDtELD4zj2E21iFiQaTQ5BOrklHyhiMlwMzLEmjYjXUIM4jJihQb3DVxVpiLT8vKy2LbRHI27HmsapmicaNmXjE2xD0wzCAaMsv16Y59tG2KWmwrrxQzO4S+YAZh3HCIHnvSqCoVXI/IdsrKS1N14VEf9pBWlZ5b9x8KzCASIkUHcJGGV8OVLt5gYk5Ys7fi+8hfi838h12azCBSIlk911JtlYfYfLBm0xCfWZruC1MYApqCCOFKgdUYB0XclbSGsU+F2Oi8ZtMQX7Q09bmCmkRTEF07ChSrIkFA3Rs30tAwR82+KnVtMuIzbYY5PTEz0GMe3kxMIN3QhqWDaSeeqFndVFVpis/ZREpkKu++YAbRD1WDbQZMgdmWVW8vUj2d/p90LDujlJp2qlQODDPxXFrBWiLl0rgpM75+8s1sH5Mwg8hhZDwSDbaJ7BCMYYQZnyESYdoawvcNM+EUeTNNA0erW04xIhBhxhcTKfaAIvbZMIPQpA2nF+xuMyeRztZqmDWZbiJNM77ETZt5GnPCkYLrHavGOuSwep6CgoKCscJ/O+uASgsFSowAAAAASUVORK5CYII=" style="width:16px; height:16px; vertical-align:middle; margin-right:6px;"> Custom Report DSK-IT';
+            toggleBtn.style.cssText = 'background: linear-gradient(135deg, #ffffff, #f1f2f6); color:#192a56; border:1px solid #dcdde1; border-radius:50px; padding:8px 16px; font-weight:bold; font-size:13px; box-shadow:0 4px 12px rgba(0,0,0,0.15); cursor:pointer; font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); user-select:none; transform-origin: right bottom; opacity: 1; transform: scale(1);';
+            toggleBtn.onmouseover = () => { if(toggleBtn.style.pointerEvents !== 'none'){ toggleBtn.style.transform = 'scale(1.05) translateY(-2px)'; toggleBtn.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)'; }};
+            toggleBtn.onmouseout = () => { if(toggleBtn.style.pointerEvents !== 'none'){ toggleBtn.style.transform = 'scale(1) translateY(0)'; toggleBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; }};
 
             let closeMenuBtn = document.createElement('div');
             closeMenuBtn.innerHTML = '\u2715 Close Menu';
-            closeMenuBtn.style.cssText = 'display:none; background: linear-gradient(135deg, #e74c3c, #c0392b); color:white; border-radius:50px; padding:8px 16px; font-weight:bold; font-size:13px; box-shadow:0 4px 12px rgba(231,76,60,0.4); cursor:pointer; font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); user-select:none; transform-origin: right bottom; opacity:0; transform: scale(0.8);';
+            closeMenuBtn.style.cssText = 'display:none; background: #ffffff; color: #e74c3c; border: 1px solid #dcdde1; border-radius:50px; padding:8px 16px; font-weight:bold; font-size:13px; box-shadow:0 4px 12px rgba(0,0,0,0.1); cursor:pointer; font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); user-select:none; transform-origin: right bottom; opacity:0; transform: scale(0.8);';
             closeMenuBtn.onmouseover = () => { if(closeMenuBtn.style.pointerEvents !== 'none'){ closeMenuBtn.style.transform = 'scale(1.05) translateY(-2px)'; closeMenuBtn.style.boxShadow = '0 8px 20px rgba(231,76,60,0.6)'; }};
             closeMenuBtn.onmouseout = () => { if(closeMenuBtn.style.pointerEvents !== 'none'){ closeMenuBtn.style.transform = 'scale(1) translateY(0)'; closeMenuBtn.style.boxShadow = '0 6px 16px rgba(231,76,60,0.4)'; }};
             
@@ -1147,9 +1164,9 @@ try {
         
         let container = document.createElement('div');
         container.id = 'bde-ghost-date-toggle';
-        container.style.cssText = 'display:flex; align-items:center; justify-content:space-between; background: linear-gradient(135deg, #2980b9 0%, rgba(0,0,0,0.4) 150%); color:white; border-radius:50px; padding:5px 12px; font-weight:bold; font-size:11px; box-shadow:0 2px 8px rgba(0,0,0,0.3); font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; width: max-content; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(5px);';
-        container.onmouseover = () => { container.style.transform = 'scale(1.05) translateX(-4px)'; container.style.boxShadow = '0 6px 18px rgba(0,0,0,0.5)'; };
-        container.onmouseout = () => { container.style.transform = 'scale(1) translateX(0)'; container.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)'; };
+        container.style.cssText = 'display:flex; align-items:center; justify-content:space-between; background: #005ca8; color: white; border: 1px solid #004b87; border-radius:50px; padding:6px 14px; font-weight:bold; font-size:12px; box-shadow:0 4px 12px rgba(0,92,168,0.25); cursor:pointer; width: max-content; font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);';
+        container.onmouseover = () => { container.style.transform = 'scale(1.05) translateX(-4px)'; container.style.boxShadow = '0 6px 16px rgba(0,0,0,0.15)'; };
+        container.onmouseout = () => { container.style.transform = 'scale(1) translateX(0)'; container.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; };
         
         let textSpan = document.createElement('span');
         textSpan.innerText = '\uD83D\uDCC5 Branch Dates';
@@ -1158,7 +1175,7 @@ try {
         let closeBtn = document.createElement('button');
         closeBtn.innerText = '\u2715';
         closeBtn.title = '\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8';
-        closeBtn.style.cssText = 'background: rgba(255,255,255,0.25); color:white; border:none; width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; outline:none; transition:0.2s;';
+        closeBtn.style.cssText = 'background: rgba(255,255,255,0.25); color:white; border:none; width:24px; height:24px; border-radius:50%; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; outline:none; transition:0.2s;';
         closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255,0,0,0.8)';
         closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255,255,255,0.25)';
         closeBtn.onclick = (e) => {
@@ -1183,19 +1200,22 @@ try {
 
         let panel = document.createElement('div');
           panel.id = 'bde-ghost-date-panel';
-          panel.style.cssText = 'position:fixed; top:10px; left:50%; transform:translateX(-50%); background:white; border:2px solid #2980b9; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.4); width:95vw; max-width:800px; max-height:90vh; z-index:999999; display:flex; flex-direction:column; font-family: SutonnyOMJ, SolaimanLipi, DSK_MixedFont, sans-serif; overflow:hidden;';
+          panel.style.cssText = 'position:fixed; top:10px; left: max(2.5vw, calc(50vw - 400px)); background:white; border:1px solid #dcdde1; border-radius:8px; box-shadow:0 12px 40px rgba(0,0,0,0.12); width:95vw; max-width:800px; height:85vh; max-height:90vh; z-index:999999; display:flex; flex-direction:column; font-family: SutonnyOMJ, SolaimanLipi, DSK_MixedFont, sans-serif; overflow:hidden; resize:both; min-width:300px; min-height:200px;';
 
         document.body.appendChild(panel);
+        setTimeout(() => { let mBtn = panel.querySelector('.panel-maximize-btn'); if(mBtn) mBtn.click(); }, 50);
 
         panel.innerHTML = `
-            <div id="bde-drag-header" style="background:#2c3e50; color:white; padding:4px 8px; display:flex; justify-content:space-between; align-items:center; cursor:move; flex-shrink:0;">
+            <div id="bde-drag-header" style="background:#192a56; color:white; padding:4px 8px; display:flex; justify-content:space-between; align-items:center; cursor:move; flex-shrink:0;">
                 <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; overflow:hidden;">
                     <strong style="font-size:11.5px;">\u{1F4C5} Branch Date Extractor</strong>
                     <span id="bde-status-msg" style="font-size:11px; font-weight:bold; color:#f1c40f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                 </div>
                 <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
-                    <button id="bde-export-excel-btn" style="display:none; background:#8e44ad; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold; transition:0.2s;">\u{1F4E5} Excel</button>
-                    <button id="bde-close-date-panel" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255, 65, 108, 0.45); transition: all 0.2s ease; outline: none; padding: 0;" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 3px 10px rgba(255, 65, 108, 0.7)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 6px rgba(255, 65, 108, 0.45)';" onmousedown="this.style.transform='scale(0.95)';">\u2715</button>
+                    <button id="bde-export-excel-btn" style="display:none; background:#192a56; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold; transition:0.2s;">\u{1F4E5} Excel</button>
+                      <button id="bde-sync-btn" title="\u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09C1\u09A8" style="background: #f1f2f6; color: #192a56; border: 1px solid #dcdde1; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease;">\u{1F504}</button>
+                    <button class="panel-maximize-btn" title="\u09AC\u09DC / \u099B\u09CB\u099F \u0995\u09B0\u09C1\u09A8" style="background: #f1f2f6; color: #192a56; border: 1px solid #dcdde1; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease;">\u26F6</button>
+                    <button id="bde-close-date-panel" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: #f1f2f6; color: #e74c3c; border: 1px solid #dcdde1; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease; outline: none; padding: 0;" onmouseover="this.style.transform='scale(1.15)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)';" onmousedown="this.style.transform='scale(0.95)';">\u2715</button>
                 </div>
             </div>
 
@@ -1208,13 +1228,9 @@ try {
                     <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
                         <select id="bde-ui-target" style="flex:1; width:100%; padding:0 4px; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box; margin:0;"></select>
-                    </div>
-                    <div>
-                        <button id="bde-sync-btn" style="height:24px; width:28px; background:#bdc3c7; color:#2c3e50; border:none; border-radius:3px; cursor:pointer; font-weight:bold; font-size:12px; display:flex; align-items:center; justify-content:center; padding:0;" title="\u09B8\u09BF\u0999\u09CD\u0995">\u{1F504}</button>
-                    </div>
-                </div>
+                    </div></div>
 
-                <button id="bde-start-fetch-btn" style="width:100%; height:28px; display:flex; align-items:center; justify-content:center; gap:6px; background:#27ae60; color:white; border:none; font-weight:bold; font-size:13px; border-radius:3px; cursor:pointer; margin-bottom:5px; flex-shrink:0; transition:0.2s;">\u{1F680} Fetch Dates (Auto Engine)</button>
+                <button id="bde-start-fetch-btn" style="width:100%; height:28px; display:flex; align-items:center; justify-content:center; gap:6px; background:#192a56; color:white; border:none; font-weight:bold; font-size:13px; border-radius:3px; cursor:pointer; margin-bottom:5px; flex-shrink:0; transition:0.2s;">\u{1F680} Fetch Dates (Auto Engine)</button>
                 
                 <div id="bde-tabs-bar" style="display:flex; gap:6px; margin-bottom:5px; flex-shrink:0;">
                     <button id="bde-tab-all" style="flex:1; background:#2980b9; color:white; border:none; padding:4px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">All (<span id="bde-lbl-all">\u09E6</span>)</button>
@@ -1222,7 +1238,7 @@ try {
                     <button id="bde-tab-back" style="flex:1; background:#ecf0f1; color:#7f8c8d; border:1px solid #bdc3c7; padding:4px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Back (<span id="bde-lbl-back">\u09E6</span>)</button>
                 </div>
                 
-                <div id="bde-table-output" style="margin-top:4px; flex:1; overflow-y:auto; border:1px solid #eaeaea; border-radius:4px;"></div>
+                <div id="bde-table-output" style="margin-top:4px; flex:1; min-height:0; overflow:auto; border:1px solid #eaeaea; border-radius:4px;"></div>
             </div>
         `;
 
@@ -1325,17 +1341,20 @@ try {
 
         async function startFetchingDates() {
             let level = document.getElementById('bde-ui-level').value;
-            let targetId = document.getElementById('bde-ui-target').value;
+            let targetSel = document.getElementById('bde-ui-target');
+            let targetId = targetSel.value;
+            let targetName = targetSel.options[targetSel.selectedIndex].text;
             let branchesToProcess = [];
+            let allB = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
 
             if (targetId === 'ALL') {
-                branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]');
+                branchesToProcess = allB;
             } else if (level === 'HO') {
-                branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]').filter(b => b.zone === targetId);
+                branchesToProcess = allB.filter(b => b.zone === targetName);
             } else if (level === 'ZONE') {
-                branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]').filter(b => b.area === targetId);
+                branchesToProcess = allB.filter(b => b.area === targetName);
             } else if (level === 'AREA') {
-                branchesToProcess = JSON.parse(sessionStorage.getItem('mf_cached_branches') || '[]').filter(b => b.id.toString() === targetId);
+                branchesToProcess = allB.filter(b => b.id === targetId);
             }
 
             if(branchesToProcess.length === 0) {
@@ -1352,10 +1371,10 @@ try {
             if(exportBtn) { exportBtn.style.display = 'none'; }
 
             let tableHtml = `
-                <table style="width:100%; border-collapse:collapse; font-size:10px; text-align:center; table-layout:fixed; font-family: 'SutonnyOMJ', 'SolaimanLipi', DSK_MixedFont, sans-serif;">
+                <table style="width:100%; border-collapse:collapse; font-size:9.5px; text-align:center; table-layout:fixed; font-family: 'SutonnyOMJ', 'SolaimanLipi', DSK_MixedFont, sans-serif;">
                     <thead style="position: sticky; top: 0; z-index:5;">
                         <tr>
-                            <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#2c3e50; color:white; width:25%; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
+                            <th style="padding:5px 2px; border:1px solid #bdc3c7; background:#192a56; color:white; width:25%; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</th>
                             <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#34495e; color:white; width:27%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</th>
                             <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:16%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">MIS \u09A1\u09C7\u099F</th>
                             <th style="padding:5px 1px; border:1px solid #bdc3c7; background:#2980b9; color:white; width:8%; white-space:nowrap; text-align:center !important; font-size:11px; font-weight:bold; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</th>
@@ -1373,7 +1392,7 @@ try {
             for(let b of branchesToProcess) { 
                 if (b.zone !== currentZ && b.zone && b.zone !== "Branch" && b.zone !== "Assigned Zone") { 
                     currentZ = b.zone; 
-                    tableHtml += `<tbody data-status="header"><tr style="background:#0277bd; color:white;"><td colspan="6" style="padding:4px; text-align:left;"><b>\u{1F3E2} Zone: ` + currentZ + `</b></td></tr></tbody>`; 
+                    tableHtml += `<tbody data-status="header"><tr style="background:#192a56; color:white;"><td colspan="6" style="padding:4px; text-align:left;"><b>\u{1F3E2} Zone: ` + currentZ + `</b></td></tr></tbody>`; 
                 } 
                 if (b.area !== currentA && b.area && b.area !== "Branch" && b.area !== "Assigned Area") { 
                     currentA = b.area; 
@@ -1384,8 +1403,8 @@ try {
                 tableHtml += `
                     <tbody id="bde-tr-${safeId}" data-status="pending">
                         <tr>
-                            <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; white-space:normal; line-height:1.25; font-size:10px; color:#2c3e50; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${b.name}</td>
-                            <td colspan="5" style="padding:3px 2px; border:1px solid #bdc3c7; color:gray; font-size:10px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u23F3 \u09AB\u09C7\u099A\u09BF\u0982...</td>
+                            <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; white-space:normal; line-height:1.25; font-size:9.5px; color:#2c3e50; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${b.name}</td>
+                            <td colspan="5" style="padding:3px 2px; border:1px solid #bdc3c7; color:gray; font-size:9.5px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">\u23F3 \u09AB\u09C7\u099A\u09BF\u0982...</td>
                         </tr>
                     </tbody>
                 `;
@@ -1452,12 +1471,12 @@ try {
                         trElement.setAttribute('data-status', rowStatus);
                         trElement.innerHTML = `
                             <tr style="${rowBg}">
-                                <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; color:#2c3e50; white-space:normal; line-height:1.25; font-size:10px; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${b.name}</td>
+                                <td style="text-align:left; padding:4px 3px; border:1px solid #bdc3c7; font-weight:bold; color:#2c3e50; white-space:normal; line-height:1.25; font-size:9.5px; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${b.name}</td>
                                 <td style="padding:3px 1px; border:1px solid #bdc3c7; font-weight:bold; font-size:8px; line-height:1.1; color:${rowStatus === 'back' ? '#c0392b' : '#27ae60'}; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${statusTextHtml}</td>
                                 <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misDate === 'N/A'?'#e74c3c':'#2980b9'}; font-weight:bold; background:#f4f9f9; font-size:9px; white-space:nowrap; overflow:hidden; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${formatMis}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misLagColor}; font-weight:bold; background:#f4f9f9; font-size:10px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${misLag}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${misLagColor}; font-weight:bold; background:#f4f9f9; font-size:9.5px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${misLag}</td>
                                 <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisDate === 'N/A'?'#e74c3c':'#27ae60'}; font-weight:bold; background:#f9fbf9; font-size:9px; white-space:nowrap; overflow:hidden; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${formatAis}</td>
-                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisLagColor}; font-weight:bold; background:#f9fbf9; font-size:10px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${aisLag}</td>
+                                <td style="padding:3px 1px; border:1px solid #bdc3c7; color:${aisLagColor}; font-weight:bold; background:#f9fbf9; font-size:9.5px; white-space:nowrap; font-family: 'SolaimanLipi', DSK_MixedFont, sans-serif;">${aisLag}</td>
                             </tr>
                         `;
                     }
@@ -1471,7 +1490,7 @@ try {
                 if (lblBack) lblBack.innerText = backCount;
                 
                 if (statusElement) { 
-                    statusElement.innerHTML = `<span style="color:#27ae60;">\u2705 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!</span>`; 
+                    statusElement.innerHTML = `<span style="color:#10ac84;">\u2705 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!</span>`; 
                     // setTimeout(() => { if(statusElement) statusElement.innerHTML = ''; }, 2000); 
                 }
             } catch(e) {
@@ -1484,7 +1503,7 @@ try {
                 if (finalStartBtn) {
                     finalStartBtn.disabled = false; 
                     finalStartBtn.removeAttribute('disabled');
-                    finalStartBtn.style.background = "#27ae60";
+                    finalStartBtn.style.background = "#192a56";
                 }
                 if (finalExportBtn) {
                     finalExportBtn.style.display = 'block'; 
@@ -1545,7 +1564,7 @@ try {
                     }
                 });
 
-                let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:o="urn:schemas-microsoft-com:office:office"\n xmlns:x="urn:schemas-microsoft-com:office:excel"\n xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:html="http://www.w3.org/TR/REC-html40">\n <Styles>\n  <Style ss:ID="Default" ss:Name="Normal">\n   <Alignment ss:Vertical="Center" ss:WrapText="1"/>\n   <Borders>\n    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n   </Borders>\n   <Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#2C3E50"/>\n  </Style>\n  <Style ss:ID="sTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="14" ss:Bold="1" ss:Color="#2980B9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sNormalBold"><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#34495E"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="H_Branch" ss:Parent="Default"><Interior ss:Color="#34495E" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="H_Status" ss:Parent="Default"><Interior ss:Color="#8E44AD" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="H_MIS" ss:Parent="Default"><Interior ss:Color="#2980B9" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="H_AIS" ss:Parent="Default"><Interior ss:Color="#16A085" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Normal_C" ss:Parent="Default"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Normal_L" ss:Parent="Default"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Normal_S" ss:Parent="Default"><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Delay_C" ss:Parent="Default"><Interior ss:Color="#FDEDEC" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Delay_L" ss:Parent="Default"><Interior ss:Color="#FDEDEC" ss:Pattern="Solid"/><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Delay_S" ss:Parent="Default"><Interior ss:Color="#FDEDEC" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="Lag_Red" ss:Parent="Default"><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="Lag_Grn" ss:Parent="Default"><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n </Styles>`;
+                let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:o="urn:schemas-microsoft-com:office:office"\n xmlns:x="urn:schemas-microsoft-com:office:excel"\n xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:html="http://www.w3.org/TR/REC-html40">\n <Styles>\n  <Style ss:ID="Default" ss:Name="Normal">\n   <Alignment ss:Vertical="Center" ss:WrapText="1"/>\n   <Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#2C3E50"/>\n  </Style>\n  <Style ss:ID="sBaseCell" ss:Parent="Default">\n   <Borders>\n    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n   </Borders>\n  </Style>\n  <Style ss:ID="sTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="14" ss:Bold="1" ss:Color="#2980B9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sNormalBold"><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#34495E"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="H_Branch" ss:Parent="sBaseCell"><Interior ss:Color="#34495E" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="H_Status" ss:Parent="sBaseCell"><Interior ss:Color="#8E44AD" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="H_MIS" ss:Parent="sBaseCell"><Interior ss:Color="#2980B9" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="H_AIS" ss:Parent="sBaseCell"><Interior ss:Color="#16A085" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Normal_C" ss:Parent="sBaseCell"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Normal_L" ss:Parent="sBaseCell"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Normal_S" ss:Parent="sBaseCell"><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Delay_C" ss:Parent="sBaseCell"><Interior ss:Color="#FDEDEC" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Delay_L" ss:Parent="sBaseCell"><Interior ss:Color="#FDEDEC" ss:Pattern="Solid"/><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="R_Delay_S" ss:Parent="sBaseCell"><Interior ss:Color="#FDEDEC" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="Lag_Red" ss:Parent="sBaseCell"><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Bold="1" ss:Color="#C0392B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="Lag_Grn" ss:Parent="sBaseCell"><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#27AE60"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n </Styles>`;
 
                 function buildWorksheet(sheetName, dataRows) {
                     let sXml = ` <Worksheet ss:Name="${escapeXml(sheetName)}">\n  <Table>\n   <Column ss:Width="45"/>\n   <Column ss:Width="130"/>\n   <Column ss:Width="130"/>\n   <Column ss:Width="160"/>\n   <Column ss:Width="140"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Column ss:Width="95"/>\n   <Column ss:Width="75"/>\n   <Row ss:Height="30"><Cell ss:MergeAcross="8" ss:StyleID="sTitle"><Data ss:Type="String">DUSHTHA SHASTHYA KENDRA (DSK)</Data></Cell></Row>\n   <Row ss:Height="20"><Cell ss:MergeAcross="8" ss:StyleID="sNormalBold"><Data ss:Type="String">Branch Date Extraction (${escapeXml(sheetName)}) | Generated: ${new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-US', { hour12: true })}</Data></Cell></Row>\n   <Row ss:Height="22">\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u0995\u09CD\u09B0\u09AE\u09BF\u0995</Data></Cell>\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u099C\u09CB\u09A8</Data></Cell>\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u0985\u099E\u09CD\u099A\u09B2</Data></Cell>\n    <Cell ss:StyleID="H_Branch"><Data ss:Type="String">\u09B6\u09BE\u0996\u09BE\u09B0 \u09A8\u09BE\u09AE</Data></Cell>\n    <Cell ss:StyleID="H_Status"><Data ss:Type="String">\u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">MIS \u09A1\u09C7\u099F</Data></Cell>\n    <Cell ss:StyleID="H_MIS"><Data ss:Type="String">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">AIS \u09A1\u09C7\u099F</Data></Cell>\n    <Cell ss:StyleID="H_AIS"><Data ss:Type="String">\u09AC\u09BF\u09B2\u09AE\u09CD\u09AC</Data></Cell>\n   </Row>\n`;
@@ -1637,7 +1656,6 @@ try {
     }, 1500);
 
 })();
-
 // ========================================================================
 // EXTENSION 2: \u{1F680} MIS & AIS Checker-DSK_IT (Full Screen & Zero Digit Clip)
 // ========================================================================
@@ -1722,10 +1740,9 @@ try {
     }
 
     function parseMis(doc) {
-        let savings = 0, loan = 0;
+        let savings = 0, loan = 0, member = 0, borrower = 0, samity = 0;
         try {
             let allElements = doc.querySelectorAll('b, span, div, th, td');
-
             for (let el of allElements) {
                 if (el.textContent && el.textContent.includes('Grand Total Saving Balance')) {
                     let valStr = el.textContent.split('Grand Total Saving Balance')[1] || el.textContent;
@@ -1734,24 +1751,46 @@ try {
                 }
             }
 
-            let rows = doc.querySelectorAll('tr');
+            let mainTable = doc.querySelector('table.topsheet_report');
+            if (mainTable) {
+                let trs = mainTable.querySelectorAll('tr');
+                for (let i = trs.length - 1; i >= 0; i--) {
+                    let tds = trs[i].querySelectorAll('td');
+                    if (tds.length > 0) {
+                        let firstText = tds[0].textContent.trim();
+                        if (/^\d+$/.test(firstText)) {
+                            samity = parseInt(firstText, 10);
+                            break;
+                        }
+                    }
+                }
+            }
 
+            let rows = doc.querySelectorAll('tr');
             for (let tr of rows) {
                 if (tr.textContent && tr.textContent.includes('Total :') && !tr.textContent.includes('Grand')) {
                     let cells = tr.querySelectorAll('td, th');
                     let financials = [];
+                    let ints = [];
                     cells.forEach(cell => {
-                        let txt = cell.textContent.trim();
+                        let txt = cell.textContent.trim().replace(/,/g, '');
                         if (txt.includes('.')) {
-                            let num = parseFloat(txt.replace(/[^\d.-]/g, ''));
+                            let num = parseFloat(txt);
                             if (!isNaN(num)) financials.push(num);
+                        } else if (txt !== '' && /^\d+$/.test(txt)) {
+                            ints.push(parseInt(txt, 10));
                         }
                     });
-                    if (financials.length >= 3) { loan = financials[2]; break; }
+                    if (financials.length >= 3) loan = financials[2];
+                    if (ints.length >= 2) {
+                        member = ints[0];
+                        borrower = ints[1];
+                    }
+                    break;
                 }
             }
         } catch(e) {}
-        return { savings, loan };
+        return { savings, loan, member, borrower, samity };
     }
 
     function triggerVueChange(el, value, win) {
@@ -2145,10 +2184,6 @@ async function getRealBranchIdViaIframe() {
             h['X-Requested-With'] = 'XMLHttpRequest';
             h['X-Tenant-Geo'] = 'bd';
 
-            try {
-                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
-                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
-            } catch(e) {}
 
             let fDate = targetDateFrom;
             let tDate = targetDateTo;
@@ -2178,7 +2213,9 @@ async function getRealBranchIdViaIframe() {
                         method: 'POST',
                         headers: h, credentials: 'include', body: formData
                     });
-                    if (!req.ok) return null;
+                    if (!req.ok) {
+                        throw new Error("HTTP " + req.status);
+                    }
                     let json = await req.json();
                     
                     if (json && json.report_data && json.report_data.infos && json.report_data.infos.total) {
@@ -2205,12 +2242,94 @@ async function getRealBranchIdViaIframe() {
                     return null;
                 } catch(err) {
                     fetchRetries++;
-                    if (fetchRetries >= 3) return null;
+                    if (fetchRetries >= 3) {
+                        return null;
+                    }
                     await new Promise(r => setTimeout(r, 1000 + Math.random()*1000));
                 }
             }
             return null;
         }
+
+        async function fetchDueRegisterReportApi(bId, targetDateTo) {
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
+            h['Site-Name'] = 'dsk';
+            h['Accept'] = 'application/json, text/plain, */*';
+            if (h['Content-Type']) delete h['Content-Type'];
+            if (h['content-type']) delete h['content-type'];
+            h['X-Requested-With'] = 'XMLHttpRequest';
+            h['X-Tenant-Geo'] = 'bd';
+
+            let tDate = targetDateTo;
+            if (tDate && tDate.includes('/')) { let p = tDate.split('/'); tDate = p[2] + '-' + p[1] + '-' + p[0]; }
+
+            let formData = new FormData();
+            let finalBId = await getRealBranchIdFallback(bId);
+            formData.append('cbo_branch', finalBId);
+            formData.append('cbo_employee', '-1');
+            formData.append('cbo_funding_organizations', '-1');
+            formData.append('cbo_loan_product_category', '-1');
+            formData.append('cbo_loan_product', '-1');
+            formData.append('cbo_product_or_category', '0');
+            formData.append('cbo_due_type', '-1');
+            formData.append('cbo_service_charge', '2');
+            formData.append('txt_date_from', '');
+            formData.append('cbo_loan_repayment_frequency', '');
+            formData.append('cbo_samity_day', '');
+            formData.append('txt_date', tDate);
+
+            let url = '/core-service/index.php/due_register_reports/ajax_for_generate_report';
+            
+            let fetchRetries = 0;
+            while (fetchRetries < 3) {
+                try {
+                    let req = await fetch(url, {
+                        method: 'POST',
+                        headers: h, credentials: 'include', body: formData
+                    });
+                    if (!req.ok) {
+                        throw new Error("HTTP " + req.status);
+                    }
+                    let json = await req.json();
+                    
+                    if (json && json.due_register_infos_main) {
+                        let totalPresent = 0;
+                        let totalDue = 0;
+                        let main = json.due_register_infos_main;
+                        for (let sId in main) {
+                            for (let mId in main[sId]) {
+                                for (let lId in main[sId][mId]) {
+                                    let loan = main[sId][mId][lId];
+                                    if (loan.present_loan_amount_principle) {
+                                        totalPresent += parseFloat(loan.present_loan_amount_principle);
+                                    } else if (loan.total_present_loan_amount) {
+                                        totalPresent += parseFloat(loan.total_present_loan_amount);
+                                    }
+                                    
+                                    if (loan.priciple_due_amount) {
+                                        totalDue += parseFloat(loan.priciple_due_amount);
+                                    } else if (loan.due_amount) {
+                                        totalDue += parseFloat(loan.due_amount);
+                                    }
+                                }
+                            }
+                        }
+                        return { presentLoanAmount: totalPresent, dueAmount: totalDue };
+                    }
+                    return null;
+                } catch(err) {
+                    fetchRetries++;
+                    if (fetchRetries >= 3) {
+                        return null;
+                    }
+                    await new Promise(r => setTimeout(r, 1000 + Math.random()*1000));
+                }
+            }
+            return null;
+        }
+
+
 
         async function fetchBalanceSheetApi(bId, targetDateTo) {
             let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
@@ -2222,10 +2341,6 @@ async function getRealBranchIdViaIframe() {
             h['X-Requested-With'] = 'XMLHttpRequest';
             h['X-Tenant-Geo'] = 'bd';
 
-            try {
-                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
-                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
-            } catch(e) {}
 
             let tDate = targetDateTo;
             if (tDate && tDate.includes('/')) { let p = tDate.split('/'); tDate = p[2] + '-' + p[1] + '-' + p[0]; }
@@ -2418,19 +2533,11 @@ async function getRealBranchIdViaIframe() {
             h['X-Requested-With'] = 'XMLHttpRequest';
             if (h['x-requested-with']) delete h['x-requested-with'];
             h['X-Requested-With'] = 'XMLHttpRequest';
-            try {
-                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
-                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
-            } catch(e) {}
             if (h['Isme-Token']) delete h['Isme-Token'];
             if (h['isme-token']) delete h['isme-token'];
             if (h['Device-Key']) delete h['Device-Key'];
             if (h['device-key']) delete h['device-key'];
 
-            try {
-                let preUrl = '/core-service/index.php/samities/index?limit=20&offset=0&isSearch=0';
-                await fetch(preUrl, { method: 'GET', headers: h, credentials: 'include' });
-            } catch(e) {}
 
             let fDate = targetDateFrom;
             let tDate = targetDateTo;
@@ -2628,6 +2735,82 @@ async function getRealBranchIdViaIframe() {
               close: closeCounts
           };
       }
+
+    async function fetchBadLoaneeApi(bId, targetDate, retries = 2) {
+        try {
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
+            h['Site-Name'] = 'dsk';
+            h['Accept'] = 'application/json, text/plain, */*';
+
+            let fDate = targetDate;
+            if (fDate && fDate.includes('/')) { let p = fDate.split('/'); fDate = p[2] + '-' + p[1] + '-' + p[0]; }
+
+            let fd = new FormData();
+            let finalBId = await getRealBranchIdFallback(bId);
+            fd.append('cbo_branch', finalBId);
+            fd.append('cbo_product', '-1');
+            fd.append('txt_date', fDate);
+            fd.append('cbo_service_charge', '1');
+
+            let res = await fetch('/core-service/index.php/mra_reports/ajax_mra_llp_04_report', { method: 'POST', headers: h, body: fd });
+            let txt = await res.text();
+            let badCount = 0;
+            if (txt.includes('bad_borrower_count')) {
+                let data = JSON.parse(txt);
+                if (data && data.reports && data.reports.products) {
+                    for (let key in data.reports.products) {
+                        let p = data.reports.products[key];
+                        if (p && p.bad_borrower_count) {
+                            badCount += parseInt(p.bad_borrower_count, 10);
+                        }
+                    }
+                }
+            }
+            return badCount;
+        } catch(e) {}
+        if (retries > 0) {
+            await new Promise(r => setTimeout(r, 1000));
+            return fetchBadLoaneeApi(bId, targetDate, retries - 1);
+        }
+        return 0;
+    }
+
+    async function fetchEmployeeReportApi(bId, targetDate, retries = 2) {
+        try {
+            let h = JSON.parse(sessionStorage.getItem('mf_main_stolen_headers') || sessionStorage.getItem('mf_cloned_headers') || localStorage.getItem('mf_cloned_headers_backup') || '{}');
+            if (!h['Authorization'] && !h['authorization']) { try { let v = JSON.parse(localStorage.getItem('vuex')); if (v && v.auth && v.auth.token) { h['Authorization'] = 'Bearer ' + v.auth.token; h['Isme-Token'] = v.auth.token; } } catch(e) {} }
+            
+            h['Site-Name'] = 'dsk';
+            h['Accept'] = 'application/json, text/plain, */*';
+            if (h['Content-Type']) delete h['Content-Type'];
+            if (h['content-type']) delete h['content-type'];
+
+            let fDate = targetDate;
+            if (fDate && fDate.includes('/')) { let p = fDate.split('/'); fDate = p[2] + '-' + p[1] + '-' + p[0]; }
+
+            let finalBId = await getRealBranchIdFallback(bId);
+            let url = `/core-service/index.php/employees/index?limit=100&offset=0&isSearch=1&cbo_branch=${finalBId}&cbo_status=1&cbo_employee_designation=80&cbo_gender=All&txt_date_from=&txt_date_to=${fDate}`;
+
+            let res = await fetch(url, { method: 'GET', headers: h });
+            let txt = await res.text();
+            if (txt.includes('employees')) {
+                let data = JSON.parse(txt);
+                let foCount = 0;
+                if (data && data.total_rows) {
+                    foCount = parseInt(data.total_rows, 10);
+                } else if (data && data.employees) {
+                    foCount = data.employees.length;
+                }
+                return foCount;
+            }
+        } catch(e) {}
+        if (retries > 0) {
+            await new Promise(r => setTimeout(r, 1000));
+            return fetchEmployeeReportApi(bId, targetDate, retries - 1);
+        }
+        return 0;
+    }
 
     async function fetchMisReportApi(bId, targetDate, retries = 2) {
         try {
@@ -3485,9 +3668,9 @@ async function getRealBranchIdViaIframe() {
         
         let container = document.createElement('div');
         container.id = id;
-        container.style.cssText = 'display:flex; align-items:center; justify-content:space-between; background: linear-gradient(135deg, ' + bgColor + ' 0%, rgba(0,0,0,0.4) 150%); color:white; border-radius:50px; padding:5px 12px; font-weight:bold; font-size:11px; box-shadow:0 2px 8px rgba(0,0,0,0.3); font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; width: max-content; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(5px);';
-        container.onmouseover = () => { container.style.transform = 'scale(1.05) translateX(-4px)'; container.style.boxShadow = '0 6px 18px rgba(0,0,0,0.5)'; };
-        container.onmouseout = () => { container.style.transform = 'scale(1) translateX(0)'; container.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)'; };
+        container.style.cssText = 'display:flex; align-items:center; justify-content:space-between; background: #005ca8; color: white; border: 1px solid #004b87; border-radius:50px; padding:6px 14px; font-weight:bold; font-size:12px; box-shadow:0 4px 12px rgba(0,92,168,0.25); cursor:pointer; width: max-content; font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);';
+        container.onmouseover = () => { container.style.transform = 'scale(1.05) translateX(-4px)'; container.style.boxShadow = '0 6px 16px rgba(0,0,0,0.15)'; };
+        container.onmouseout = () => { container.style.transform = 'scale(1) translateX(0)'; container.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; };
         
         let textSpan = document.createElement('span');
         textSpan.innerText = title;
@@ -3496,7 +3679,7 @@ async function getRealBranchIdViaIframe() {
         let closeBtn = document.createElement('button');
         closeBtn.innerText = '\u2715';
         closeBtn.title = '\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8';
-        closeBtn.style.cssText = 'background: rgba(255,255,255,0.25); color:white; border:none; width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; outline:none; transition:0.2s;';
+        closeBtn.style.cssText = 'background: rgba(255,255,255,0.25); color:white; border:none; width:24px; height:24px; border-radius:50%; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; outline:none; transition:0.2s;';
         closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255,0,0,0.8)';
         closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255,255,255,0.25)';
         closeBtn.onclick = (e) => {
@@ -3523,12 +3706,13 @@ async function getRealBranchIdViaIframe() {
 
     function initMisAisToggleBtn() {
         if (!window.location.hash.includes('dashboard')) return;
-        createCheckerButton('mis-ais-toggle-btn', '\u{1F680} MIS & AIS Crosschecker', 202, '#2c3e50', 'MIS');
-        createCheckerButton('cash-bank-toggle-btn', '\u{1F4B0} Cash-Bank', 244, '#16a085', 'CASH');
-        createCheckerButton('equity-toggle-btn', '\u{1F4CA} Equity', 286, '#8e44ad', 'EQUITY');
-        createCheckerButton('samity-toggle-btn', '\u{1F465} Samity wise member info.', 328, '#2980b9', 'SAMITY');
-        createCheckerButton('due-toggle-btn', '\u{1F4B0} Due collection Summary', 370, '#c0392b', 'DUE_COLLECTION');
-        createCheckerButton('daily-toggle-btn', '\u{1F4B0} Daily Tran. Summ.', 412, '#f39c12', 'DAILY_TRANSACTION');
+        createCheckerButton('mis-ais-toggle-btn', '\u{1F680} MIS & AIS Crosschecker', 202, '#e8f4f8', 'MIS');
+        createCheckerButton('cash-bank-toggle-btn', '\u{1F4B0} Cash-Bank', 244, '#e6f4ea', 'CASH');
+        createCheckerButton('equity-toggle-btn', '\u{1F4CA} Equity', 286, '#f4e6f9', 'EQUITY');
+        createCheckerButton('samity-toggle-btn', '\u{1F465} Samity wise member info.', 328, '#e3f2fd', 'SAMITY');
+        createCheckerButton('due-toggle-btn', '\u{1F4B0} Due collection Summary', 370, '#fdeaea', 'DUE_COLLECTION');
+        createCheckerButton('daily-toggle-btn', '\u{1F4B0} Daily Transaction Summary', 412, '#fff3e0', 'DAILY_TRANSACTION');
+        createCheckerButton('kpi-toggle-btn', '\u{1F4C8} KPI Report', 454, '#ffffff', 'KPI_REPORT');
     }
 
     function openMisAisPanel(customTitle) {
@@ -3552,28 +3736,30 @@ async function getRealBranchIdViaIframe() {
 
         const panel = document.createElement('div');
         panel.id = 'ghost-audit-panel';
-        panel.style.cssText = 'position: fixed; top: 5px; left: 50%; transform: translateX(-50%); background: #fff; border: 2px solid #2c3e50; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); width: 98vw; max-width: 750px; font-family: DSK_MixedFont, sans-serif; z-index: 999999; overflow: hidden;';
+        panel.style.cssText = 'position: fixed; top: 5px; left: max(1vw, calc(50vw - 375px)); background: #fff; border: 1px solid #dcdde1; border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.12); width: 98vw; max-width: 750px; font-family: DSK_MixedFont, sans-serif; z-index: 999999; overflow: hidden; resize: both; min-width: 300px; min-height: 200px; height: 85vh; max-height: 90vh; display: flex; flex-direction: column;';
         document.body.appendChild(panel);
+        setTimeout(() => { let mBtn = panel.querySelector('.panel-maximize-btn'); if(mBtn) mBtn.click(); }, 50);
 
         panel.innerHTML = `
-            <div id="ghost-header" style="background:#2c3e50; color:white; padding:4px 8px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+            <div id="ghost-header" style="background:#192a56; color:white; padding:4px 8px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
                 <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; overflow:hidden;">
                     <strong id="panel-title" style="font-size:11.5px; pointer-events:none; white-space:nowrap;">${customTitle}</strong>
                     <span id="audit-status" style="font-size:11px; font-weight:bold; color:#f1c40f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                 </div>
                 <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
 
-                    <button id="export-excel-btn" style="display:none; background:#8e44ad; border:none; color:white; font-size:11px; cursor:pointer; padding:3px 8px; border-radius:3px; font-weight:bold; transition:0.2s;">\u{1F4E5} Excel</button>
-                    <button id="sync-locations-btn" style="background:#f39c12; border:none; color:white; font-size:11px; cursor:pointer; padding:3px 8px; border-radius:3px; font-weight:bold;">\u{1F504} Sync</button>
-                    <button id="ghost-close" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(255, 65, 108, 0.45); transition: all 0.2s ease;">\u2715</button>
+                    <button id="export-excel-btn" style="display:none; background:#2e86de; border:none; color:white; font-size:11px; cursor:pointer; padding:3px 8px; border-radius:3px; font-weight:bold; transition:0.2s;">\u{1F4E5} Excel</button>
+                    <button id="sync-locations-btn" title="Sync Locations" style="background: #f1f2f6; color: #192a56; border: 1px solid #dcdde1; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease;">\u{1F504}</button>
+                    <button class="panel-maximize-btn" title="\u09AC\u09DC / \u099B\u09CB\u099F \u0995\u09B0\u09C1\u09A8" style="background: #f1f2f6; color: #192a56; border: 1px solid #dcdde1; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease;">\u26F6</button>
+                    <button id="ghost-close" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: #f1f2f6; color: #e74c3c; border: 1px solid #dcdde1; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease;">\u2715</button>
                 </div>
             </div>
             
-            <div id="ghost-body" style="padding:6px; display:flex; flex-direction:column; height: 100%;">
+            <div id="ghost-body" style="padding:6px; display:flex; flex-direction:column; flex:1; min-height:0;">
                 <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px; align-items:center;" id="controls-container">
                 </div>
-                <button id="start-audit-btn" style="width:100%; background:#27ae60; color:white; border:none; height:26px; font-weight:bold; font-size:12px; border-radius:3px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:0.2s; flex-shrink:0;">\u{1F680} Start Process</button>
-                <div id="audit-output" style="margin-top:4px; display:flex; flex-direction:column; flex:1; overflow:hidden;"></div>
+                <button id="start-audit-btn" style="width:100%; background:#192a56; color:white; border:none; height:26px; font-weight:bold; font-size:12px; border-radius:3px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:0.2s; flex-shrink:0;">\u{1F680} Start Process</button>
+                <div id="audit-output" style="margin-top:4px; display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden;"></div>
             </div>
         `;
 
@@ -3618,7 +3804,7 @@ async function getRealBranchIdViaIframe() {
                 container.innerHTML = dateHtml + `
                     <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09AC\u09CD\u09B0\u09BE\u099E\u09CD\u099A:</label>
-                        <select id="custom-target" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; font-weight:bold; color:#16a085; height:24px; box-sizing:border-box;"><option value="ALL">\u09B8\u0995\u09B2 \u09B6\u09BE\u0996\u09BE (Select All)</option></select>
+                          <select id="custom-target" disabled style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; font-weight:bold; color:#16a085; height:24px; box-sizing:border-box; background-color:#f8f9fa;"><option value="ALL">${currentBranchName}</option></select>
                     </div>
                 `;
             } 
@@ -3645,27 +3831,22 @@ async function getRealBranchIdViaIframe() {
                       areas = [...new Set(Object.values(aMap))].filter(Boolean).sort().map(a => ({ id: a, name: a }));
                   }
                 
-                let levelOptions = `<option value="1">\u09B6\u09BE\u0996\u09BE</option>`;
-                if (areas.length > 0) levelOptions += `<option value="2">\u0985\u099E\u09CD\u099A\u09B2</option>`;
-                if (zones.length > 0) levelOptions += `<option value="3" selected>\u099C\u09CB\u09A8</option>`;
-                else if (areas.length > 0) levelOptions = levelOptions.replace('value="2"', 'value="2" selected');
-                else levelOptions = levelOptions.replace('value="1"', 'value="1" selected');
-
                 container.innerHTML = dateHtml + `
                     <div style="flex:1; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09B2\u09C7\u09AD\u09C7\u09B2:</label>
                         <select id="custom-level" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box;">
-                            ${levelOptions}
+                            <option value="1">\u09B6\u09BE\u0996\u09BE</option>
+                            ${uType === 'HO' || uType === 'ZONE' ? '<option value="2">\u0985\u099E\u09CD\u099A\u09B2</option>' : ''}
+                            ${uType === 'HO' ? '<option value="3" selected>\u099C\u09CB\u09A8</option>' : ''}
                         </select>
                     </div>
                     <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
                         <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
                         <select id="custom-target" style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box;">
-                            <option value="">\u09B2\u09CB\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</option>
+                            <option value="ALL">-- \u{1F680} All --</option>
                         </select>
                     </div>
                 `;
-                
                 let lvl = document.getElementById('custom-level');
                 if(lvl) {
                     lvl.onchange = populateTargets;
@@ -3685,7 +3866,9 @@ async function getRealBranchIdViaIframe() {
 
             let level = document.getElementById('custom-level') ? document.getElementById('custom-level').value : '1';
             
-            targetSel.innerHTML = '<option value="ALL" selected>\u{1F680} Select All</option>';
+            
+targetSel.innerHTML = '<option value="ALL" selected>\u{1F680} Select All</option>';
+
             
             if (uType === 'AREA') {
                 data = JSON.parse(sessionStorage.getItem('mf_cached_branches') || localStorage.getItem('microfin_branch_list') || '[]');
@@ -3723,12 +3906,12 @@ async function getRealBranchIdViaIframe() {
                 let st = document.getElementById('audit-status');
                 if(st) {
                     if(success) {
-                        st.innerHTML = `<span style="color:#27ae60;">\u2705 \u09B8\u09BF\u09B8\u09CD\u099F\u09C7\u09AE \u09AA\u09CD\u09B0\u09B8\u09CD\u09A4\u09C1\u09A4!</span>`;
+                        st.innerHTML = `<span style="color:#10ac84;">\u2705 \u09B8\u09BF\u09B8\u09CD\u099F\u09C7\u09AE \u09AA\u09CD\u09B0\u09B8\u09CD\u09A4\u09C1\u09A4!</span>`;
                         // setTimeout(() => { if(st) st.innerHTML = ''; }, 2000);
                         document.getElementById('start-audit-btn').disabled = false;
                         populateTargets();
                     } else {
-                        st.innerHTML = `<span style="color:#e74c3c;">\u274C \u09B8\u09BF\u0982\u0995 \u09AB\u09C7\u0987\u09B2\u09CD\u09A1!</span>`;
+                        st.innerHTML = `<span style="color:#b33939;">\u274C \u09B8\u09BF\u0982\u0995 \u09AB\u09C7\u0987\u09B2\u09CD\u09A1!</span>`;
                     }
                 }
             });
@@ -3829,9 +4012,9 @@ async function getRealBranchIdViaIframe() {
     if(window.applyTabFilters) window.applyTabFilters();
 
     // FIXED: totalCols includes the 3 injected columns already. Do not add 3 again.
-    let totalCols = window.currentCheckerType === 'MIS' ? 8 : (window.currentCheckerType === 'EQUITY' || window.currentCheckerType === 'SAMITY' ? 7 : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 32 : 6));
+    let totalCols = window.currentCheckerType === 'MIS' ? 8 : (window.currentCheckerType === 'EQUITY' ? 7 : (window.currentCheckerType === 'SAMITY' ? 9 : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 32 : (window.currentCheckerType === 'KPI_REPORT' ? 16 : 6))));
     
-    let rName = window.currentCheckerType === 'MIS' ? 'MIS Check' : (window.currentCheckerType === 'EQUITY' ? 'Equity Check' : (window.currentCheckerType === 'CASH' ? 'Cash & Bank' : (window.currentCheckerType === 'SAMITY' ? 'Samity Info' : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 'Daily Tran. Summ.' : 'Due Collection'))));
+    let rName = window.currentCheckerType === 'MIS' ? 'MIS Check' : (window.currentCheckerType === 'EQUITY' ? 'Equity Check' : (window.currentCheckerType === 'CASH' ? 'Cash & Bank' : (window.currentCheckerType === 'SAMITY' ? 'Samity Info' : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 'Daily Tran. Summ.' : (window.currentCheckerType === 'KPI_REPORT' ? 'KPI Report' : 'Due Collection')))));
     let exDate = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : '';
     let exDateFrom = document.getElementById('custom-audit-date-from') ? document.getElementById('custom-audit-date-from').value : exDate;
     let exDateStr = '';
@@ -3895,6 +4078,17 @@ async function getRealBranchIdViaIframe() {
                 );
             }
         });
+
+        clone.querySelectorAll('tbody[data-status="summary"]').forEach(tbody => {
+            let firstTr = tbody.querySelector('tr');
+            if (firstTr) {
+                let firstTd = firstTr.querySelector('td');
+                if (firstTd) {
+                    firstTd.innerHTML = (firstTd.innerHTML || '').replace(/&nbsp;/g, '').trim();
+                }
+                firstTr.insertAdjacentHTML('afterbegin', '<td></td><td></td><td></td>');
+            }
+        });
         
         clone.querySelectorAll('tbody:not([id^="tbody-"])').forEach(tb => {
             if (tb.classList.contains('dt-subtotal')) return;
@@ -3923,9 +4117,11 @@ async function getRealBranchIdViaIframe() {
             sXml += '   <Column ss:Width="120"/>\n';
 
         } else if (window.currentCheckerType === 'SAMITY') {
-            sXml += '   <Column ss:Width="80"/>\n';
-            sXml += '   <Column ss:Width="100"/>\n';
-            sXml += '   <Column ss:Width="400"/>\n';
+              sXml += '   <Column ss:Width="80"/>\n';
+              sXml += '   <Column ss:Width="100"/>\n';
+              sXml += '   <Column ss:Width="250"/>\n';
+              sXml += '   <Column ss:Width="100"/>\n';
+              sXml += '   <Column ss:Width="250"/>\n';
 
         } else if (window.currentCheckerType === 'DUE_COLLECTION') {
             sXml += '   <Column ss:Width="120"/>\n';
@@ -3933,6 +4129,8 @@ async function getRealBranchIdViaIframe() {
 
         } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
             for(let i=0; i<22; i++) sXml += '   <Column ss:Width="53"/>\n';
+        } else if (window.currentCheckerType === 'KPI_REPORT') {
+            for(let i=0; i<12; i++) sXml += '   <Column ss:Width="65"/>\n';
         } else {
             // CASH
             sXml += '   <Column ss:Width="80"/>\n';
@@ -3958,7 +4156,7 @@ async function getRealBranchIdViaIframe() {
                 let text = (cell.innerHTML || '').replace(/<br\s*[\/]?>/gi, '\n').replace(/<[^>]+>/g, '').trim();
                 text = text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').replace(/[\u2700-\u27BF]/gu, ''); 
                 
-                let isTotalRow = tr.closest('.dt-subtotal, tfoot') !== null;
+                let isTotalRow = tr.closest('.dt-subtotal, tfoot, tbody[data-status="summary"]') !== null;
                 let sId = cell.tagName.toLowerCase() === 'th' ? 'sHeader' : 'sRowCenter';
                 if (isTotalRow) {
                     sId = cell.classList.contains('subtotal-label') ? 'sTotalRowRight' : 'sTotalRow';
@@ -3990,7 +4188,7 @@ async function getRealBranchIdViaIframe() {
         return sXml;
     }
 
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:o="urn:schemas-microsoft-com:office:office"\n xmlns:x="urn:schemas-microsoft-com:office:excel"\n xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:html="http://www.w3.org/TR/REC-html40">\n <Styles>\n  <Style ss:ID="Default" ss:Name="Normal">\n   <Alignment ss:Vertical="Center" ss:WrapText="1"/>\n   <Borders>\n    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n   </Borders>\n   <Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#2C3E50"/>\n  </Style>\n  <Style ss:ID="sTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="16" ss:Bold="1" ss:Color="#2980B9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sSubTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="12" ss:Bold="1" ss:Color="#34495E"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sHeader"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/></Borders></Style>\n  <Style ss:ID="sRowCenter" ss:Parent="Default"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowLeft" ss:Parent="Default"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowRight" ss:Parent="Default"><Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sTotalRow" ss:Parent="Default"><Interior ss:Color="#E1F5FE" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Bold="1" ss:Color="#01579B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sTotalRowRight" ss:Parent="sTotalRow"><Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/></Style>\n </Styles>\n';
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:o="urn:schemas-microsoft-com:office:office"\n xmlns:x="urn:schemas-microsoft-com:office:excel"\n xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"\n xmlns:html="http://www.w3.org/TR/REC-html40">\n <Styles>\n  <Style ss:ID="Default" ss:Name="Normal">\n   <Alignment ss:Vertical="Center" ss:WrapText="1"/>\n   <Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Color="#2C3E50"/>\n  </Style>\n  <Style ss:ID="sBaseCell" ss:Parent="Default">\n   <Borders>\n    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#000000"/>\n   </Borders>\n  </Style>\n  <Style ss:ID="sTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="16" ss:Bold="1" ss:Color="#2980B9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sSubTitle"><Font ss:FontName="SutonnyOMJ" ss:Size="12" ss:Bold="1" ss:Color="#34495E"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>\n  <Style ss:ID="sHeader"><Interior ss:Color="#2C3E50" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#FFFFFF"/></Borders></Style>\n  <Style ss:ID="sRowCenter" ss:Parent="sBaseCell"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowLeft" ss:Parent="sBaseCell"><Alignment ss:Horizontal="Left" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sRowRight" ss:Parent="sBaseCell"><Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sTotalRow" ss:Parent="sBaseCell"><Interior ss:Color="#E1F5FE" ss:Pattern="Solid"/><Font ss:FontName="SutonnyOMJ" ss:Size="10" ss:Bold="1" ss:Color="#01579B"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>\n  <Style ss:ID="sTotalRowRight" ss:Parent="sTotalRow"><Alignment ss:Horizontal="Right" ss:Vertical="Center" ss:WrapText="1"/></Style>\n </Styles>\n';
     
     xml += injectSerialZoneArea(cloneAll, 'All Branches');
     
@@ -4001,11 +4199,39 @@ async function getRealBranchIdViaIframe() {
         xml += injectSerialZoneArea(cloneHighCash, 'High Cash-Bank');
     }
 
+    if (window.currentCheckerType === 'DAILY_TRANSACTION') {
+        let summC = document.getElementById('daily-summary-container');
+        if (summC) {
+            let sTable = summC.querySelector('table');
+            if (sTable) {
+                let sXml = ' <Worksheet ss:Name="Summary">\n  <Table>\n';
+                sXml += '   <Column ss:Width="250"/>\n';
+                sXml += '   <Column ss:Width="120"/>\n';
+                sXml += '   <Row ss:Height="30"><Cell ss:MergeAcross="1" ss:StyleID="sTitle"><Data ss:Type="String">DUSHTHA SHASTHYA KENDRA (DSK)</Data></Cell></Row>\n';
+                sXml += '   <Row ss:Height="22"><Cell ss:MergeAcross="1" ss:StyleID="sSubTitle"><Data ss:Type="String">Daily Tran. Summ. (Summary) - Generated On: ' + dt + '</Data></Cell></Row>\n';
+                sTable.querySelectorAll('tr').forEach(tr => {
+                    sXml += '   <Row>\n';
+                    tr.querySelectorAll('th, td').forEach(td => {
+                        let text = td.textContent || td.innerText;
+                        let merge = td.hasAttribute('colspan') ? parseInt(td.getAttribute('colspan')) : 1;
+                        let colspanStr = merge > 1 ? ' ss:MergeAcross="' + (merge - 1) + '"' : '';
+                        let style = td.tagName.toLowerCase() === 'th' ? 'sHeader' : 'sRowLeft';
+                        if (td.style.textAlign === 'right') style = 'sRowRight';
+                        sXml += '    <Cell' + colspanStr + ' ss:StyleID="' + style + '"><Data ss:Type="String">' + escapeXml(text) + '</Data></Cell>\n';
+                    });
+                    sXml += '   </Row>\n';
+                });
+                sXml += '  </Table>\n </Worksheet>\n';
+                xml += sXml;
+            }
+        }
+    }
+
     xml += '</Workbook>';
 
     let finalOutput = '\uFEFF' + xml; 
 
-    let tN = window.currentCheckerType === 'MIS' ? 'MIS_Check' : (window.currentCheckerType === 'EQUITY' ? 'Equity_Check' : (window.currentCheckerType === 'CASH' ? 'Cash_Bank_Check' : (window.currentCheckerType === 'SAMITY' ? 'Samity_Info' : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 'Daily_Transaction_Summary' : 'Due_Collection'))));
+    let tN = window.currentCheckerType === 'MIS' ? 'MIS_Check' : (window.currentCheckerType === 'EQUITY' ? 'Equity_Check' : (window.currentCheckerType === 'CASH' ? 'Cash_Bank_Check' : (window.currentCheckerType === 'SAMITY' ? 'Samity_Info' : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 'Daily_Transaction_Summary' : (window.currentCheckerType === 'KPI_REPORT' ? 'KPI_Report' : 'Due_Collection')))));
     let fileName = tN + '_' + new Date().getTime() + '.xls';
     
     try {
@@ -4068,12 +4294,12 @@ async function getRealBranchIdViaIframe() {
                     mData = await fetchMisReportApi(bId, sDate);
                     if (mData) {
                         let t2 = document.getElementById(`tbody-${safeId}`);
-                        if(t2) t2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        if(t2) t2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         aData = await fetchBalanceSheetApi(bId, sDate);
                     }
                     } else if (window.currentCheckerType === 'SAMITY') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         aData = await scrapeViaGhost( '#/samity/samities/index', sDate, '1', bId, 'samity', updateStatus);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
@@ -4082,25 +4308,25 @@ async function getRealBranchIdViaIframe() {
                         }
                     } else if (window.currentCheckerType === 'DUE_COLLECTION') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         
                         let safeBId = typeof bId !== 'undefined' ? bId : b.id;
-                        let safeDateFrom = typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate);
-                        let safeDateTo = typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate);
+                        let customDateFrom = document.getElementById('custom-audit-date-from') ? document.getElementById('custom-audit-date-from').value : (typeof selectedDate !== 'undefined' ? selectedDate : sDate);
+                        let customDateTo = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : (typeof selectedDate !== 'undefined' ? selectedDate : sDate);
                         
-                        aData = await fetchDueCollectionApi(safeBId, safeDateFrom, safeDateTo);
+                        aData = await fetchDueCollectionApi(safeBId, customDateFrom, customDateTo);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
                             if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} Due Collection \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09BE\u0987...</td></tr>`;
-                            aData = await fetchDueCollectionApi(safeBId, safeDateFrom, safeDateTo);
+                            aData = await fetchDueCollectionApi(safeBId, customDateFrom, customDateTo);
                         }
                         if (aData) {
-                            let dWriteOff = await fetchWriteOffColl(safeBId, safeDateFrom, safeDateTo);
+                            let dWriteOff = await fetchWriteOffColl(safeBId, customDateFrom, customDateTo);
                             aData.writeOffColl = dWriteOff;
                         }
                     } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${bName}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         
                         let targetDateFrom = document.getElementById('custom-audit-date-from') ? document.getElementById('custom-audit-date-from').value : sDate;
                         let targetDateTo = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : sDate;
@@ -4202,7 +4428,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         
                         htmlRowsSingle = `
                             <tr>
-                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${targetName}</td>
+                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${targetName}</td>
                                 <td style="text-align:left; font-size:9px;"><b>Loan</b></td>
                                 <td style="white-space:nowrap; font-size:9px;">${misData ? formatNum(misData.loan) : '0'}</td>
                                 <td style="white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.loan) : '0'}</td>
@@ -4220,7 +4446,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         let bankColor = (aisData && aisData.cashAtBank >= 1000001) ? 'red' : '#16a085';
                         htmlRowsSingle = `
                             <tr>
-                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${targetName}</td>
+                                <td rowspan="2" style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${targetName}</td>
                                 <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Cash</b></td>
                                 <td style="color:${cashColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.cashInHand) : '0'}</td>
                             </tr>
@@ -4234,7 +4460,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         let sY = isData ? formatNum(isData.surplusYear) : '0';
                         htmlRowsSingle = `
                             <tr class="equity-row">
-                                <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">${targetName}</td>
+                                <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">${targetName}</td>
                                 <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Equity</b></td>
                                 <td style="color:${(aisData && aisData.equity < 0 && aisData.equity !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.equity) : '0'}</td>
                                 <td style="color:${(aisData && aisData.equityPrev < 0 && aisData.equityPrev !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${aisData ? formatNum(aisData.equityPrev) : '0'}</td>
@@ -4251,13 +4477,17 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         let smallCount = smallSamities.length;
                         let codesText = smallSamities.map(s => s.code).join(', ');
                         if (totalCount === 0 && aData && aData.debug) codesText = '<span style="color:red;">' + aData.debug + '</span>';
-                        htmlRowsSingle = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
+                        let largeSamities = aData && aData.data ? aData.data.filter(s => s.members > 40) : (aData && Array.isArray(aData) ? aData.filter(s => s.members > 40) : []);
+                          let largeCount = largeSamities.length;
+                          let largeCodesText = largeSamities.map(s => s.code).join(', ');
+                          
+                          htmlRowsSingle = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; color:#2c3e50; font-size:9.5px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:9.5px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td><td style="text-align:center; color:#c0392b; font-size:9.5px; font-weight:bold;">` + largeCount + `</td><td style="text-align:left; color:#e67e22; font-size:9px; white-space:normal; word-wrap:break-word;">` + largeCodesText + `</td></tr>`;
                     } else if (window.currentCheckerType === 'DUE_COLLECTION') {
-                        htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
+                        htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? window.fmtNum(aData.totalCurrent, 2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? window.fmtNum(aData.totalMatured, 2) : '0') + `</td></tr>`;
                     } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
                           let otr = aData && aData.recoverable > 0 ? ((aData.regular * 100) / aData.recoverable).toFixed(2) : '0.00';
                           let disbCount = aData ? (aData.disbCount || 0) : 0;
-                          htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData && aData.admissions ? aData.admissions : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData && aData.dropouts ? aData.dropouts : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData && aData.tdOpen ? aData.tdOpen : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">` + (aData && aData.tdClose ? aData.tdClose : '0') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + (aData && aData.fullPaidCount ? aData.fullPaidCount : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.cashInHand)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.cashAtBank)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData && aData.newDueBorrower ? aData.newDueBorrower : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.newDueAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.writeOffColl)||0).toFixed(2) : '0.00') + `</td></tr>`;
+                          htmlRowsSingle = `<tr><td style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + targetName + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + window.fmtNum(aData ? aData.admissions : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + window.fmtNum(aData ? aData.dropouts : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + window.fmtNum(aData ? aData.tdOpen : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#b33939;">` + window.fmtNum(aData ? aData.tdClose : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? window.fmtNum(aData.savingsDeposit, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.savingsRefund, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.savingsRefundCash, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.savingsRefundNonCash, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + window.fmtNum(aData ? aData.fullPaidCount : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? window.fmtNum(aData.disbAmount, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? window.fmtNum(aData.recoverable, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? window.fmtNum(aData.regular, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.due, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? window.fmtNum(aData.currentDue, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.maturedDue, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? window.fmtNum(aData.advance, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? window.fmtNum(aData.principal, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? window.fmtNum(aData.serviceCharge, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? window.fmtNum(aData.cashInHand, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? window.fmtNum(aData.cashAtBank, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + window.fmtNum(aData ? aData.newDueBorrower : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.newDueAmount, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? window.fmtNum(aData.writeOffColl, 2) : '0.00') + `</td></tr>`;
                       }
                       tbody.innerHTML = htmlRowsSingle;
                 
@@ -4324,8 +4554,9 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                 } else if (targetId === 'ALL') {
                     branchesToProcess = allBranches;
                 } else {
-                    if (level === '3') branchesToProcess = allBranches.filter(b => b.zone === targetName);
-                    else if (level === '2') branchesToProcess = allBranches.filter(b => b.area === targetName);
+                    let targetName = targetSel.options[targetSel.selectedIndex].text;
+                    if (level === '3') branchesToProcess = allBranches.filter(b => b.zone === targetName || b.zoneId === targetId);
+                    else if (level === '2') branchesToProcess = allBranches.filter(b => b.area === targetName || b.areaId === targetId);
                     else if (level === '1') branchesToProcess = allBranches.filter(b => b.id === targetId);
                 }
                 
@@ -4335,7 +4566,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                 }
 
                 let output = document.getElementById('audit-output');
-                let tableStyle = `<style>.audit-table { width:100%; border-collapse:collapse; background:white; } .audit-table th, .audit-table td { border:1px solid #bdc3c7; padding:4px; font-family: DSK_MixedFont, sans-serif; } .has-diff {} .no-diff {} .loss-branch {} .high-cash {} .audit-table th { background:#2c3e50; color:white; border: 1px solid white; }</style>`;
+                let tableStyle = `<style>.audit-table { width:100%; border-collapse:collapse; background:white; } .audit-table th, .audit-table td { border:1px solid #bdc3c7; padding:4px; font-family: DSK_MixedFont, sans-serif; } .has-diff {} .no-diff {} .loss-branch {} .high-cash {} .audit-table th { background:#192a56; color:white; border: 1px solid white; }</style>`;
                 
                 let now = new Date();
                 let dtString = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -4353,18 +4584,20 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                 }
 
                 window._misAisCurrentTab = window._misAisCurrentTab || 'ALL';
+                let allBranchesBtnText = uType === 'BRANCH' ? (localStorage.getItem('microfin_entity_name') || '\u09B6\u09BE\u0996\u09BE') : '\u09B8\u0995\u09B2 \u09B6\u09BE\u0996\u09BE';
                 let tableHtml = tableStyle + `
-                    <div style="margin-bottom:6px; display:flex; gap:6px; justify-content:center;">
-                        <button id="tab-all-branches" style="background:#2980b9; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'ALL' ? '1' : '0.5'}; transition:0.2s;">\u{1F4CA} \u09B8\u0995\u09B2 \u09B6\u09BE\u0996\u09BE</button>
+                    <div style="margin-bottom:6px; display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+                        <button id="tab-all-branches" style="background:#2980b9; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'ALL' ? '1' : '0.5'}; transition:0.2s;">\u{1F4CA} ${allBranchesBtnText}</button>
                         ${window.currentCheckerType === 'MIS' ? 
-                            `<button id="tab-only-diff" style="background:#e74c3c; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'DIFF' ? '1' : '0.5'}; transition:0.2s;">\u26A0\uFE0F Only Differences</button>` :
-                            (window.currentCheckerType === 'EQUITY' ? `<button id="tab-loss-branches" style="background:#e74c3c; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'LOSS' ? '1' : '0.5'}; transition:0.2s;">\u{1F4C9} \u09B2\u09B8 \u09B6\u09BE\u0996\u09BE</button>` : 
-                            (window.currentCheckerType === 'CASH' ? `<button id="tab-high-cash" style="background:#c0392b; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'HIGH_CASH' ? '1' : '0.5'}; transition:0.2s;">\u{1F6A8} High Cash-Bank</button>` : ''))
+                            `<button id="tab-only-diff" style="background:#b33939; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'DIFF' ? '1' : '0.5'}; transition:0.2s;">\u26A0\uFE0F Only Differences</button>` :
+                            (window.currentCheckerType === 'EQUITY' ? `<button id="tab-loss-branches" style="background:#b33939; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'LOSS' ? '1' : '0.5'}; transition:0.2s;">\u{1F4C9} \u09B2\u09B8 \u09B6\u09BE\u0996\u09BE</button>` : 
+                            (window.currentCheckerType === 'CASH' ? `<button id="tab-high-cash" style="background:#c0392b; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'HIGH_CASH' ? '1' : '0.5'}; transition:0.2s;">\u{1F6A8} High Cash-Bank</button>` : 
+                            (window.currentCheckerType === 'DAILY_TRANSACTION' ? `<button id="tab-daily-summary" style="background:#192a56; color:white; border:none; padding:5px 12px; font-size:11px; border-radius:3px; cursor:pointer; font-weight:bold; opacity:${window._misAisCurrentTab === 'SUMMARY' ? '1' : '0.5'}; transition:0.2s;">\u{1F4CA} \u09B8\u09BE\u09AE\u09BE\u09B0\u09BF</button>` : '')))
                         }
                     </div>
-                    <div style="max-height:55vh; overflow-y:auto;">
+                    <div id="daily-main-container" style="${window._misAisCurrentTab === 'SUMMARY' ? 'flex:0 0 0px; height:0px; min-height:0; overflow:hidden; opacity:0; pointer-events:none;' : 'flex:1; min-height:0; overflow:auto; opacity:1; pointer-events:auto;'}">
                     <table class="audit-table">
-                        <thead style="background:#2c3e50; color:white; position:sticky; top:0; z-index:1;">
+                        <thead style="background:#192a56; color:white; position:sticky; top:0; z-index:1;">
                             <tr style="background:#e8f4f8; color:#2980b9;">
                                 <td colspan="26" style="padding:4px; font-size:11px; text-align:center; font-weight:bold; border:1px solid #bdc3c7;">
                                     \u{1F552} Report Generated On: ${dtString}${dateRangeStr}
@@ -4375,15 +4608,31 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                               (window.currentCheckerType === 'EQUITY' ?
                                 `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:31%; text-align:right;">Current Yr / This Month</th><th style="width:31%; text-align:right;">Previous Yr / This Yr</th></tr>` :
                               (window.currentCheckerType === 'SAMITY' ?
-                                `<tr><th style="width:150px; text-align:center; vertical-align:middle;">Branch</th><th style="width:100px; text-align:center; vertical-align:middle;">Total Samity</th><th style="width:120px; text-align:center; vertical-align:middle;">Samity Count (0-19 Members)</th><th style="width:400px; text-align:center; vertical-align:middle;">Samity Numbers</th></tr>` :
+                                `<tr><th rowspan="2" style="width:150px; text-align:center !important; vertical-align:middle; border:1px solid white;">Branch</th><th rowspan="2" style="width:100px; text-align:center !important; vertical-align:middle; border:1px solid white;">Total Samity</th><th colspan="2" style="text-align:center !important; vertical-align:middle; border:1px solid white;">Less then 20 Members Each Samity</th><th colspan="2" style="text-align:center !important; vertical-align:middle; border:1px solid white;">More then 40 Members Each Samity</th></tr><tr><th style="width:120px; text-align:center !important; vertical-align:middle; border:1px solid white;">Number of Samity</th><th style="width:200px; text-align:center !important; vertical-align:middle; border:1px solid white;">Samity Code's</th><th style="width:120px; text-align:center !important; vertical-align:middle; border:1px solid white;">Number of Samity</th><th style="width:200px; text-align:center !important; vertical-align:middle; border:1px solid white;">Samity Code's</th></tr>` :
                               (window.currentCheckerType === 'DUE_COLLECTION' ?
                                 `<tr><th style="width:30%; text-align:left;">Branch</th><th style="width:35%; text-align:center;">Current Due</th><th style="width:35%; text-align:center;">Matured Due</th></tr>` :
                               (window.currentCheckerType === 'DAILY_TRANSACTION' ?
-                                `<tr style="height:32px;"><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; text-align:left; width:7%;">Branch</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Member<br>Admission</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Member<br>DropOut</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Term Deposit<br>Open</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Term Deposit<br>Close</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Savings<br>Coll.</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Savings<br>Ref.</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Sav. Ref.<br>(Cash)</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Sav. Ref.<br>(Non-Cash)</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%; font-size:9px;">Borrower<br>Rec. Loan</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%; font-size:9px;">Full<br>Paid</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Disbursed</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Recoverable</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Regular</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:3%;">OTR %</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Due</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Current<br>Due</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Matured<br>Due</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Advance</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Total<br>Collection</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">SC</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Cash<br>In Hand</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">Cash<br>At Bank</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">New Due<br>Borrower</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">New Due<br>Amount</th><th style="position:sticky; top:0; z-index:21; background:#2c3e50; color:white; border:1px solid white; text-align:center; font-size:10px; width:4%;">WriteOff<br>Coll.</th></tr>` :
-                                `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:62%; text-align:right;">Balance (AIS)</th></tr>`))))}
+                                `<tr style="height:32px;"><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; text-align:left; width:7%;">Branch</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Member<br>Admission</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Member<br>DropOut</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Term Deposit<br>Open</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Term Deposit<br>Close</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Savings<br>Coll.</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Savings<br>Ref.</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Sav. Ref.<br>(Cash)</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Sav. Ref.<br>(Non-Cash)</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%; font-size:9px;">Borrower<br>Rec. Loan</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%; font-size:9px;">Full<br>Paid</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Disbursed</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Recoverable</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Regular</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:3%;">OTR %</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Total Due</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Current<br>Due</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Matured<br>Due</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Advance</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Total<br>Collection</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Service Charge</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Cash<br>In Hand</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">Cash<br>At Bank</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">New Due<br>Borrower</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">New Due<br>Amount</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center; font-size:9.5px; width:4%;">WriteOff<br>Coll.</th></tr>` :
+                              (window.currentCheckerType === 'KPI_REPORT' ?
+                                `<tr style="height:32px;"><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px; width:10%;">Branch Name</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">OTR</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">PAR</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">DR</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">Borrower<br>Coverage</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">Savings ratio</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">Outstanding<br>per Borrower</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">Member<br>per samity</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">Borrower<br>per Samity</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">Outstanding<br>Per FO</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">Borrower<br>Per FO</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">Active Borrower<br>(Total Borrower - Bad Loanee)</th><th style="position:sticky; top:0; z-index:21; background:#192a56; color:white; border:1px solid white; text-align:center !important; vertical-align:middle !important; font-size:9.5px;">Total FO</th></tr>` :
+                                `<tr><th style="width:24%; text-align:left;">Branch</th><th style="width:14%; text-align:left;">Item</th><th style="width:62%; text-align:right;">Balance (AIS)</th></tr>`)))))}
                         </thead>
                 `;
-                branchesToProcess.sort((a, b) => { let z = (a.zone || "").localeCompare(b.zone || ""); if (z !== 0) return z; let ar = (a.area || "").localeCompare(b.area || ""); if (ar !== 0) return ar; return parseInt(a.id || "0") - parseInt(b.id || "0"); }); let currentZ = ""; let currentA = ""; for(let b of branchesToProcess) { if (b.zone !== currentZ && b.zone && b.zone !== "Branch" && b.zone !== "Assigned Zone") { currentZ = b.zone; tableHtml += `<tbody data-status="header"><tr style="background:#0277bd; color:white;"><td colspan="26" style="padding:4px; text-align:left;"><b>\u{1F3E2} Zone: ` + currentZ + `</b></td></tr></tbody>`; } if (b.area !== currentA && b.area && b.area !== "Branch" && b.area !== "Assigned Area") { currentA = b.area; tableHtml += `<tbody data-status="header"><tr style="background:#e1f5fe; color:#01579b;"><td colspan="26" style="padding:4px; text-align:left;">&nbsp;&nbsp;<b>\u{1F4CD} Area: ` + currentA + `</b></td></tr></tbody>`; } let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, ""); tableHtml += `
+                if (window.currentCheckerType === 'KPI_REPORT') window._kpiAggregates = {};
+                branchesToProcess.sort((a, b) => { let z = (a.zone || "").localeCompare(b.zone || ""); if (z !== 0) return z; let ar = (a.area || "").localeCompare(b.area || ""); if (ar !== 0) return ar; return parseInt(a.id || "0") - parseInt(b.id || "0"); }); 
+                let currentZ = ""; let currentA = ""; 
+                for (let i = 0; i < branchesToProcess.length; i++) {
+                    let b = branchesToProcess[i];
+                    if (b.zone !== currentZ && b.zone && b.zone !== "Branch" && b.zone !== "Assigned Zone") { 
+                        currentZ = b.zone; 
+                        tableHtml += `<tbody data-status="header"><tr style="background:#192a56; color:white;"><td colspan="26" style="padding:4px; text-align:left;"><b>\u{1F3E2} Zone: ` + currentZ + `</b></td></tr></tbody>`; 
+                    } 
+                    if (b.area !== currentA && b.area && b.area !== "Branch" && b.area !== "Assigned Area") { 
+                        currentA = b.area; 
+                        tableHtml += `<tbody data-status="header"><tr style="background:#e1f5fe; color:#01579b;"><td colspan="26" style="padding:4px; text-align:left;">&nbsp;&nbsp;<b>\u{1F4CD} Area: ` + currentA + `</b></td></tr></tbody>`; 
+                    } 
+                    let safeId = b.id.toString().replace(/[^a-zA-Z0-9]/g, ""); 
+                    tableHtml += `
                         <tbody id="tbody-${safeId}" class="audit-row-group" data-zone="${b.zone || ''}" data-area="${b.area || ''}">
                             <tr style="background:#fff;">
                                 <td style="text-align:left; font-weight:bold; color:#2c3e50; font-size:9px;">${b.name}</td>
@@ -4391,14 +4640,42 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                             </tr>
                         </tbody>
                     `;
+                    
+                    let nextB = branchesToProcess[i+1];
+                    let isLastInArea = !nextB || nextB.area !== b.area || nextB.zone !== b.zone;
+                    let isLastInZone = !nextB || nextB.zone !== b.zone;
+
+                    if (window.currentCheckerType === 'KPI_REPORT') {
+                        if (isLastInArea && b.area && b.area !== "Branch" && b.area !== "Assigned Area") {
+                            let safeAreaId = b.area.replace(/[^a-zA-Z0-9]/g, "");
+                            tableHtml += `<tbody id="summary-area-${safeAreaId}" data-status="summary"></tbody>`;
+                        }
+                        if (isLastInZone && b.zone && b.zone !== "Branch" && b.zone !== "Assigned Zone") {
+                            let safeZoneId = b.zone.replace(/[^a-zA-Z0-9]/g, "");
+                            tableHtml += `<tbody id="summary-zone-${safeZoneId}" data-status="summary"></tbody>`;
+                        }
+                    }
+                }
+                if (window.currentCheckerType === 'KPI_REPORT') {
+                    tableHtml += `<tbody id="summary-grand-total" data-status="summary"></tbody>`;
                 }
                 tableHtml += `</table></div>`;
+                
+                if (window.currentCheckerType === 'DAILY_TRANSACTION') {
+                    tableHtml += `
+                    <div id="daily-summary-container" style="${window._misAisCurrentTab === 'SUMMARY' ? 'flex:1; min-height:0; overflow:auto; padding:10px; font-family: DSK_MixedFont, sans-serif; opacity:1; pointer-events:auto;' : 'flex:0 0 0px; height:0px; min-height:0; overflow:hidden; opacity:0; padding:0; pointer-events:none;'}">
+                    </div>
+                    `;
+                }
+                
                 output.innerHTML = tableHtml;
 
                 let tabAll = document.getElementById('tab-all-branches');
                 let tabDiff = document.getElementById('tab-only-diff');
                 let tabLoss = document.getElementById('tab-loss-branches');
                 let tabHighCash = document.getElementById('tab-high-cash');
+                let tabMain = document.getElementById('tab-daily-main');
+                let tabSummary = document.getElementById('tab-daily-summary');
                 
                 window.applyTabFilters = function(targetTbody = null) {
                     let tbodies = targetTbody ? [targetTbody] : document.querySelectorAll('.audit-row-group');
@@ -4458,8 +4735,8 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         }
                     });
 
-                    // Add total row for DAILY_TRANSACTION
-                    if (window.currentCheckerType === 'DAILY_TRANSACTION') {
+                    // Add total row for DAILY_TRANSACTION and DUE_COLLECTION
+                    if (window.currentCheckerType === 'DAILY_TRANSACTION' || window.currentCheckerType === 'DUE_COLLECTION') {
                         let tfoot = document.getElementById('daily-transaction-tfoot');
                         if (!tfoot) {
                             tfoot = document.createElement('tfoot');
@@ -4484,7 +4761,14 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                             let hasValidData = false;
                             trs.forEach(tr => {
                                 let tds = tr.querySelectorAll('td');
-                                if (tds.length >= 20 && tds[0].innerText !== 'Total' && !tds[1].innerText.includes('\u23F3') && !tds[1].innerText.includes('\u274C') && !tds[1].innerText.includes('\u{1F504}')) {
+                                if (window.currentCheckerType === 'DUE_COLLECTION' && tds.length === 3 && tds[0].innerText !== 'Total' && !tds[1].innerText.includes('\u23F3') && !tds[1].innerText.includes('\u274C') && !tds[1].innerText.includes('\u{1F504}')) {
+                                    hasValidData = true;
+                                    let v = (i) => parseFloat(tds[i].innerText.replace(/,/g, '')) || 0;
+                                    let add = (obj) => {
+                                        obj.curDue += v(1); obj.matDue += v(2);
+                                    };
+                                    add(grandTotals); add(zoneTotals[zone]); add(areaTotals[zone + '|' + area]);
+                                } else if (tds.length >= 20 && tds[0].innerText !== 'Total' && !tds[1].innerText.includes('\u23F3') && !tds[1].innerText.includes('\u274C') && !tds[1].innerText.includes('\u{1F504}')) {
                                     hasValidData = true;
                                     let v = (i) => parseFloat(tds[i].innerText.replace(/,/g, '')) || 0;
                                     let add = (obj) => {
@@ -4519,27 +4803,33 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         Object.keys(areaTotals).forEach(key => {
                             let data = areaTotals[key];
                             if (level === '1') return; // Hide area totals if branch level
-                            if (data.lastTb && key.split('|')[1] !== 'Unknown' && key.split('|')[1] !== '' && data.branchCount > 1) {
+                            if (data.lastTb && key.split('|')[1] !== 'Unknown' && key.split('|')[1] !== '' && data.branchCount > 0) {
                                 let otr = data.rec > 0 ? ((data.reg * 100) / data.rec).toFixed(2) : '0.00';
-                                let html = `<tr style="background:#e1f5fe; color:#01579b; font-weight:bold;" class="dt-subtotal">
-                                    <td style="text-align:right; font-size:10px; white-space:nowrap;" class="subtotal-label">${key.split('|')[1]} (Total)</td><td style="text-align:center; font-size:10px;">${data.admissions}</td><td style="text-align:center; font-size:10px;">${data.dropouts}</td><td style="text-align:center; font-weight:bold; color:#16a085;">${data.tdOpen}</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">${data.tdClose}</td><td style="text-align:center; font-size:10px;">${data.savDep.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.savRef.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.savRefCash.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.savRefNon.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.disbCount}</td>
-                                      <td style="text-align:center; font-size:10px;">${data.fullPaid}</td>
-                                      <td style="text-align:center; font-size:10px;">${data.disb.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.rec.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.reg.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${otr}%</td>
-                                    <td style="text-align:center; font-size:10px;">${data.due.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.curDue.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.matDue.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.adv.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.prin.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.sc.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.cashIn.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.cashBank.toFixed(2)}</td><td style="text-align:center; font-size:10px;">${data.newDueBorrower}</td><td style="text-align:center; font-size:10px;">${data.newDueAmount.toFixed(2)}</td><td style="text-align:center; font-size:10px;">${data.writeOffColl.toFixed(2)}</td></tr>`;
+                                let html = window.currentCheckerType === 'DUE_COLLECTION' ? 
+                                    `<tr style="background:#e1f5fe; color:#01579b; font-weight:bold;" class="dt-subtotal">
+                                      <td style="text-align:right; font-size:9.5px; white-space:nowrap;" class="subtotal-label">${key.split('|')[1]} (Total)</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.curDue, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.matDue, 2)}</td>
+                                    </tr>` :
+                                    `<tr style="background:#e1f5fe; color:#01579b; font-weight:bold;" class="dt-subtotal">
+                                      <td style="text-align:right; font-size:9.5px; white-space:nowrap;" class="subtotal-label">${key.split('|')[1]} (Total)</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.admissions, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.dropouts, 0)}</td><td style="text-align:center; font-weight:bold; color:#16a085;">${window.fmtNum(data.tdOpen, 0)}</td><td style="text-align:center; font-weight:bold; color:#b33939;">${window.fmtNum(data.tdClose, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.savDep, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.savRef, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.savRefCash, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.savRefNon, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.disbCount, 0)}</td>
+                                        <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.fullPaid, 0)}</td>
+                                        <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.disb, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.rec, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.reg, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${otr}%</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.due, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.curDue, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.matDue, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.adv, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.prin, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.sc, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.cashIn, 2)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.cashBank, 2)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.newDueBorrower, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.newDueAmount, 2)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.writeOffColl, 2)}</td></tr>`;
                                 let tb = document.createElement('tbody');
                                 tb.className = 'dt-subtotal dt-area-total';
                                 tb.innerHTML = html;
@@ -4552,27 +4842,27 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                             let data = zoneTotals[z];
                             if (level === '1' || level === '2') return; // Hide zone totals if area or branch level
                             let areasInZone = Object.keys(areaTotals).filter(k => k.startsWith(z + '|')).length;
-                            if (data.lastTb && z !== 'Unknown' && z !== '' && areasInZone > 1) {
+                            if (data.lastTb && z !== 'Unknown' && z !== '' && areasInZone > 0) {
                                 let otr = data.rec > 0 ? ((data.reg * 100) / data.rec).toFixed(2) : '0.00';
-                                let html = `<tr style="background:#0277bd; color:white; font-weight:bold;" class="dt-subtotal">
-                                    <td style="text-align:right; font-size:10px; white-space:nowrap;" class="subtotal-label">${z} (Total)</td><td style="text-align:center; font-size:10px;">${data.admissions}</td><td style="text-align:center; font-size:10px;">${data.dropouts}</td><td style="text-align:center; font-weight:bold; color:#16a085;">${data.tdOpen}</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">${data.tdClose}</td><td style="text-align:center; font-size:10px;">${data.savDep.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.savRef.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.savRefCash.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.savRefNon.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.disbCount}</td>
-                                      <td style="text-align:center; font-size:10px;">${data.fullPaid}</td>
-                                      <td style="text-align:center; font-size:10px;">${data.disb.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.rec.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.reg.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${otr}%</td>
-                                    <td style="text-align:center; font-size:10px;">${data.due.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.curDue.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.matDue.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.adv.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.prin.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.sc.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.cashIn.toFixed(2)}</td>
-                                    <td style="text-align:center; font-size:10px;">${data.cashBank.toFixed(2)}</td><td style="text-align:center; font-size:10px;">${data.newDueBorrower}</td><td style="text-align:center; font-size:10px;">${data.newDueAmount.toFixed(2)}</td><td style="text-align:center; font-size:10px;">${data.writeOffColl.toFixed(2)}</td></tr>`;
+                                let html = window.currentCheckerType === 'DUE_COLLECTION' ? `<tr style="background:#192a56; color:white; font-weight:bold;" class="dt-subtotal"><td style="text-align:right; font-size:9.5px; white-space:nowrap;" class="subtotal-label">${z} (Total)</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.curDue, 2)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.matDue, 2)}</td></tr>` : `<tr style="background:#192a56; color:white; font-weight:bold;" class="dt-subtotal">
+                                    <td style="text-align:right; font-size:9.5px; white-space:nowrap;" class="subtotal-label">${z} (Total)</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.admissions, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.dropouts, 0)}</td><td style="text-align:center; font-weight:bold;">${window.fmtNum(data.tdOpen, 0)}</td><td style="text-align:center; font-weight:bold;">${window.fmtNum(data.tdClose, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.savDep, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.savRef, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.savRefCash, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.savRefNon, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.disbCount, 0)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.fullPaid, 0)}</td>
+                                      <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.disb, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.rec, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.reg, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${otr}%</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.due, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.curDue, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.matDue, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.adv, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.prin, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.sc, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.cashIn, 2)}</td>
+                                    <td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.cashBank, 2)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.newDueBorrower, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.newDueAmount, 2)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(data.writeOffColl, 2)}</td></tr>`;
                                 let tb = document.createElement('tbody');
                                 tb.className = 'dt-subtotal dt-zone-total';
                                 tb.innerHTML = html;
@@ -4584,25 +4874,73 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         let targetSel = document.getElementById('custom-target');
                         let isAll = !targetSel || targetSel.value === 'ALL';
                         
-                        if (isAll && grandTotals.branchCount > 1) {
-                            tfoot.innerHTML = `<tr>
-                                <td style="text-align:left; font-size:10.5px; padding:6px;" class="subtotal-label"><b>Grand Total</b></td><td style="text-align:center; font-size:10px;">${grandTotals.admissions}</td><td style="text-align:center; font-size:10px;">${grandTotals.dropouts}</td><td style="text-align:center; font-weight:bold; color:#16a085;">${grandTotals.tdOpen}</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">${grandTotals.tdClose}</td><td style="text-align:center; font-size:10px;">${grandTotals.savDep.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.savRef.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.savRefCash.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.savRefNon.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.disbCount}</td><td style="text-align:center; font-size:10px;">${grandTotals.fullPaid}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.disb.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.rec.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.reg.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${otr}%</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.due.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.curDue.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.matDue.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.adv.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.prin.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.sc.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.cashIn.toFixed(2)}</td>
-                                <td style="text-align:center; font-size:10px;">${grandTotals.cashBank.toFixed(2)}</td><td style="text-align:center; font-size:10px;">${grandTotals.newDueBorrower}</td><td style="text-align:center; font-size:10px;">${grandTotals.newDueAmount.toFixed(2)}</td><td style="text-align:center; font-size:10px;">${grandTotals.writeOffColl.toFixed(2)}</td></tr>`;
+                        if (window.currentCheckerType === 'DAILY_TRANSACTION' && grandTotals.branchCount > 0) {
+                            let summC = document.getElementById('daily-summary-container');
+                            if (summC) {
+                                let fTime = new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-US', { hour12: true });
+                                let dFrom = document.getElementById('custom-audit-date-from') ? document.getElementById('custom-audit-date-from').value : '';
+                                let dTo = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : '';
+                                let dRange = (dFrom && dTo && dFrom !== dTo) ? `Date Range: ${dFrom} to ${dTo}` : `Date: ${dTo}`;
+                                summC.innerHTML = `
+                                <div style="width:100%; max-width:450px; margin: 0 auto 4px auto; background:linear-gradient(135deg, #f8f9fa, #e8f4f8); border:1px solid #d0e1e9; border-radius:6px; padding:4px 8px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                                    <div style="font-size:9.5px; font-family:'SolaimanLipi', 'Kalpurush', sans-serif; color:#34495e; font-weight:bold;">
+                                        <span style="color:#2980b9;">\u23F3 Generated:</span> ${fTime}
+                                    </div>
+                                    <div style="font-size:9.5px; font-family:'SolaimanLipi', 'Kalpurush', sans-serif; color:#34495e; font-weight:bold;">
+                                        <span style="color:#e67e22;">\u{1F4C5}</span> ${dRange}
+                                    </div>
+                                </div>
+                                <table style="width:100%; max-width:450px; margin:0 auto; border-collapse:collapse; background:white; font-family:'SolaimanLipi', 'Kalpurush', sans-serif; font-size:9.5px; line-height:1.15; box-shadow:0 0 10px rgba(0,0,0,0.1);">
+                                    <tr style="background:#192a56; color:white;"><th colspan="2" style="padding:6px; font-size:11px; font-family:'SolaimanLipi', 'Kalpurush', sans-serif; border:1px solid #bdc3c7; text-align:center !important;">\u{1F4CA} Daily Transaction Summary At a Glance (Total Branches: ${grandTotals.branchCount})</th></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold; width:60%;">Member Admission</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.admissions, 0)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Member DropOut</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.dropouts, 0)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Term Deposit Open</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right; color:#16a085;">${window.fmtNum(grandTotals.tdOpen, 0)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Term Deposit Close</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right; color:#b33939;">${window.fmtNum(grandTotals.tdClose, 0)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Savings Collection</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.savDep, 2)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Savings Refund</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.savRef, 2)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Savings Refund (Cash)</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.savRefCash, 2)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Savings Refund (Non-Cash)</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.savRefNon, 2)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Borrower Received Loan</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.disbCount, 0)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Full Paid</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.fullPaid, 0)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Disbursed</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.disb, 2)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Recoverable</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.rec, 2)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Regular</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.reg, 2)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">OTR %</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right; font-weight:bold; color:#8e44ad;">${otr}%</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Total Due</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.due, 2)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Current Due</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.curDue, 2)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Matured Due</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.matDue, 2)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Advance</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.adv, 2)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Total Collection</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.prin + grandTotals.sc, 2)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Service Charge</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.sc, 2)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Cash In Hand</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right; color:#c0392b;">${window.fmtNum(grandTotals.cashIn, 2)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">Cash At Bank</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right; color:#c0392b;">${window.fmtNum(grandTotals.cashBank, 2)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">New Due Borrower</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.newDueBorrower, 0)}</td></tr>
+                                    <tr style="background:#f8f9fa;"><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">New Due Amount</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.newDueAmount, 2)}</td></tr>
+                                    <tr><td style="padding:1px 4px; border:1px solid #bdc3c7; font-weight:bold;">WriteOff Collection</td><td style="padding:1px 4px; border:1px solid #bdc3c7; text-align:right;">${window.fmtNum(grandTotals.writeOffColl, 2)}</td></tr>
+                                </table>
+                                `;
+                            }
+                        }
+
+                        if (isAll && grandTotals.branchCount > 0) {
+                            tfoot.innerHTML = window.currentCheckerType === 'DUE_COLLECTION' ? `<tr><td style="text-align:left; font-size:10.5px; padding:6px;" class="subtotal-label"><b>Grand Total</b></td><td style="text-align:center; font-size:9.5px; color:#16a085;"><b>${window.fmtNum(grandTotals.curDue, 2)}</b></td><td style="text-align:center; font-size:9.5px; color:#e67e22;"><b>${window.fmtNum(grandTotals.matDue, 2)}</b></td></tr>` : `<tr>
+                                <td style="text-align:left; font-size:10.5px; padding:6px;" class="subtotal-label"><b>Grand Total</b></td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.admissions, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.dropouts, 0)}</td><td style="text-align:center; font-weight:bold; color:#16a085;">${window.fmtNum(grandTotals.tdOpen, 0)}</td><td style="text-align:center; font-weight:bold; color:#b33939;">${window.fmtNum(grandTotals.tdClose, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.savDep, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.savRef, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.savRefCash, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.savRefNon, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.disbCount, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.fullPaid, 0)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.disb, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.rec, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.reg, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${otr}%</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.due, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.curDue, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.matDue, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.adv, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.prin, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.sc, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.cashIn, 2)}</td>
+                                <td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.cashBank, 2)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.newDueBorrower, 0)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.newDueAmount, 2)}</td><td style="text-align:center; font-size:9.5px;">${window.fmtNum(grandTotals.writeOffColl, 2)}</td></tr>`;
                             tfoot.style.display = '';
                         } else {
                             tfoot.style.display = 'none';
@@ -4617,6 +4955,17 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         if (tabDiff) tabDiff.style.opacity = '0.5';
                         if (tabLoss) tabLoss.style.opacity = '0.5';
                         if (tabHighCash) tabHighCash.style.opacity = '0.5';
+                        if (tabSummary) tabSummary.style.opacity = '0.5';
+                        
+                        let mainC = document.getElementById('daily-main-container');
+                        let summC = document.getElementById('daily-summary-container');
+                        if (summC) {
+                            summC.style.flex = '0 0 0px'; summC.style.height = '0px'; summC.style.overflow = 'hidden'; summC.style.opacity = '0'; summC.style.pointerEvents = 'none'; summC.style.padding = '0';
+                        }
+                        if (mainC) {
+                            mainC.style.height = 'auto'; mainC.style.flex = '1'; mainC.style.maxHeight = 'none'; mainC.style.overflow = 'auto'; mainC.style.opacity = '1'; mainC.style.pointerEvents = 'auto';
+                        }
+                        
                         if (window.applyTabFilters) window.applyTabFilters();
                     };
                 }
@@ -4648,13 +4997,44 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         if (window.applyTabFilters) window.applyTabFilters();
                     };
                 }
+                if (tabMain) {
+                    tabMain.onclick = () => {
+                        window._misAisCurrentTab = 'MAIN';
+                        tabMain.style.opacity = '1';
+                        if (tabSummary) tabSummary.style.opacity = '0.5';
+                        let mainC = document.getElementById('daily-main-container');
+                        let summC = document.getElementById('daily-summary-container');
+                        if (summC) {
+                            summC.style.flex = '0 0 0px'; summC.style.height = '0px'; summC.style.overflow = 'hidden'; summC.style.opacity = '0'; summC.style.pointerEvents = 'none'; summC.style.padding = '0';
+                        }
+                        if (mainC) {
+                            mainC.style.height = 'auto'; mainC.style.flex = '1'; mainC.style.maxHeight = 'none'; mainC.style.overflow = 'auto'; mainC.style.opacity = '1'; mainC.style.pointerEvents = 'auto';
+                        }
+                    };
+                }
+                if (tabSummary) {
+                    tabSummary.onclick = () => {
+                        window._misAisCurrentTab = 'SUMMARY';
+                        tabSummary.style.opacity = '1';
+                        if (tabAll) tabAll.style.opacity = '0.5';
+                        if (tabMain) tabMain.style.opacity = '0.5';
+                        let mainC = document.getElementById('daily-main-container');
+                        let summC = document.getElementById('daily-summary-container');
+                        if (mainC) {
+                            mainC.style.flex = '0 0 0px'; mainC.style.height = '0px'; mainC.style.overflow = 'hidden'; mainC.style.opacity = '0'; mainC.style.pointerEvents = 'none';
+                        }
+                        if (summC) {
+                            summC.style.height = 'auto'; summC.style.flex = '1'; summC.style.maxHeight = 'none'; summC.style.overflow = 'auto'; summC.style.opacity = '1'; summC.style.pointerEvents = 'auto'; summC.style.padding = '10px';
+                        }
+                    };
+                }
                 const updateStatus = (msg) => { 
                     let stEl = document.getElementById('audit-status');
                     if(stEl) stEl.innerText = msg; 
                 };
                 let successCount = 0;
                 let currentIndex = 0;
-                const CONCURRENT_LIMIT = window.currentCheckerType === "DAILY_TRANSACTION" ? 10 : 8;
+                const CONCURRENT_LIMIT = 10;
 
                 async function processNextBranch() {
                     while (currentIndex < branchesToProcess.length) {
@@ -4686,7 +5066,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         }
                         if (mData) {
                             let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                            if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                             aData = await fetchBalanceSheetApi(b.id, selectedDate);
                             if (!aData) {
                                 let tRetry3 = document.getElementById(`tbody-${safeId}`);
@@ -4696,7 +5076,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         }
                     } else if (window.currentCheckerType === 'SAMITY') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} \u09B8\u09AE\u09BF\u09A4\u09BF \u09B2\u09BF\u09B8\u09CD\u099F \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         aData = await scrapeViaGhost( '#/samity/samities/index', selectedDate, '1', b.id, 'samity', updateStatus);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
@@ -4705,16 +5085,44 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         }
                     } else if (window.currentCheckerType === 'DUE_COLLECTION') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
-                        aData = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate), typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} Due Collection \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        
+                        let customDateFrom = document.getElementById('custom-audit-date-from') ? document.getElementById('custom-audit-date-from').value : (typeof selectedDate !== 'undefined' ? selectedDate : sDate);
+                        let customDateTo = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : (typeof selectedDate !== 'undefined' ? selectedDate : sDate);
+                        
+                        aData = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, customDateFrom, customDateTo);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
                             if(tRetry3) tRetry3.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#e67e22; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#d35400; font-size:9px;">\u{1F504} Due Collection \u0985\u099F\u09CB-\u09B0\u09BF\u099F\u09CD\u09B0\u09BE\u0987...</td></tr>`;
-                            aData = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, typeof targetDateFrom !== 'undefined' ? targetDateFrom : (typeof selectedDate !== 'undefined' ? selectedDate : sDate), typeof targetDateTo !== 'undefined' ? targetDateTo : (typeof selectedDate !== 'undefined' ? selectedDate : sDate));
+                            aData = await fetchDueCollectionApi(typeof bId !== 'undefined' ? bId : b.id, customDateFrom, customDateTo);
                         }
+                    } else if (window.currentCheckerType === 'KPI_REPORT') {
+                        let targetDateTo = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : selectedDate;
+
+                        let targetDateFrom = targetDateTo;
+                        if (targetDateTo) {
+                            let tParts = targetDateTo.split('-');
+                            if (tParts.length === 3) targetDateFrom = tParts[0] + '-' + tParts[1] + '-01';
+                        }
+                        let tRetry2 = document.getElementById(`tbody-${safeId}`);
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} KPI Data Loading...</td></tr>`;
+                        let dAll = await fetchPeriodicalReportApi(b.id, targetDateFrom, targetDateTo, "0");
+                        let dDue = await fetchDueRegisterReportApi(b.id, targetDateTo);
+                        let mDataKpi = await fetchMisReportApi(b.id, targetDateTo);
+                        let totalFo = await fetchEmployeeReportApi(b.id, targetDateTo);
+                        let badLoanee = await fetchBadLoaneeApi(b.id, targetDateTo);
+                        aData = dAll || {};
+                        aData.dueRegister = dDue;
+                        aData.outstanding = mDataKpi ? mDataKpi.loan : 0;
+                        aData.savingsBalance = mDataKpi ? mDataKpi.savings : 0;
+                        aData.member = mDataKpi ? mDataKpi.member : 0;
+                        aData.borrower = mDataKpi ? mDataKpi.borrower : 0;
+                        aData.samity = mDataKpi ? mDataKpi.samity : 0;
+                        aData.totalFo = totalFo;
+                        aData.badLoanee = badLoanee;
                     } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} Daily Transaction \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         
                         let targetDateFrom = document.getElementById('custom-audit-date-from') ? document.getElementById('custom-audit-date-from').value : selectedDate;
                         let targetDateTo = document.getElementById('custom-audit-date') ? document.getElementById('custom-audit-date').value : selectedDate;
@@ -4801,7 +5209,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         }
                     } else {
                         let tRetry2 = document.getElementById(`tbody-${safeId}`);
-                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                        if(tRetry2) tRetry2.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} Balance Sheet \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                         aData = await fetchBalanceSheetApi(b.id, selectedDate);
                         if (!aData) {
                             let tRetry3 = document.getElementById(`tbody-${safeId}`);
@@ -4810,7 +5218,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         }
                         if (window.currentCheckerType === 'EQUITY') {
                             let tRetry4 = document.getElementById(`tbody-${safeId}`);
-                            if(tRetry4) tRetry4.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#27ae60; font-size:9px;">\u{1F504} Income Statement \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
+                            if(tRetry4) tRetry4.innerHTML = `<tr><td style="text-align:left; font-weight:bold; color:#2980b9; font-size:9px;">${b.name}</td><td colspan="26" style="text-align:center; color:#10ac84; font-size:9px;">\u{1F504} Income Statement \u09B0\u09BF\u09A1 \u09B9\u099A\u09CD\u099B\u09C7...</td></tr>`;
                             iData = await fetchIncomeStatementApi(b.id, selectedDate);
                             if (!iData) {
                                 let tRetry5 = document.getElementById(`tbody-${safeId}`);
@@ -4869,7 +5277,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         if (window.currentCheckerType === 'MIS') {
                             htmlRowsBatch = `
                                 <tr>
-                                    <td rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${b.name}</td>
+                                    <td rowspan="2" style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${b.name}</td>
                                     <td style="text-align:left; font-size:9px;"><b>Loan</b></td>
                                     <td style="white-space:nowrap; font-size:9px;">${formatNum(mData.loan)}</td>
                                     <td style="white-space:nowrap; font-size:9px;">${formatNum(aData.loan)}</td>
@@ -4889,7 +5297,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                             let isHighBankClass = aData.cashAtBank >= 1000001 ? 'is-high' : '';
                             htmlRowsBatch = `
                                 <tr class="cash-row ${isHighCashClass}">
-                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${b.name}</td>
+                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; background:#f4f9f4; font-size:9px;">${b.name}</td>
                                     <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Cash</b></td>
                                     <td style="color:${cashColor}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.cashInHand)}</td>
                                 </tr>
@@ -4901,7 +5309,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         } else if (window.currentCheckerType === 'EQUITY') {
                             htmlRowsBatch = `
                                 <tr class="equity-row">
-                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">${b.name}</td>
+                                    <td class="branch-name-td" rowspan="2" style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">${b.name}</td>
                                     <td style="text-align:left; color:#2c3e50; font-size:9px;"><b>Equity</b></td>
                                     <td style="color:${(aData.equity < 0 && aData.equity !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equity)}</td>
                                     <td style="color:${(aData.equityPrev < 0 && aData.equityPrev !== -999) ? 'red' : '#8e44ad'}; text-align:right; font-weight:bold; white-space:nowrap; font-size:9px;">${formatNum(aData.equityPrev)}</td>
@@ -4918,13 +5326,81 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                             let smallCount = smallSamities.length;
                             let codesText = smallSamities.map(s => s.code).join(', ');
                             if (totalCount === 0 && aData && aData.debug) codesText = '<span style="color:red;">' + aData.debug + '</span>';
-                            htmlRowsBatch = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; color:#2c3e50; font-size:10px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:10px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td></tr>`;
+                            let largeSamities = aData && aData.data ? aData.data.filter(s => s.members > 40) : (aData && Array.isArray(aData) ? aData.filter(s => s.members > 40) : []);
+                              let largeCount = largeSamities.length;
+                              let largeCodesText = largeSamities.map(s => s.code).join(', ');
+                              
+                              htmlRowsBatch = `<tr class="samity-row"><td style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; color:#2c3e50; font-size:9.5px; font-weight:bold;">` + totalCount + `</td><td style="text-align:center; color:#c0392b; font-size:9.5px; font-weight:bold;">` + smallCount + `</td><td style="text-align:left; color:#8e44ad; font-size:9px; white-space:normal; word-wrap:break-word;">` + codesText + `</td><td style="text-align:center; color:#c0392b; font-size:9.5px; font-weight:bold;">` + largeCount + `</td><td style="text-align:left; color:#e67e22; font-size:9px; white-space:normal; word-wrap:break-word;">` + largeCodesText + `</td></tr>`;
                         } else if (window.currentCheckerType === 'DUE_COLLECTION') {
-                            htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.totalCurrent)||0).toFixed(2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.totalMatured)||0).toFixed(2) : '0') + `</td></tr>`;
+                            htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? window.fmtNum(aData.totalCurrent, 2) : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? window.fmtNum(aData.totalMatured, 2) : '0') + `</td></tr>`;
+                        } else if (window.currentCheckerType === 'KPI_REPORT') {
+                            if (!window._kpiAggregates[b.zone]) window._kpiAggregates[b.zone] = { recoverable:0, regular:0, dueRegPresent:0, dueRegDue:0, outstanding:0, savingsBalance:0, borrower:0, member:0, samity:0, totalFo:0, badLoanee:0, _areas:{} };
+                            if (!window._kpiAggregates[b.zone]._areas[b.area]) window._kpiAggregates[b.zone]._areas[b.area] = { recoverable:0, regular:0, dueRegPresent:0, dueRegDue:0, outstanding:0, savingsBalance:0, borrower:0, member:0, samity:0, totalFo:0, badLoanee:0 };
+                            if (aData) {
+                                let _z = window._kpiAggregates[b.zone];
+                                let _a = _z._areas[b.area];
+                                let _vals = [
+                                    aData.recoverable||0, aData.regular||0, 
+                                    (aData.dueRegister?aData.dueRegister.presentLoanAmount:0)||0, 
+                                    (aData.dueRegister?aData.dueRegister.dueAmount:0)||0,
+                                    aData.outstanding||0, aData.savingsBalance||0, aData.borrower||0, aData.member||0, aData.samity||0, aData.totalFo||0, aData.badLoanee||0
+                                ];
+                                [_z, _a].forEach(obj => {
+                                    obj.recoverable += _vals[0]; obj.regular += _vals[1]; obj.dueRegPresent += _vals[2]; obj.dueRegDue += _vals[3];
+                                    obj.outstanding += _vals[4]; obj.savingsBalance += _vals[5]; obj.borrower += _vals[6]; obj.member += _vals[7];
+                                    obj.samity += _vals[8]; obj.totalFo += _vals[9]; obj.badLoanee += _vals[10];
+                                });
+                            }
+
+                            let otr = aData && aData.recoverable > 0 ? ((aData.regular * 100) / aData.recoverable).toFixed(2) : '0.00';
+                            let par = '0.00';
+                            let dr = '0.00';
+                            let savingsRatio = '0.00';
+                            let borrowerCoverage = '0.00';
+                            let outPerBorrower = '0.00';
+                            let memberPerSamity = '0';
+                            let borrowerPerSamity = '0';
+                            let outPerFo = '0.00';
+                            let borrowerPerFo = '0';
+                            
+                            if (aData && aData.dueRegister && aData.outstanding > 0) {
+                                par = ((aData.dueRegister.presentLoanAmount / aData.outstanding) * 100).toFixed(2);
+                                dr = ((aData.dueRegister.dueAmount / aData.outstanding) * 100).toFixed(2);
+                            }
+                            if (aData && aData.outstanding > 0 && aData.savingsBalance) {
+                                savingsRatio = ((aData.savingsBalance / aData.outstanding) * 100).toFixed(2);
+                            }
+                            if (aData && aData.member > 0 && aData.borrower > 0) {
+                                borrowerCoverage = ((aData.borrower / aData.member) * 100).toFixed(2);
+                            }
+                            if (aData && aData.borrower > 0 && aData.outstanding > 0) {
+                                outPerBorrower = (aData.outstanding / aData.borrower).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+                            }
+                            if (aData && aData.samity > 0) {
+                                memberPerSamity = Math.round(aData.member / aData.samity).toString();
+                                borrowerPerSamity = Math.round(aData.borrower / aData.samity).toString();
+                            }
+                            if (aData && aData.totalFo > 0) {
+                                if (aData.outstanding > 0) outPerFo = (aData.outstanding / aData.totalFo).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+                                if (aData.borrower > 0) borrowerPerFo = Math.round(aData.borrower / aData.totalFo).toString();
+                            }
+                            
+                            let debugStr = `Samity: ${aData ? aData.samity : 0}, Mem: ${aData ? aData.member : 0}, Borr: ${aData ? aData.borrower : 0}, FO: ${aData ? aData.totalFo : 0}`;
+                            let na = `<span style="color:#bdc3c7;" title="${debugStr}">N/A</span>`;
+                            let debugMem = `<span title="${debugStr}" style="color:#d35400;">${memberPerSamity}</span>`;
+                            let debugBor = `<span title="${debugStr}" style="color:#c0392b;">${borrowerPerSamity}</span>`;
+                            let outFoHtml = `<span title="${debugStr}" style="color:#16a085;">${outPerFo}</span>`;
+                            let borFoHtml = `<span title="${debugStr}" style="color:#2980b9;">${borrowerPerFo}</span>`;
+                            let activeBorrowerCount = (aData && aData.borrower ? aData.borrower : 0) - (aData && aData.badLoanee ? aData.badLoanee : 0);
+                            if (activeBorrowerCount < 0) activeBorrowerCount = 0;
+                            let activeBorHtml = `<span title="${debugStr}, Bad Loanee: ${aData ? aData.badLoanee : 0}" style="color:#8e44ad;">${activeBorrowerCount}</span>`;
+                            let totalFoHtml = `<span title="${debugStr}" style="color:#d35400;">${aData ? aData.totalFo : 0}</span>`;
+                            
+                            htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + par + `%</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">` + dr + `%</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + borrowerCoverage + `%</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + savingsRatio + `%</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + outPerBorrower + `</td><td style="text-align:center; font-weight:bold;">` + debugMem + `</td><td style="text-align:center; font-weight:bold;">` + debugBor + `</td><td style="text-align:center; font-weight:bold;">` + outFoHtml + `</td><td style="text-align:center; font-weight:bold;">` + borFoHtml + `</td><td style="text-align:center; font-weight:bold;">` + activeBorHtml + `</td><td style="text-align:center; font-weight:bold;">` + totalFoHtml + `</td></tr>`;
                         } else if (window.currentCheckerType === 'DAILY_TRANSACTION') {
                             let otr = aData && aData.recoverable > 0 ? ((aData.regular * 100) / aData.recoverable).toFixed(2) : '0.00';
                             let disbCount = aData ? (aData.disbCount || 0) : 0;
-                              htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#27ae60; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData && aData.admissions ? aData.admissions : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData && aData.dropouts ? aData.dropouts : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData && aData.tdOpen ? aData.tdOpen : '0') + `</td><td style="text-align:center; font-weight:bold; color:#e74c3c;">` + (aData && aData.tdClose ? aData.tdClose : '0') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.savingsDeposit)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefund)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.savingsRefundNonCash)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + (aData && aData.fullPaidCount ? aData.fullPaidCount : '0') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.disbAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? (parseFloat(aData.recoverable)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.regular)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.due)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? (parseFloat(aData.currentDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.maturedDue)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.advance)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.principal)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? (parseFloat(aData.serviceCharge)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? (parseFloat(aData.cashInHand)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? (parseFloat(aData.cashAtBank)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData && aData.newDueBorrower ? aData.newDueBorrower : '0') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? (parseFloat(aData.newDueAmount)||0).toFixed(2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? (parseFloat(aData.writeOffColl)||0).toFixed(2) : '0.00') + `</td></tr>`;
+                              htmlRowsBatch = `<tr><td style="text-align:left; font-weight:bold; color:#10ac84; vertical-align:middle; white-space:nowrap; font-size:9px; border-bottom:1px solid #bdc3c7;">` + b.name + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + window.fmtNum(aData ? aData.admissions : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + window.fmtNum(aData ? aData.dropouts : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + window.fmtNum(aData ? aData.tdOpen : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#b33939;">` + window.fmtNum(aData ? aData.tdClose : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? window.fmtNum(aData.savingsDeposit, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.savingsRefund, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.savingsRefundCash, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.savingsRefundNonCash, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + disbCount + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + window.fmtNum(aData ? aData.fullPaidCount : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? window.fmtNum(aData.disbAmount, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#e67e22;">` + (aData ? window.fmtNum(aData.recoverable, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? window.fmtNum(aData.regular, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2c3e50;">` + otr + `%</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.due, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + (aData ? window.fmtNum(aData.currentDue, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.maturedDue, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? window.fmtNum(aData.advance, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? window.fmtNum(aData.principal, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#8e44ad;">` + (aData ? window.fmtNum(aData.serviceCharge, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#16a085;">` + (aData ? window.fmtNum(aData.cashInHand, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#2980b9;">` + (aData ? window.fmtNum(aData.cashAtBank, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#d35400;">` + window.fmtNum(aData ? aData.newDueBorrower : 0, 0) + `</td><td style="text-align:center; font-weight:bold; color:#c0392b;">` + (aData ? window.fmtNum(aData.newDueAmount, 2) : '0.00') + `</td><td style="text-align:center; font-weight:bold; color:#f39c12;">` + (aData ? window.fmtNum(aData.writeOffColl, 2) : '0.00') + `</td></tr>`;
                         }
                         tbodyAfter.innerHTML = htmlRowsBatch;
                         if (window.applyTabFilters) window.applyTabFilters(tbodyAfter);
@@ -4932,10 +5408,10 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                     } else {
                         tbodyAfter.innerHTML = `
                             <tr>
-                                <td style="text-align:left; font-weight:bold; color:#e74c3c; font-size:9px;">${b.name}</td>
-                                <td colspan="${window.currentCheckerType === 'MIS' ? 3 : (window.currentCheckerType === 'EQUITY' || window.currentCheckerType === 'SAMITY' ? 2 : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 26 : 4))}" style="text-align:center; color:red; font-size:9px;">\u274C \u09A1\u09BE\u099F\u09BE \u09A8\u09C7\u0987</td>
+                                <td style="text-align:left; font-weight:bold; color:#b33939; font-size:9px;">${b.name}</td>
+                                <td colspan="${window.currentCheckerType === 'MIS' ? 3 : (window.currentCheckerType === 'EQUITY' ? 2 : (window.currentCheckerType === 'SAMITY' ? 5 : (window.currentCheckerType === 'DAILY_TRANSACTION' ? 26 : 4)))}" style="text-align:center; color:red; font-size:9px;">\u274C \u09A1\u09BE\u099F\u09BE \u09A8\u09C7\u0987</td>
                                 <td style="text-align:center; vertical-align:middle;">
-                                    <button class="manual-retry-btn" data-id="${b.id}" data-name="${b.name}" style="background:#e74c3c; color:white; border:none; padding:2px 6px; font-size:9px; border-radius:2px; cursor:pointer; font-weight:bold;">\u{1F504} Retry</button>
+                                    <button class="manual-retry-btn" data-id="${b.id}" data-name="${b.name}" style="background:#b33939; color:white; border:none; padding:2px 6px; font-size:9px; border-radius:2px; cursor:pointer; font-weight:bold;">\u{1F504} Retry</button>
                                 </td>
                             </tr>
                         `;
@@ -4953,6 +5429,49 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                 }
                 await Promise.all(workers);
 
+                if (window.currentCheckerType === 'KPI_REPORT' && window._kpiAggregates) {
+                    let calcSummary = (title, data, bgColor, titleColor) => {
+                        let otr = data.recoverable > 0 ? ((data.regular * 100) / data.recoverable).toFixed(2) : '0.00';
+                        let par = data.outstanding > 0 ? ((data.dueRegPresent / data.outstanding) * 100).toFixed(2) : '0.00';
+                        let dr = data.outstanding > 0 ? ((data.dueRegDue / data.outstanding) * 100).toFixed(2) : '0.00';
+                        let savingsRatio = data.outstanding > 0 ? ((data.savingsBalance / data.outstanding) * 100).toFixed(2) : '0.00';
+                        let borrowerCoverage = data.member > 0 ? ((data.borrower / data.member) * 100).toFixed(2) : '0.00';
+                        let outPerBorrower = data.borrower > 0 ? (data.outstanding / data.borrower).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '0.00';
+                        let memberPerSamity = data.samity > 0 ? Math.round(data.member / data.samity).toString() : '0';
+                        let borrowerPerSamity = data.samity > 0 ? Math.round(data.borrower / data.samity).toString() : '0';
+                        let outPerFo = data.totalFo > 0 ? (data.outstanding / data.totalFo).toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '0.00';
+                        let borrowerPerFo = data.totalFo > 0 ? Math.round(data.borrower / data.totalFo).toString() : '0';
+                        let activeBor = (data.borrower || 0) - (data.badLoanee || 0);
+                        if(activeBor < 0) activeBor = 0;
+                        return `<tr style="background:${bgColor}; font-weight:bold;"><td style="text-align:left; padding:4px; font-size:10px; color:${titleColor};">&nbsp;&nbsp;${title}</td><td style="text-align:center; padding:4px; font-size:10px;">${otr}%</td><td style="text-align:center; padding:4px; font-size:10px;">${par}%</td><td style="text-align:center; padding:4px; font-size:10px;">${dr}%</td><td style="text-align:center; padding:4px; font-size:10px;">${borrowerCoverage}%</td><td style="text-align:center; padding:4px; font-size:10px;">${savingsRatio}%</td><td style="text-align:center; padding:4px; font-size:10px;">${outPerBorrower}</td><td style="text-align:center; padding:4px; font-size:10px;">${memberPerSamity}</td><td style="text-align:center; padding:4px; font-size:10px;">${borrowerPerSamity}</td><td style="text-align:center; padding:4px; font-size:10px;">${outPerFo}</td><td style="text-align:center; padding:4px; font-size:10px;">${borrowerPerFo}</td><td style="text-align:center; padding:4px; font-size:10px;">${activeBor}</td><td style="text-align:center; padding:4px; font-size:10px;">${data.totalFo}</td></tr>`;
+                    };
+                    let grandTotalObj = { recoverable:0, regular:0, dueRegPresent:0, dueRegDue:0, outstanding:0, savingsBalance:0, borrower:0, member:0, samity:0, totalFo:0, badLoanee:0 };
+                    for (let z in window._kpiAggregates) {
+                        let zObj = window._kpiAggregates[z];
+                        for (let a in zObj._areas) {
+                            let aObj = zObj._areas[a];
+                            if (a && a !== "Branch" && a !== "Assigned Area") {
+                                let safeAreaId = a.replace(/[^a-zA-Z0-9]/g, "");
+                                let aEl = document.getElementById(`summary-area-${safeAreaId}`);
+                                if (aEl) aEl.innerHTML = calcSummary(`\u{1F4CA} Total Area (${a})`, aObj, '#fff2e6', '#d35400');
+                            }
+                        }
+                        if (z && z !== "Branch" && z !== "Assigned Zone") {
+                            let safeZoneId = z.replace(/[^a-zA-Z0-9]/g, "");
+                            let zEl = document.getElementById(`summary-zone-${safeZoneId}`);
+                            if (zEl) zEl.innerHTML = calcSummary(`\u{1F4CA} Total Zone (${z})`, zObj, '#e6f4ea', 'green');
+                        }
+                        
+                        ['recoverable', 'regular', 'dueRegPresent', 'dueRegDue', 'outstanding', 'savingsBalance', 'borrower', 'member', 'samity', 'totalFo', 'badLoanee'].forEach(k => {
+                            grandTotalObj[k] += zObj[k] || 0;
+                        });
+                    }
+                    if (Object.keys(window._kpiAggregates).length > 1) {
+                        let gEl = document.getElementById('summary-grand-total');
+                        if (gEl) gEl.innerHTML = calcSummary(`\u{1F4CA} Grand Total`, grandTotalObj, '#e1f5fe', '#01579b');
+                    }
+                }
+
                 let finalStatus = document.getElementById('audit-status');
                 if(finalStatus) {
                     finalStatus.innerHTML = `\u2705 ${successCount} \u099F\u09BF \u09B6\u09BE\u0996\u09BE\u09B0 \u0985\u09A1\u09BF\u099F \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8!`;
@@ -4960,17 +5479,45 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                 }
                 
                 let finalBtn = document.getElementById('start-audit-btn');
-                if(finalBtn) { finalBtn.disabled = false; finalBtn.style.background = "#27ae60"; }
+                if(finalBtn) { finalBtn.disabled = false; finalBtn.style.background = "#192a56"; }
                 
                 let expBtn = document.getElementById('export-excel-btn');
                 if(expBtn) expBtn.style.display = 'block';
+                
+                if (window.jQuery && window.jQuery.fn.tooltip) {
+                    window.jQuery('#ghost-audit-panel [title]').tooltip({ container: 'body', trigger: 'hover' });
+                }
             }
         });
 
         if(!document.getElementById('spinner-css')) {
             const style = document.createElement('style');
             style.id = 'spinner-css';
-            style.innerHTML = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+            style.innerHTML = `
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            
+            /* Responsive styles for Mobile */
+            @media (max-width: 768px) {
+                #ghost-audit-panel {
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    max-height: 100vh !important;
+                    max-width: 100vw !important;
+                    border-radius: 0 !important;
+                    border: none !important;
+                    resize: none !important;
+                }
+                #bde-drag-header {
+                    cursor: default !important;
+                }
+                .audit-table th, .audit-table td {
+                    padding: 4px 2px !important;
+                    font-size: 8.5px !important;
+                }
+            }
+            `;
             document.head.appendChild(style);
         }
     }
@@ -4993,6 +5540,8 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
             if (btn5) btn5.remove();
             let btn6 = document.getElementById('daily-toggle-btn');
             if (btn6) btn6.remove();
+            let btn7 = document.getElementById('kpi-toggle-btn');
+            if (btn7) btn7.remove();
             
             let p = document.getElementById('ghost-audit-panel');
             if (p) p.remove();
@@ -5000,7 +5549,6 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
     }, 1500);
 
 })();
-
 // ========================================================================
 // \u{1F4CA} 3. HIERARCHICAL BRANCH REPORT (DASHBOARD MEMBER VERIFICATION MODULE)
 // ========================================================================
@@ -5326,9 +5874,9 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
         
         let container = document.createElement('div');
         container.id = 'member-report-toggle-btn';
-        container.style.cssText = 'display:flex; align-items:center; justify-content:space-between; background: linear-gradient(135deg, #8e44ad 0%, rgba(0,0,0,0.4) 150%); color:white; border-radius:50px; padding:5px 12px; font-weight:bold; font-size:11px; box-shadow:0 2px 8px rgba(0,0,0,0.3); font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; width: max-content; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(5px);';
-        container.onmouseover = () => { container.style.transform = 'scale(1.05) translateX(-4px)'; container.style.boxShadow = '0 6px 18px rgba(0,0,0,0.5)'; };
-        container.onmouseout = () => { container.style.transform = 'scale(1) translateX(0)'; container.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)'; };
+        container.style.cssText = 'display:flex; align-items:center; justify-content:space-between; background: #005ca8; color: white; border: 1px solid #004b87; border-radius:50px; padding:6px 14px; font-weight:bold; font-size:12px; box-shadow:0 4px 12px rgba(0,92,168,0.25); cursor:pointer; width: max-content; font-family: DSK_MixedFont, sans-serif; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);';
+        container.onmouseover = () => { container.style.transform = 'scale(1.05) translateX(-4px)'; container.style.boxShadow = '0 6px 16px rgba(0,0,0,0.15)'; };
+        container.onmouseout = () => { container.style.transform = 'scale(1) translateX(0)'; container.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; };
         
         let textSpan = document.createElement('span');
         textSpan.innerText = '\u{1F465} Member CIB Verification';
@@ -5339,7 +5887,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
         let closeBtn = document.createElement('button');
         closeBtn.innerText = '\u2715';
         closeBtn.title = '\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8';
-        closeBtn.style.cssText = 'background: rgba(255,255,255,0.25); color:white; border:none; width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; outline:none; transition:0.2s;';
+        closeBtn.style.cssText = 'background: rgba(255,255,255,0.25); color:white; border:none; width:24px; height:24px; border-radius:50%; font-size:11px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; outline:none; transition:0.2s;';
         closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255,0,0,0.8)';
         closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255,255,255,0.25)';
         closeBtn.onclick = (e) => {
@@ -5366,65 +5914,37 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
 
             const panel = document.createElement('div');
             panel.id = 'auto-report-panel';
-            panel.style.cssText = 'position: fixed; top: 5px; left: 50%; transform: translateX(-50%); background: #fff; border: 2px solid #8e44ad; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); width: 97vw; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column; font-family: DSK_MixedFont, sans-serif; z-index: 999999; overflow: hidden;';
+            panel.style.cssText = 'position: fixed; top: 5px; left: max(1.5vw, calc(50vw - 350px)); background: #fff; border: 1px solid #dcdde1; border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.12); width: 97vw; max-width: 700px; max-height: 90vh; display: flex; flex-direction: column; font-family: DSK_MixedFont, sans-serif; z-index: 999999; overflow: hidden; resize: both; min-width: 300px; min-height: 200px; height: 85vh; max-height: 90vh; display: flex; flex-direction: column;';
 
             let filterHtml = '';
             if (isReady) {
                 let zones = [...new Set(Object.values(maps.zMap))].filter(Boolean).sort();
                 let areas = [...new Set(Object.values(maps.aMap))].filter(Boolean).sort();
                 
-                let levelOptions = `<option value="1">\u09B6\u09BE\u0996\u09BE</option>`;
-                if (maps.role === 'HO' || maps.role === 'ZONE') {
-                    if (areas.length > 0) levelOptions += `<option value="2">\u0985\u099E\u09CD\u099A\u09B2</option>`;
-                }
-                
-                if (maps.role === 'HO') {
-                    if (zones.length > 0) levelOptions += `<option value="3" selected>\u099C\u09CB\u09A8</option>`;
-                    else if (areas.length > 0) levelOptions = levelOptions.replace('value="2"', 'value="2" selected');
-                    else levelOptions = levelOptions.replace('value="1"', 'value="1" selected');
-                } else if (maps.role === 'ZONE') {
-                    if (areas.length > 0) levelOptions = levelOptions.replace('value="2"', 'value="2" selected');
-                    else levelOptions = levelOptions.replace('value="1"', 'value="1" selected');
-                } else {
-                    levelOptions = levelOptions.replace('value="1"', 'value="1" selected');
-                }
-
-                filterHtml = `
-                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; align-items:center;">
-                        <div style="flex:1; min-width:130px; display:flex; align-items:center; gap:4px;">
-                            <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09B2\u09C7\u09AD\u09C7\u09B2:</label>
-                            <select id="mv-level-selection" style="flex:1; width:100%; padding:0 4px; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box; margin:0;">
-                                ${levelOptions}
-                            </select>
-                        </div>
-                        <div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;">
-                            <label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label>
-                            <select id="filter-selection" style="flex:1; width:100%; padding:0 4px; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box; margin:0;">
-                            </select>
-                        </div>
-                    </div>
-                `;
+                if (maps.role === 'BRANCH') { let bName = maps.entityName || 'My Branch'; if (bName === 'My Branch' || !bName) { let bInfo = document.querySelector('.branch_info'); if (bInfo) { let bText = bInfo.innerText.replace(/\u00A0/g, ' ').replace(/\s+/g, ' '); let m = bText.match(/Branch\s*:\s*(.*?)(?=\s+Date|\s+Zone|\s+Area|$|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)/i); if (m && m[1]) bName = m[1].trim(); } } filterHtml = `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; align-items:center;"><div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;"><label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09AC\u09CD\u09B0\u09BE\u099E\u09CD\u099A:</label><select id="mv-level-selection" style="display:none;"><option value="1">1</option></select><select id="filter-selection" disabled style="flex:1; width:100%; padding:0 4px; margin:0; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; font-weight:bold; color:#16a085; height:24px; box-sizing:border-box; background-color:#f8f9fa;"><option value="ALL">${bName}</option></select></div></div>`; } else { let levelOptions = `<option value="1">\u09B6\u09BE\u0996\u09BE</option>`; if (maps.role === 'HO' || maps.role === 'ZONE') { if (areas.length > 0) levelOptions += `<option value="2">\u0985\u099E\u09CD\u099A\u09B2</option>`; } if (maps.role === 'HO') { if (zones.length > 0) levelOptions += `<option value="3" selected>\u099C\u09CB\u09A8</option>`; else if (areas.length > 0) levelOptions = levelOptions.replace('value="2"', 'value="2" selected'); else levelOptions = levelOptions.replace('value="1"', 'value="1" selected'); } else if (maps.role === 'ZONE') { if (areas.length > 0) levelOptions = levelOptions.replace('value="2"', 'value="2" selected'); else levelOptions = levelOptions.replace('value="1"', 'value="1" selected'); } else { levelOptions = levelOptions.replace('value="1"', 'value="1" selected'); } filterHtml = `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; align-items:center;"><div style="flex:1; min-width:130px; display:flex; align-items:center; gap:4px;"><label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09B2\u09C7\u09AD\u09C7\u09B2:</label><select id="mv-level-selection" style="flex:1; width:100%; padding:0 4px; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box; margin:0;">${levelOptions}</select></div><div style="flex:1.5; min-width:130px; display:flex; align-items:center; gap:4px;"><label style="font-size:12px; font-weight:bold; color:#34495e; white-space:nowrap; margin:0; padding:0; line-height:24px; display:flex; align-items:center;">\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8:</label><select id="filter-selection" style="flex:1; width:100%; padding:0 4px; border:1px solid #bdc3c7; border-radius:3px; font-size:12px; height:24px; box-sizing:border-box; margin:0;"><option value="ALL">\uD83C\uDF10 All Branches</option></select></div></div>`; }
             }
 
             panel.innerHTML = `
-                <div id="mem-report-header" style="background:#8e44ad; color:white; padding:4px 8px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+                <div id="mem-report-header" style="background:#192a56; color:white; padding:4px 8px; cursor:move; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
                     <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0; overflow:hidden;">
                         <strong style="font-size:11.5px; pointer-events:none; white-space:nowrap;">\u{1F465} Member CIB Verification</strong>
                         <span id="status-text" style="font-size:11.5px; font-weight:bold; color:#f1c40f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
                     </div>
                     <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
-                        <button id="export-btn" style="display:none; background:#27ae60; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold; transition:0.2s;">\u{1F4E5} Excel</button>
-                        <button id="resync-btn" style="background:#f39c12; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold;">\u{1F504} Resync</button>
-                        <button id="close-panel-btn" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; border: none; width: 25px; height: 25px; border-radius: 50%; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(255, 65, 108, 0.45); transition: 0.2s;">\u2715</button>
+                        <button id="export-btn" style="display:none; background:#2e86de; color:white; border:none; padding:4px 8px; font-size:11px; cursor:pointer; border-radius:3px; font-weight:bold; transition:0.2s;">\u{1F4E5} Excel</button>
+                        <button id="resync-btn" title="Resync Data" style="background: #f1f2f6; color: #192a56; border: 1px solid #dcdde1; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s;">\u{1F504}</button>
+                        <button class="panel-maximize-btn" title="\u09AC\u09DC / \u099B\u09CB\u099F \u0995\u09B0\u09C1\u09A8" style="background: #f1f2f6; color: #192a56; border: 1px solid #dcdde1; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s;">\u26F6</button>
+                        <button id="close-panel-btn" title="\u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8" style="background: #f1f2f6; color: #e74c3c; border: 1px solid #dcdde1; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s;">\u2715</button>
                     </div>
                 </div>
-                <div style="padding:10px; overflow-y:auto; flex:1; display:flex; flex-direction:column;">
+                <div style="padding:10px; overflow:auto; flex:1; display:flex; flex-direction:column;">
                     ${filterHtml}
                     <button id="gen-btn" style="width:100%; height:30px; display:flex; align-items:center; justify-content:center; gap:6px; background:${isReady ? '#8e44ad' : '#ccc'}; color:white; border:none; cursor:${isReady ? 'pointer' : 'not-allowed'}; font-weight:bold; border-radius:3px; font-size:13px; flex-shrink:0; transition:0.2s;" ${!isReady ? 'disabled' : ''}>\u{1F680} Generate Tree Report</button>
-                    <div id="table-container" style="overflow-y:auto; margin-top:8px; flex:1; max-height:55vh;"></div>
+                    <div id="table-container" style="overflow:auto; margin-top:8px; flex:1;"></div>
                 </div>
             `;
             document.body.appendChild(panel);
+            setTimeout(() => { let mBtn = panel.querySelector('.panel-maximize-btn'); if(mBtn) mBtn.click(); }, 50);
 
             let mvLevel = document.getElementById('mv-level-selection');
             let mvFilter = document.getElementById('filter-selection');
@@ -5435,6 +5955,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                 
                 mvLevel.onchange = () => {
                     let val = mvLevel.value;
+                    
                     if (val === '3') {
                         mvFilter.innerHTML = '<option value="ALL">\u{1F310} All Zones</option>' + zones.map(z => `<option value="${z}">${z}</option>`).join('');
                     } else if (val === '2') {
@@ -5442,6 +5963,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                     } else if (val === '1') {
                         mvFilter.innerHTML = '<option value="ALL">\u{1F310} All Branches</option>' + bList.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
                     }
+                    
                 };
                 mvLevel.onchange(); 
             }
@@ -5505,7 +6027,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                                 \u{1F552} Report Generated On: ${dtString}
                             </td>
                         </tr>
-                        <tr style="background:#2c3e50; color:white; font-size:11px;">
+                        <tr style="background:#192a56; color:white; font-size:11px;">
                             <th style="padding:2px; text-align:left; white-space:normal;">Hierarchy & Branch</th>
                             <th style="padding:2px; text-align:center; white-space:normal;">Active Member</th>
                             <th style="padding:2px; text-align:center; white-space:normal;">Verified Active Member</th>
@@ -5537,7 +6059,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         let totalHOActive = 0, totalHOVerified = 0, totalHOWrong = 0;
                         
                         for (let z in tree) {
-                            html += `<tr style="background:#0277bd; color:white;"><td colspan="5" style="padding:4px;"><b>\u{1F3E2} Zone: ${z}</b></td></tr>`;
+                            html += `<tr style="background:#192a56; color:white;"><td colspan="5" style="padding:4px;"><b>\u{1F3E2} Zone: ${z}</b></td></tr>`;
                             let zoneActive = 0, zoneVerified = 0, zoneWrong = 0;
                             
                             for (let a in tree[z]) {
@@ -5573,7 +6095,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         
                         if (Object.keys(tree).length > 1) {
                             let hoPerc = totalHOActive > 0 ? Math.round((totalHOVerified / totalHOActive) * 100) : 0;
-                            html += `<tr style="background:#e1f5fe; color:#01579b; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">\u{1F4CA} Grand Total</td><td style="text-align:center; padding:2px;">${totalHOActive}</td><td style="text-align:center; padding:2px;">${totalHOVerified}</td><td style="text-align:center; color:#c0392b; padding:2px;">${totalHOWrong}</td><td style="text-align:center; color:#0277bd; padding:2px;">${hoPerc}%</td></tr>`;
+                            html += `<tr style="background:#e1f5fe; color:#01579b; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">\u{1F4CA} Grand Total</td><td style="text-align:center; padding:2px;">${totalHOActive}</td><td style="text-align:center; padding:2px;">${totalHOVerified}</td><td style="text-align:center; color:#c0392b; padding:2px;">${totalHOWrong}</td><td style="text-align:center; color:#192a56; padding:2px;">${hoPerc}%</td></tr>`;
                         }
                     } 
                     else if (currentRole === 'ZONE') {
@@ -5584,7 +6106,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                         });
                         let grandActive = 0, grandVerified = 0, grandWrong = 0;
                         for (let a in tree) {
-                            html += `<tr style="background:#0277bd; color:white;"><td colspan="5" style="padding:4px;"><b>\u{1F4CD} Area: ${a}</b></td></tr>`;
+                            html += `<tr style="background:#192a56; color:white;"><td colspan="5" style="padding:4px;"><b>\u{1F4CD} Area: ${a}</b></td></tr>`;
                             let areaActive = 0, areaVerified = 0, areaWrong = 0;
                             
                             for (let b of tree[a]) {
@@ -5640,7 +6162,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                             } else if (maps.entityName) {
                                 totalLabel = `\u{1F4CA} Grand Total (${maps.entityName})`;
                             } 
-                            html += `<tr style="background:#e1f5fe; color:#01579b; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">${totalLabel}</td><td style="text-align:center; padding:2px;">${grandActive}</td><td style="text-align:center; padding:2px;">${grandVerified}</td><td style="text-align:center; color:#c0392b; padding:2px;">${grandWrong}</td><td style="text-align:center; color:#0277bd; padding:2px;">${grandPerc}%</td></tr>`;
+                            html += `<tr style="background:#e1f5fe; color:#01579b; font-weight:bold; font-size:11px;"><td style="text-align:left; padding:2px; white-space:normal;">${totalLabel}</td><td style="text-align:center; padding:2px;">${grandActive}</td><td style="text-align:center; padding:2px;">${grandVerified}</td><td style="text-align:center; color:#c0392b; padding:2px;">${grandWrong}</td><td style="text-align:center; color:#192a56; padding:2px;">${grandPerc}%</td></tr>`;
                         }
                     }
                     html += `</table>`;
@@ -5706,7 +6228,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
                     }
 
                     if (!sessionStorage.getItem('mf_cloned_url') && !localStorage.getItem('mf_cloned_url_backup')) {
-                        status.innerHTML = '<span style="color:#e74c3c;">Connection failed. Please visit Member > Member List manually once.</span>';
+                        status.innerHTML = '<span style="color:#b33939;">Connection failed. Please visit Member > Member List manually once.</span>';
                         setTimeout(() => { if(!status || !status.parentNode) return; status.innerText = "Ready"; btn.disabled = false; }, 6000);
                         return;
                     }
@@ -5720,7 +6242,7 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
 
                     // removed Connecting text
                     
-                    let concurrency = 5; 
+                    let concurrency = 10; 
                     let index = 0;
                     let completed = 0;
                     let totalTasks = rawBranches.length;
@@ -5939,6 +6461,20 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
             fractionSel.dispatchEvent(new Event('change', { bubbles: true }));
             fractionSel.dispatchEvent(new Event('input', { bubbles: true }));
         }
+
+        // Auto-select dropdowns for single-branch users (or single area/zone)
+        ['cbo_zone', 'cbo_area', 'cbo_branch'].forEach(name => {
+            let sel = document.querySelector(`select[name="${name}"]`);
+            if (sel && sel.options.length === 2 && (sel.value === '' || sel.value === '-1' || sel.value === '0' || sel.options[sel.selectedIndex].text.includes('সকল') || sel.options[sel.selectedIndex].text.includes('Select'))) {
+                let validOpt = sel.options[1];
+                if (validOpt && validOpt.value !== '' && validOpt.value !== '-1' && validOpt.value !== '0') {
+                    sel.value = validOpt.value;
+                    sel.dispatchEvent(new Event('input', { bubbles: true }));
+                    sel.dispatchEvent(new Event('change', { bubbles: true }));
+                    if (window.jQuery) window.jQuery(sel).trigger('change');
+                }
+            }
+        });
     }, 1500);
 
     // --- CREATOR CREDITS EASTER EGG ---
@@ -5950,13 +6486,10 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
             return;
         }
         if (!e.key) return;
-        _secretCode += e.key;
-        if (_secretCode.length > 4) {
-            _secretCode = _secretCode.substring(_secretCode.length - 4);
-        }
-        if (_secretCode === "1994") {
+        _secretCode += e.key.toLowerCase();
+        if (_secretCode.length > 50) _secretCode = _secretCode.slice(-50);
+        if (_secretCode.endsWith("creator") || _secretCode.endsWith("author") || _secretCode.endsWith("1994")) {
             showCreatorCredits();
-            _secretCode = "";
         }
     });
 
@@ -5998,4 +6531,35 @@ aData.due = (parseFloat(aData.currentDue) || 0) + (parseFloat(aData.maturedDue) 
             setTimeout(() => overlay.remove(), 400);
         };
     }
+
+    // Panel Maximize Toggle Logic
+    document.addEventListener('click', (e) => {
+        let btn = e.target.closest('.panel-maximize-btn');
+        if (btn) {
+            let panel = btn.closest('#ghost-audit-panel') || btn.closest('#auto-report-panel') || btn.closest('#bde-ghost-date-panel');
+            if (panel) {
+                if (panel.getAttribute('data-maximized') === 'true') {
+                    panel.style.maxWidth = panel.getAttribute('data-orig-max-width');
+                    panel.style.height = panel.getAttribute('data-orig-height') || '';
+                    panel.style.maxHeight = panel.getAttribute('data-orig-max-height') || '';
+                    panel.style.top = panel.getAttribute('data-orig-top') || '5px';
+                    panel.style.left = panel.getAttribute('data-orig-left') || '';
+                    panel.setAttribute('data-maximized', 'false');
+                } else {
+                    panel.setAttribute('data-orig-max-width', panel.style.maxWidth);
+                    panel.setAttribute('data-orig-height', panel.style.height);
+                    panel.setAttribute('data-orig-max-height', panel.style.maxHeight);
+                    panel.setAttribute('data-orig-top', panel.style.top);
+                    panel.setAttribute('data-orig-left', panel.style.left);
+                    panel.style.maxWidth = '98vw';
+                    panel.style.height = '96vh';
+                    panel.style.maxHeight = '96vh';
+                    panel.style.top = '2vh';
+                    panel.style.left = '1vw';
+                    panel.setAttribute('data-maximized', 'true');
+                }
+            }
+        }
+    });
+
 })();
