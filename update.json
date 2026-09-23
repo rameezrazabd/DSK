@@ -1,7 +1,7 @@
 {
-  "version": "2.4",
-  "title": "নতুন আপডেট 2.4! ",
-  "message": "এপ্সটি বর্তমানে সুপারফাস্ট কাজ করবে, কিছু বাগ ছিলো ফিক্স করা হয়েছে । এগুলি পেতে আপডেট করুন!",
+  "version": "2.5",
+  "title": "নতুন আপডেট 2.5! ",
+  "message": "এপ্সটি কেপিআই বেসিক দেয়া হয়েছে, কিছু বাগ ছিলো ফিক্স করা হয়েছে । এগুলি পেতে আপডেট করুন!",
   "download_url": "https://github.com/rameezrazabd/DSK/releases/download/latest/MicrofinApp-Latest.apk",
   "force_update": false
 }
